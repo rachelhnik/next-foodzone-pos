@@ -11,14 +11,14 @@ import { useState } from "react";
 import MenusData from "../typings/Types";
 import { config } from "../config/Config";
 import FileDropZone from "./FileDropZone";
-import { AppContext } from "../contexts/AppContext";
+import { AppContext } from "../contexts/BackofficeContext";
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const CreateMenu = () => {
     const [menuImage, setMenuImage] = useState<File>();
     const [locationNames, setLocationName] = useState<string[] | string>([]);
-    const navigate = useNavigate();
+    const router = useRouter();
     const accessToken = localStorage.getItem("accessToken");
     const { fetchData } = useContext(AppContext);
 
@@ -63,7 +63,7 @@ const CreateMenu = () => {
                     body: JSON.stringify(menu),
                 });
                 fetchData();
-                if (menuResponse.ok) navigate("/menus");
+                if (menuResponse.ok) router.push("/menus");
             }
         } catch (error) {
             return null;

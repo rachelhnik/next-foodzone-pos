@@ -1,11 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import Layout from "./Layout";
+import Layout from "../../../components/Layout";
 import {
     Box,
     Button,
-    Checkbox,
-    FormHelperText,
-    InputLabel,
     MenuItem,
     Radio,
     Select,
@@ -16,24 +13,24 @@ import {
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import { AppContext } from "../contexts/AppContext";
-import { BranchesData, Company, User } from "../typings/Types";
+import { BackofficeContext } from "../../../contexts/BackofficeContext";
+import { BranchesData, Company } from "../../../typings/Types";
 
-import { config } from "../config/Config";
-import { useNavigate } from "react-router-dom";
+import { config } from "../../../config/Config";
+
+import { useRouter } from "next/router";
+import { getselectedLocationId } from "@/utils";
+import { useSession } from "next-auth/react";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 export default function Settings() {
-    const { company, branches, user, townships, fetchData } =
-        useContext(AppContext);
-    const navigate = useNavigate();
-    const accessToken = localStorage.getItem("accessToken");
-    const currentBranchId = localStorage.getItem("selectedLocation");
+    const { company, branches, townships, fetchData } =
+        useContext(BackofficeContext);
+    const router = useRouter();
+    const { data: session } = useSession();
+    const currentBranchId = getselectedLocationId();
     const [companyName, setCompanyName] = useState<Company>({
         name: company?.name || "",
-    });
-    const [newEmail, setNewEmail] = useState<User>({
-        email: user?.email || "",
     });
 
     const [branchesData, setBranchesData] = useState<BranchesData[]>(branches);
@@ -47,8 +44,8 @@ export default function Settings() {
     >();
 
     useEffect(() => {
-        if (!accessToken) {
-            navigate("/login");
+        if (!session) {
+            router.push("/auth/signin");
         }
         if (branches.length) {
             const selectedBranchId = localStorage.getItem("selectedLocation");
@@ -70,7 +67,7 @@ export default function Settings() {
             }
         }
         setBranchesData(branches);
-    }, [branches]);
+    }, [session, branches, router, selectedBranch?.id]);
 
     const handleOnchange = (evt: SelectChangeEvent<number>) => {
         localStorage.setItem("selectedLocation", String(evt.target.value));
@@ -84,51 +81,29 @@ export default function Settings() {
     const updateCompany = async () => {
         if (companyName.name === company?.name) alert("please update new name");
         const response = await fetch(
-            `${config.apiBaseUrl}/settings/companies/${company?.id}`,
+            `${config.backofficeApiBaseUrl}/settings/companies/${company?.id}`,
             {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify(companyName),
             }
         );
         const newCompany = await response.json();
-        console.log(newCompany);
+
         fetchData();
         setCompanyName(newCompany.name);
-    };
-
-    const updateEmail = async () => {
-        if (newEmail.email === user?.email)
-            alert("please enter different email");
-        const response = await fetch(
-            `${config.apiBaseUrl}/settings/users/${user?.id}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify(newEmail),
-            }
-        );
-        const newEmailResult = await response.json();
-
-        fetchData();
-        setNewEmail(newEmailResult);
     };
 
     const createNewBranch = async () => {
         if (!selectedTownshipId || !newAddress) return;
         const response = await fetch(
-            `${config.apiBaseUrl}/branches/create/${company?.id}`,
+            `${config.backofficeApiBaseUrl}/branches/create/${company?.id}`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     townshipId: selectedTownshipId,
@@ -147,12 +122,12 @@ export default function Settings() {
         const newBranch = branchesData.find(
             (updateBranch) => updateBranch.id === branchId
         );
+
         if (oldBranch?.address !== newBranch?.address) {
-            await fetch(`${config.apiBaseUrl}/branches/${branchId}`, {
+            await fetch(`${config.backofficeApiBaseUrl}/branches/${branchId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify(newBranch),
             });
@@ -162,12 +137,9 @@ export default function Settings() {
 
     const deleteLocation = async (branch: BranchesData) => {
         const response = await fetch(
-            `${config.apiBaseUrl}/branches/${branch.id}`,
+            `${config.backofficeApiBaseUrl}/branches/${branch.id}`,
             {
                 method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
             }
         );
         if (response.ok) {
@@ -209,36 +181,10 @@ export default function Settings() {
                             }
                         />
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             sx={{ width: 100 }}
                             size="small"
                             onClick={updateCompany}
-                        >
-                            update
-                        </Button>
-                    </div>
-                    <label>email </label>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "2rem",
-                        }}
-                    >
-                        <TextField
-                            id="outlined-size-small"
-                            value={newEmail.email}
-                            size="small"
-                            onChange={(evt) =>
-                                setNewEmail({ email: evt.target.value })
-                            }
-                        />
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            sx={{ width: 100 }}
-                            onClick={updateEmail}
                         >
                             update
                         </Button>
@@ -331,14 +277,14 @@ export default function Settings() {
                                     }}
                                 >
                                     <Button
-                                        variant="outlined"
+                                        variant="contained"
                                         sx={{ mr: 2 }}
                                         onClick={() => updateLocation(branch)}
                                     >
                                         Update
                                     </Button>
                                     <Button
-                                        variant="outlined"
+                                        variant="contained"
                                         color="error"
                                         onClick={() => deleteLocation(branch)}
                                     >
@@ -397,7 +343,7 @@ export default function Settings() {
                     </FormControl>
 
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="success"
                         onClick={createNewBranch}
                     >

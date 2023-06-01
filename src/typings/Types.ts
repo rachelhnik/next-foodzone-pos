@@ -7,7 +7,7 @@ export default interface MenusData extends BaseType {
     asset_url: string;
     price: number;
     description: string;
-    branchIds?: string[];
+    menucategoryIds?: number[];
     isAvailable: boolean;
 }
 export interface MenuCategory extends BaseType {}
@@ -16,10 +16,13 @@ export interface Addon extends BaseType {
     addon_categories_id: any;
     price: number;
 }
-export interface menuMenuCategory {
-    menu_cat_id: any;
+export interface BranchesMenucategoriesMenus {
+    id?: number;
     menu_id: number;
-    menu_categories_id: number;
+    menucategory_id: number;
+    branch_id: number;
+    is_available_menu: boolean;
+    is_available_menucategory: boolean;
 }
 
 export interface AddonCategory extends BaseType {
@@ -51,3 +54,7 @@ export interface User {
     email: string;
 }
 export interface Townships extends BaseType {}
+
+export interface Order {
+    order: [{ menuIds: number[]; addonIds: number[] }];
+}

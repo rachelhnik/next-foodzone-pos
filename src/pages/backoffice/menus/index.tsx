@@ -6,106 +6,98 @@ import {
     CardMedia,
     Typography,
 } from "@mui/material";
-import Layout from "./Layout";
-import { useContext, useEffect, useState } from "react";
-import MenusData, { branchesMenus } from "../typings/Types";
-import { AppContext, AppContextType } from "../contexts/AppContext";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import Layout from "../../../components/Layout";
+import { useContext } from "react";
+
+import {
+    BackofficeContext,
+    AppContextType,
+} from "../../../contexts/BackofficeContext";
+import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
-import { config } from "../config/Config";
+import { config } from "../../../config/Config";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { red } from "@mui/material/colors";
+
+import { getselectedLocationId } from "@/utils";
 
 const Menus = () => {
-    const navigate = useNavigate();
-    const branchId = localStorage.getItem("selectedLocation");
-    const accessToken = localStorage.getItem("accessToken");
+    const branchId = getselectedLocationId();
 
-    const { fetchData, menus, branches, branchesMenus } =
-        useContext(AppContext);
-    const branchIds = branches.map((branch) => branch.id);
+    const { fetchData, menus, branchesMenucategoriesMenus } =
+        useContext(BackofficeContext);
+    console.log(branchesMenucategoriesMenus, menus);
 
-    const [branchMenus, setBranchMenus] =
-        useState<branchesMenus[]>(branchesMenus);
+    const validMenusIds = branchesMenucategoriesMenus
+        .filter((data) => String(data.branch_id) === branchId)
+        .map((data) => data.menu_id);
 
-    const validBranchesMenus = branchesMenus
-        .filter((branchMenu) => String(branchMenu.branch_id) === branchId)
-        .map((branchMenu) => branchMenu.menu_id);
-
-    const filteredMenus = menus.filter((menu) =>
-        validBranchesMenus.includes(menu.id as number)
-    );
+    const filteredMenus = menus
+        .filter((menu) => menu.id && validMenusIds.includes(menu.id))
+        .flatMap((data) => data);
 
     const handleDelete = async (menuId: number | undefined) => {
-        const response = await fetch(`${config.apiBaseUrl}/menus/${menuId}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/menus/${menuId}`,
+            {
+                method: "DELETE",
+            }
+        );
         if (response.ok) fetchData();
     };
 
     const handleSoldOut = async (menuId: number | undefined) => {
-        const currentBranchesData = branchMenus.map((updateBranchMenu) => {
+        const currentBranchesData = branchesMenucategoriesMenus.map((data) => {
             if (
-                updateBranchMenu.menu_id === menuId &&
-                String(updateBranchMenu.branch_id) === branchId
+                data.menu_id === menuId &&
+                String(data.branch_id) === branchId
             ) {
-                return { ...updateBranchMenu, is_available: false };
+                return { ...data, is_available_menu: false };
             }
-            return updateBranchMenu;
+            return data;
         });
 
         const response = await fetch(
-            `${config.apiBaseUrl}/menus/sale/${menuId}`,
+            `${config.backofficeApiBaseUrl}/menus/sale/${menuId}`,
             {
-                method: "put",
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     currentBranchesData,
                     branchId: branchId,
-                    branchIds: branchIds,
                 }),
             }
         );
-        const updatedData = await response.json();
+
         fetchData();
-        setBranchMenus(updatedData);
     };
     const handleInstock = async (menuId: number | undefined) => {
-        const currentBranchesData = branchMenus.map((updateBranchMenu) => {
+        const currentBranchesData = branchesMenucategoriesMenus.map((data) => {
             if (
-                updateBranchMenu.menu_id === menuId &&
-                String(updateBranchMenu.branch_id) === branchId
+                data.menu_id === menuId &&
+                String(data.branch_id) === branchId
             ) {
-                return { ...updateBranchMenu, is_available: true };
+                return { ...data, is_available_menu: true };
             }
-            return updateBranchMenu;
+            return data;
         });
 
         const response = await fetch(
-            `${config.apiBaseUrl}/menus/sale/${menuId}`,
+            `${config.backofficeApiBaseUrl}/menus/sale/${menuId}`,
             {
                 method: "put",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     currentBranchesData,
                     branchId: branchId,
-                    branchIds: branchIds,
                 }),
             }
         );
         const updatedData = await response.json();
         fetchData();
-        setBranchMenus(updatedData);
     };
 
     return (
@@ -120,7 +112,7 @@ const Menus = () => {
             >
                 <Box sx={{ display: "flex", mt: 5 }}>
                     <Link
-                        to={"/menus/create"}
+                        href={`/backoffice/menus/create`}
                         style={{ textDecoration: "none", color: "black" }}
                     >
                         <Box
@@ -153,7 +145,7 @@ const Menus = () => {
                             key={menu.id}
                         >
                             <Link
-                                to={`/menus/${menu.id}`}
+                                href={`/backoffice/menus/${menu.id}`}
                                 style={{
                                     textDecoration: "none",
                                     marginBottom: "1rem",
@@ -180,12 +172,12 @@ const Menus = () => {
                                             {menu.description}
                                         </Typography>
 
-                                        {branchMenus.find(
-                                            (branchMenu) =>
-                                                String(branchMenu.branch_id) ===
+                                        {branchesMenucategoriesMenus.find(
+                                            (data) =>
+                                                String(data.branch_id) ===
                                                     branchId &&
-                                                branchMenu.menu_id === menu.id
-                                        )?.is_available === false ? (
+                                                data.menu_id === menu.id
+                                        )?.is_available_menu === false ? (
                                             <Typography
                                                 variant="h5"
                                                 sx={{ color: "red", mt: 2 }}

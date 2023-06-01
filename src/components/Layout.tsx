@@ -1,8 +1,7 @@
 import React from "react";
 
-import AppProvider, { AppContextType } from "../contexts/AppContext";
+import AppProvider, { AppContextType } from "../contexts/BackofficeContext";
 import NavBar from "./Navbar";
-import { useParams } from "react-router-dom";
 
 interface Props {
     title?: string;
@@ -10,7 +9,6 @@ interface Props {
 }
 
 export default function Layout(props: Props) {
-    const { locationId } = useParams();
     return (
         <div>
             <NavBar title={props.title} />

@@ -24,47 +24,50 @@ import CategoryIcon from "@mui/icons-material/Category";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import TapasIcon from "@mui/icons-material/Tapas";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { AppContext } from "../contexts/AppContext";
+import Link from "next/link";
+import { BackofficeContext } from "../contexts/BackofficeContext";
 import { useContext } from "react";
+import { getAccessToken, getselectedLocationId } from "@/utils";
+import { useRouter } from "next/router";
+import { signOut, useSession } from "next-auth/react";
 
 const drawerList = [
     {
         id: 1,
         icon: <LocalMallIcon />,
         label: "Orders",
-        link: "/orders",
+        link: "/backoffice/orders",
     },
     {
         id: 2,
         icon: <RestaurantMenuIcon />,
         label: "Menu",
-        link: "/menus",
+        link: "/backoffice/menus",
     },
     {
         id: 3,
         icon: <CategoryIcon />,
         label: "Menu Category",
-        link: "/menu-categories",
+        link: "/backoffice/menu-categories",
     },
     {
         id: 4,
         icon: <TapasIcon />,
         label: "Add on",
-        link: "/addons",
+        link: "/backoffice/addons",
     },
     {
         id: 5,
         icon: <ClassIcon />,
         label: "Add on Category",
-        link: "/addon-categories",
+        link: "/backoffice/addon-categories",
     },
 
     {
         id: 6,
         icon: <SettingsIcon />,
         label: "Settings",
-        link: "/settings",
+        link: "/backoffice/settings",
     },
 ];
 interface Props {
@@ -72,10 +75,10 @@ interface Props {
 }
 export default function NavBar({ title }: Props) {
     const [state, setState] = React.useState({ open: false });
-
-    const { branches, townships } = useContext(AppContext);
-    const selectedLocationId = localStorage.getItem("selectedLocation");
-    const accessToken = localStorage.getItem("accessToken");
+    const router = useRouter();
+    const { data } = useSession();
+    const { branches, townships } = useContext(BackofficeContext);
+    const selectedLocationId = getselectedLocationId();
     const selectedBranch = branches.find(
         (branch) => String(branch.id) === selectedLocationId
     );
@@ -91,7 +94,7 @@ export default function NavBar({ title }: Props) {
                     {drawerList.slice(0, 5).map((item) => (
                         <Link
                             key={item.id}
-                            to={item.link}
+                            href={item.link}
                             style={{
                                 textDecoration: "none",
                                 color: "transparent",
@@ -133,7 +136,7 @@ export default function NavBar({ title }: Props) {
                     {drawerList.slice(-1).map((item) => (
                         <Link
                             key={item.id}
-                            to={item.link}
+                            href={item.link}
                             style={{ textDecoration: "none", color: "#313131" }}
                         >
                             <ListItem disablePadding>
@@ -154,7 +157,7 @@ export default function NavBar({ title }: Props) {
         );
     };
     const pageTitle = drawerList.find(
-        (item) => item.link === window.location.pathname
+        (item) => item.link === router.pathname
     )?.label;
 
     return (
@@ -204,13 +207,16 @@ export default function NavBar({ title }: Props) {
                             {pageTitle}
                         </Typography>
                     </Box>
-                    <Box>
-                        <Link to={accessToken ? "/logout" : "/login"}>
-                            <Button color="inherit" sx={{ color: "white" }}>
-                                {accessToken ? "Logout" : "Login"}
-                            </Button>
-                        </Link>
-                    </Box>
+                    {data ? (
+                        <Typography
+                            onClick={() => signOut()}
+                            sx={{ cursor: "pointer" }}
+                        >
+                            Sign out
+                        </Typography>
+                    ) : (
+                        <span></span>
+                    )}
                 </Toolbar>
             </AppBar>
             <Drawer

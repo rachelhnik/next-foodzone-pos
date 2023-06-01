@@ -7,10 +7,13 @@ import MenusData, {
     branchesMenus,
     BranchesData,
     MenuCategory,
-    menuMenuCategory,
+    BranchesMenucategoriesMenus,
     Townships,
 } from "../typings/Types";
 import { config } from "../config/Config";
+import { getAccessToken, setselectedLocationId } from "@/utils";
+import { useSession } from "next-auth/react";
+import { getselectedLocationId } from "@/utils";
 
 export interface AppContextType {
     user: User | null;
@@ -18,12 +21,11 @@ export interface AppContextType {
     menuCategories: MenuCategory[];
     addons: Addon[];
     addonCategories: AddonCategory[];
-    menuMenuCategories: menuMenuCategory[];
+    branchesMenucategoriesMenus: BranchesMenucategoriesMenus[];
     company: Company | null;
     townships: Townships[];
     branches: BranchesData[];
-    branchesMenus: branchesMenus[];
-    accessToken: string;
+
     setPosData: (data: any) => void;
     fetchData: () => void;
 }
@@ -34,48 +36,48 @@ export const defaultContext: AppContextType = {
     menuCategories: [],
     addons: [],
     addonCategories: [],
-    menuMenuCategories: [],
+    branchesMenucategoriesMenus: [],
     company: null,
     townships: [],
     branches: [],
-    branchesMenus: [],
-    accessToken: "",
+
     setPosData: () => {},
     fetchData: () => {},
 };
 
-export const AppContext = createContext(defaultContext);
+export const BackofficeContext = createContext(defaultContext);
 
-const AppProvider = ({ children }: any) => {
+const BackofficeAppProvider = ({ children }: any) => {
     const [posData, setPosData] = useState(defaultContext);
 
-    const accessToken = localStorage.getItem("accessToken");
+    const selectedBranch = getselectedLocationId();
+    const { data: session } = useSession();
 
     useEffect(() => {
-        if (accessToken) {
+        if (session) {
             fetchData();
         }
-    }, [accessToken]);
+    }, [session]);
 
     const fetchData = async () => {
-        const response = await fetch(`${config.apiBaseUrl}/data  `, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
+        const response = await fetch(`${config.backofficeApiBaseUrl}/app`);
+
         const data = await response.json();
         console.log(data);
 
+        const branchId = data.branches[0].id;
+        if (!selectedBranch) setselectedLocationId(branchId);
+
         const {
-            user,
             menus,
             menuCategories,
             addons,
             addonCategories,
             branches,
-            townships,
+            branchesMenucategoriesMenus,
             company,
-            branchesMenus,
+            townships,
+            user,
         } = data;
 
         setPosData({
@@ -88,14 +90,16 @@ const AppProvider = ({ children }: any) => {
             company: company,
             townships: townships,
             branches: branches,
-            branchesMenus: branchesMenus,
+            branchesMenucategoriesMenus: branchesMenucategoriesMenus,
         });
     };
 
     return (
-        <AppContext.Provider value={{ ...posData, setPosData, fetchData }}>
+        <BackofficeContext.Provider
+            value={{ ...posData, setPosData, fetchData }}
+        >
             {children}
-        </AppContext.Provider>
+        </BackofficeContext.Provider>
     );
 };
-export default AppProvider;
+export default BackofficeAppProvider;

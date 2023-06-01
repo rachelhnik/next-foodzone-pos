@@ -1,68 +1,90 @@
-import { useContext, useEffect, useState } from "react";
-import Layout from "./Layout";
-import { AppContext } from "../contexts/AppContext";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import {
-    Autocomplete,
-    Box,
-    Button,
-    Card,
-    CardMedia,
-    Divider,
-    FormControl,
-    MenuItem,
-    Select,
-    Stack,
-    TextField,
-    Typography,
-} from "@mui/material";
-import MenusData from "../typings/Types";
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Layout from "@/components/Layout";
+import { Button, MenuItem, Select, TextField, Typography } from "@mui/material";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { config } from "../config/Config";
-import FileDropZone from "./FileDropZone";
-import AddonCategories from "./AddonCategories";
+import FileDropZone from "@/components/FileDropZone";
 
-export default function MenuDetail() {
+import MenusData from "@/typings/Types";
+
+import { useRouter } from "next/router";
+import { BackofficeContext } from "../../../contexts/BackofficeContext";
+import { config } from "@/config/Config";
+
+export default function CenteredTabs() {
+    const [value, setValue] = React.useState(0);
+    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+        setValue(newValue);
+    };
+    interface TabPanelProps {
+        children?: React.ReactNode;
+        index: number;
+        value: number;
+    }
+
+    function TabPanel(props: TabPanelProps) {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`vertical-tabpanel-${index}`}
+                aria-labelledby={`vertical-tab-${index}`}
+                {...other}
+            >
+                {value === index && (
+                    <Box sx={{ p: 3 }}>
+                        <Typography>{children}</Typography>
+                    </Box>
+                )}
+            </div>
+        );
+    }
     const {
         menus,
-        branchesMenus,
+        branchesMenucategoriesMenus,
         menuCategories,
         addonCategories,
         addons,
         fetchData,
-    } = useContext(AppContext);
-    const [menuImage, setMenuImage] = useState<File>();
+    } = React.useContext(BackofficeContext);
+    const [menuImage, setMenuImage] = React.useState<File>();
 
-    const [selectedAddonCategoryId, setSelectdAddonCategoryId] = useState("");
+    const [selectedAddonCategoryId, setSelectdAddonCategoryId] =
+        React.useState("");
 
-    const [selectedAddonIds, setSelectdAddonIds] = useState<number[]>([]);
-    const [selectedMenuCategoryIds, setSelectedMenuCategoryIds] = useState<
-        number[]
-    >([]);
-    const { menuId } = useParams();
-    const accessToken = localStorage.getItem("accessToken");
-    const navigate = useNavigate();
+    const [selectedAddonIds, setSelectdAddonIds] = React.useState<number[]>([]);
+    const [selectedMenuCategoryIds, setSelectedMenuCategoryIds] =
+        React.useState<number[]>([]);
+
+    const router = useRouter();
+    const menuId = router.query.id as string;
 
     let menu: MenusData | undefined;
+
     if (menuId) {
-        menu = menus.find((menu) => menu.id === parseInt(menuId, 10));
+        menu = menus.find((menu) => String(menu.id) === menuId);
         if (menu) {
-            const menuLocation = branchesMenus.find(
+            const menuLocation = branchesMenucategoriesMenus.find(
                 (item) => item.menu_id === menu?.id
             );
             if (menuLocation) {
-                menu.isAvailable = menuLocation.is_available;
+                menu.isAvailable = menuLocation.is_available_menu;
             }
         }
     }
-    const [updatedMenu, setUpdatedMenu] = useState({
-        name: "",
-        price: 0,
-        asset_url: "",
-    });
 
-    useEffect(() => {
+    const [updatedMenu, setUpdatedMenu] = React.useState({
+        name: menu?.name,
+        price: menu?.price,
+        asset_url: menu?.asset_url,
+    });
+    console.log(updatedMenu);
+
+    React.useEffect(() => {
         if (menu) {
             setUpdatedMenu({
                 name: menu.name,
@@ -81,26 +103,28 @@ export default function MenuDetail() {
                 const formData = new FormData();
 
                 formData.append("files", menuImage as Blob);
-                const response = await fetch(`${config.apiBaseUrl}/assets`, {
-                    method: "POST",
+                const response = await fetch(
+                    `${config.backofficeApiBaseUrl}/assets`,
+                    {
+                        method: "POST",
 
-                    body: formData,
-                });
+                        body: formData,
+                    }
+                );
                 const responseJSON = await response.json();
                 updatedMenu.asset_url = responseJSON.assetUrl;
                 const responseUpdateMenu = await fetch(
-                    `${config.apiBaseUrl}/menus/${menu?.id}`,
+                    `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
                     {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${accessToken}`,
                         },
                         body: JSON.stringify(updatedMenu),
                     }
                 );
                 fetchData();
-                navigate("/menus");
+                router.push("/menus");
             }
         } catch (error) {
             return null;
@@ -113,12 +137,11 @@ export default function MenuDetail() {
 
     const addMenuCategory = async () => {
         const response = await fetch(
-            `${config.apiBaseUrl}/menus/menus-menucats/${menuId}`,
+            `${config.backofficeApiBaseUrl}/menus/menus-menucats/${menuId}`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({ menuCatIds: selectedMenuCategoryIds }),
             }
@@ -129,12 +152,11 @@ export default function MenuDetail() {
 
     const addAddonData = async () => {
         const response = await fetch(
-            `${config.apiBaseUrl}/menus/menus-addoncat-addons/${menuId}`,
+            `${config.backofficeApiBaseUrl}/menus/menus-addoncat-addons/${menuId}`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     selectedAddonCategoryId: selectedAddonCategoryId,
@@ -149,76 +171,88 @@ export default function MenuDetail() {
 
     return (
         <Layout>
-            <Box
-                sx={{
-                    maxWidth: 600,
-                    margin: "0 auto",
-                    mt: 5,
-                }}
-            >
-                {menu ? (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            maxWidth: 1024,
-                        }}
-                    >
+            <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
+                <Tabs value={value} onChange={handleChange} centered>
+                    <Tab label="update menu data" />
+                    <Tab label="add menu category for menu" />
+                    <Tab label="add addon datas for menu" />
+                </Tabs>
+
+                <TabPanel value={value} index={0}>
+                    {menu ? (
                         <Box
                             sx={{
                                 display: "flex",
-                                flexDirection: "column",
-                                mr: 2,
+                                maxWidth: 300,
+                                margin: "0 auto",
                             }}
                         >
-                            <Typography variant="caption">Name</Typography>
-                            <TextField
-                                id="outlined-basic"
-                                variant="outlined"
-                                defaultValue={menu.name}
-                                sx={{ mb: 2 }}
-                                onChange={(evt) =>
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        name: evt.target.value,
-                                    })
-                                }
-                            />
-                            <Typography variant="caption">Price</Typography>
-                            <TextField
-                                id="outlined-basic"
-                                variant="outlined"
-                                type="number"
-                                defaultValue={menu.price}
-                                sx={{ mb: 2 }}
-                                onChange={(evt) =>
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        price: parseInt(evt.target.value, 10),
-                                    })
-                                }
-                            />
-
-                            <Typography>change Image ?</Typography>
-                            <FileDropZone onFileSelected={onFileSelected} />
-                            <Button
-                                variant="contained"
-                                onClick={updateMenu}
+                            <Box
                                 sx={{
-                                    width: 200,
-                                    margin: "auto",
-                                    mt: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    mr: 2,
                                 }}
                             >
-                                Update
-                            </Button>
+                                <Typography variant="caption">Name</Typography>
+                                <TextField
+                                    id="outlined-basic"
+                                    variant="outlined"
+                                    value={updatedMenu ? updatedMenu.name : ""}
+                                    sx={{ mb: 2 }}
+                                    onChange={(evt) => {
+                                        const values = evt.target.value;
+                                        setUpdatedMenu({
+                                            ...updatedMenu,
+                                            name: evt.target.value,
+                                        });
+                                    }}
+                                />
+                                <Typography variant="caption">Price</Typography>
+                                <TextField
+                                    id="outlined-basic"
+                                    variant="outlined"
+                                    type="number"
+                                    defaultValue={menu.price}
+                                    sx={{ mb: 2 }}
+                                    onChange={(evt) =>
+                                        setUpdatedMenu({
+                                            ...updatedMenu,
+                                            price: parseInt(
+                                                evt.target.value,
+                                                10
+                                            ),
+                                        })
+                                    }
+                                />
+
+                                <Typography>change Image ?</Typography>
+                                <FileDropZone onFileSelected={onFileSelected} />
+                                <Button
+                                    variant="contained"
+                                    onClick={updateMenu}
+                                    sx={{
+                                        width: 300,
+                                        margin: "auto",
+                                        mt: 2,
+                                    }}
+                                >
+                                    Update
+                                </Button>
+                            </Box>
                         </Box>
-                        <Divider orientation="vertical" flexItem />
+                    ) : (
+                        <Typography>Menu not found</Typography>
+                    )}
+                </TabPanel>
+                <TabPanel value={value} index={1}>
+                    {
                         <Box
                             sx={{
                                 display: "flex",
                                 flexDirection: "column",
-                                width: 300,
-                                ml: 2,
+                                maxWidth: 300,
+                                margin: "0 auto",
                             }}
                         >
                             <Typography variant="caption">
@@ -250,7 +284,19 @@ export default function MenuDetail() {
                             >
                                 Add
                             </Button>
-
+                        </Box>
+                    }
+                </TabPanel>
+                <TabPanel value={value} index={2}>
+                    {
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                maxWidth: 300,
+                                margin: "0 auto",
+                            }}
+                        >
                             <Typography variant="h6" sx={{ mt: 2 }}>
                                 Select Addon Category and addons pair
                             </Typography>
@@ -319,10 +365,8 @@ export default function MenuDetail() {
                                 Add
                             </Button>
                         </Box>
-                    </Box>
-                ) : (
-                    <h1>Menu not found</h1>
-                )}
+                    }
+                </TabPanel>
             </Box>
         </Layout>
     );

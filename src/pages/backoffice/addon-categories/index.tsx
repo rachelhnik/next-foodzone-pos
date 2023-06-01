@@ -1,9 +1,9 @@
 import { Box, TextField, Checkbox, Button, Chip, Stack } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import Layout from "./Layout";
-import { AddonCategory } from "../typings/Types";
-import { config } from "../config/Config";
-import { AppContext } from "../contexts/AppContext";
+import Layout from "../../../components/Layout";
+import { AddonCategory } from "../../../typings/Types";
+import { config } from "../../../config/Config";
+import { BackofficeContext } from "../../../contexts/BackofficeContext";
 
 export default function AddonCategories() {
     const [addonCategory, setAddonCategory] = useState<AddonCategory | null>(
@@ -11,26 +11,29 @@ export default function AddonCategories() {
     );
     const accessToken = localStorage.getItem("accessToken");
 
-    const { fetchData, addonCategories } = useContext(AppContext);
+    const { fetchData, addonCategories } = useContext(BackofficeContext);
 
     const updateAddonCategory = async () => {
         if (!addonCategory?.name) return;
 
-        const response = await fetch(`${config.apiBaseUrl}/addon-categories`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(addonCategory),
-        });
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/addon-categories`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(addonCategory),
+            }
+        );
         fetchData();
     };
 
     const deleteAddonCategory = async (addonCategoryId: number | undefined) => {
         if (!addonCategoryId) return;
         const response = await fetch(
-            `${config.apiBaseUrl}/addon-categories/${addonCategoryId}`,
+            `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
             {
                 method: "DELETE",
                 headers: {

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import Layout from "./Layout";
+import Layout from "../../../components/Layout";
 import {
     Box,
     TextField,
@@ -13,26 +13,26 @@ import {
     Stack,
     FormHelperText,
 } from "@mui/material";
-import { Addon } from "../typings/Types";
-import { AppContext } from "../contexts/AppContext";
-import MenuCategories from "./MenuCategories";
-import { config } from "../config/Config";
-import { useNavigate } from "react-router-dom";
+import { Addon } from "../../../typings/Types";
+import { BackofficeContext } from "../../../contexts/BackofficeContext";
+
+import { config } from "../../../config/Config";
+import { useRouter } from "next/router";
 
 export default function Addons() {
     const [addon, setAddon] = useState<Addon | null>(null);
     const branchId = localStorage.getItem("selectedLocation");
     const [checked, setIsChecked] = useState<boolean>(false);
-    console.log(checked);
+
     const accessToken = localStorage.getItem("accessToken");
     const { fetchData, addons, addonCategories, branches } =
-        useContext(AppContext);
-    const navigate = useNavigate();
+        useContext(BackofficeContext);
+    const router = useRouter();
 
     const updateAddon = async () => {
         if (addon?.name.length === 0 || addon?.addon_categories_id === null)
             return;
-        const response = await fetch(`${config.apiBaseUrl}/addons`, {
+        const response = await fetch(`${config.backofficeApiBaseUrl}/addons`, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -47,9 +47,12 @@ export default function Addons() {
 
     const deleteAddon = async (addonId: number | undefined) => {
         if (addonId === undefined) return;
-        const response = await fetch(`${config.apiBaseUrl}/addons/${addonId}`, {
-            method: "DELETE",
-        });
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/addons/${addonId}`,
+            {
+                method: "DELETE",
+            }
+        );
         fetchData();
     };
     return (
