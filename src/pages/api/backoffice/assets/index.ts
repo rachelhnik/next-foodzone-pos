@@ -25,7 +25,7 @@ export default async function handler(
             const files = req.files as Express.MulterS3.File[];
             const file = files[0];
             const assetUrl = file.location;
-            console.log(assetUrl);
+
             res.send({ assetUrl });
         });
     } catch (error) {

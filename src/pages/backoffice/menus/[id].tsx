@@ -12,6 +12,7 @@ import MenusData from "@/typings/Types";
 import { useRouter } from "next/router";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { config } from "@/config/Config";
+import { useState } from "react";
 
 export default function CenteredTabs() {
     const [value, setValue] = React.useState(0);
@@ -61,28 +62,27 @@ export default function CenteredTabs() {
         React.useState<number[]>([]);
 
     const router = useRouter();
+
+    // finding current menu
     const menuId = router.query.id as string;
 
     let menu: MenusData | undefined;
 
     if (menuId) {
         menu = menus.find((menu) => String(menu.id) === menuId);
+
         if (menu) {
-            const menuLocation = branchesMenucategoriesMenus.find(
+            const branchMenu = branchesMenucategoriesMenus.find(
                 (item) => item.menu_id === menu?.id
             );
-            if (menuLocation) {
-                menu.isAvailable = menuLocation.is_available_menu;
-            }
         }
     }
-
-    const [updatedMenu, setUpdatedMenu] = React.useState({
-        name: menu?.name,
-        price: menu?.price,
-        asset_url: menu?.asset_url,
+    const [updatedMenu, setUpdatedMenu] = useState({
+        name: "",
+        price: 0,
+        asset_url: "",
+        description: "",
     });
-    console.log(updatedMenu);
 
     React.useEffect(() => {
         if (menu) {
@@ -90,13 +90,14 @@ export default function CenteredTabs() {
                 name: menu.name,
                 price: menu.price,
                 asset_url: "",
+                description: menu.description,
             });
         }
     }, [menu]);
     const onFileSelected = (files: File[]) => {
         setMenuImage(files[0]);
     };
-
+    // update the menu data s/a name,price,image
     const updateMenu = async () => {
         try {
             if (menuImage) {
@@ -107,7 +108,6 @@ export default function CenteredTabs() {
                     `${config.backofficeApiBaseUrl}/assets`,
                     {
                         method: "POST",
-
                         body: formData,
                     }
                 );
@@ -124,7 +124,7 @@ export default function CenteredTabs() {
                     }
                 );
                 fetchData();
-                router.push("/menus");
+                router.push("/backoffice/menus");
             }
         } catch (error) {
             return null;
@@ -174,8 +174,8 @@ export default function CenteredTabs() {
             <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                 <Tabs value={value} onChange={handleChange} centered>
                     <Tab label="update menu data" />
-                    <Tab label="add menu category for menu" />
-                    <Tab label="add addon datas for menu" />
+                    <Tab label="update menucategory data " />
+                    <Tab label="update addons datas " />
                 </Tabs>
 
                 <TabPanel value={value} index={0}>
@@ -198,10 +198,10 @@ export default function CenteredTabs() {
                                 <TextField
                                     id="outlined-basic"
                                     variant="outlined"
-                                    value={updatedMenu ? updatedMenu.name : ""}
+                                    autoFocus
+                                    defaultValue={updatedMenu.name}
                                     sx={{ mb: 2 }}
                                     onChange={(evt) => {
-                                        const values = evt.target.value;
                                         setUpdatedMenu({
                                             ...updatedMenu,
                                             name: evt.target.value,
@@ -213,29 +213,45 @@ export default function CenteredTabs() {
                                     id="outlined-basic"
                                     variant="outlined"
                                     type="number"
-                                    defaultValue={menu.price}
+                                    autoFocus
+                                    defaultValue={updatedMenu.price}
                                     sx={{ mb: 2 }}
-                                    onChange={(evt) =>
+                                    onChange={(evt) => {
                                         setUpdatedMenu({
                                             ...updatedMenu,
                                             price: parseInt(
                                                 evt.target.value,
                                                 10
                                             ),
-                                        })
-                                    }
+                                        });
+                                    }}
+                                />
+                                <Typography variant="caption">
+                                    description
+                                </Typography>
+                                <TextField
+                                    id="outlined-basic"
+                                    variant="outlined"
+                                    defaultValue={updatedMenu.description}
+                                    sx={{ mb: 2 }}
+                                    onChange={(evt) => {
+                                        setUpdatedMenu({
+                                            ...updatedMenu,
+                                            description: evt.target.value,
+                                        });
+                                    }}
                                 />
 
                                 <Typography>change Image ?</Typography>
                                 <FileDropZone onFileSelected={onFileSelected} />
                                 <Button
                                     variant="contained"
-                                    onClick={updateMenu}
                                     sx={{
                                         width: 300,
                                         margin: "auto",
                                         mt: 2,
                                     }}
+                                    onClick={updateMenu}
                                 >
                                     Update
                                 </Button>
