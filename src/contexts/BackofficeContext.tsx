@@ -1,15 +1,16 @@
 import { createContext, useEffect, useState } from "react";
-import MenusData, {
-    User,
-    Addon,
-    AddonCategory,
-    Company,
-    branchesMenus,
-    BranchesData,
-    MenuCategory,
-    BranchesMenucategoriesMenus,
-    Townships,
-} from "../typings/Types";
+
+import type {
+    menus as MenusData,
+    users as User,
+    addons as Addon,
+    addon_categories as AddonCategory,
+    companies as Company,
+    branches as BranchesData,
+    menu_categories as MenuCategory,
+    branches_menucategories_menus as BranchesMenucategoriesMenus,
+    townships as Townships,
+} from "@prisma/client";
 import { config } from "../config/Config";
 import { getAccessToken, setselectedLocationId } from "@/utils";
 import { useSession } from "next-auth/react";

@@ -9,16 +9,20 @@ import {
     MenuItem,
     Select,
 } from "@mui/material";
-import { MenuCategory } from "../../../typings/Types";
+import type {
+    menu_categories as MenuCategory,
+    branches,
+    townships,
+} from "@prisma/client";
 import { config } from "../../../config/Config";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
 export default function MenuCategories() {
-    const [menuCategory, setMenuCategory] = useState<MenuCategory | null>({
+    const [menuCategory, setMenuCategory] = useState({
         name: "",
-    });
+    } as MenuCategory);
 
     const [selectedBranchIds, setSelectedBranchIds] = useState<number[]>();
 
@@ -51,7 +55,7 @@ export default function MenuCategories() {
         );
         console.log(await response.json());
         fetchData();
-        setMenuCategory({ name: "" });
+        setMenuCategory({ ...menuCategory, name: "" });
         setSelectedBranchIds([]);
     };
 
@@ -82,7 +86,12 @@ export default function MenuCategories() {
                     label="Name"
                     variant="outlined"
                     sx={{ mb: 2 }}
-                    onChange={(e) => setMenuCategory({ name: e.target.value })}
+                    onChange={(e) =>
+                        setMenuCategory({
+                            ...menuCategory,
+                            name: e.target.value,
+                        })
+                    }
                 />
                 <Select
                     labelId="demo-simple-select-helper-label"
@@ -97,10 +106,10 @@ export default function MenuCategories() {
                         setSelectedBranchIds(values);
                     }}
                 >
-                    {branches.map((branch) => (
+                    {branches.map((branch: branches) => (
                         <MenuItem key={branch.id} value={branch.id}>
                             {townships &&
-                                townships.map((ts) =>
+                                townships.map((ts: townships) =>
                                     ts.id === branch.township_id ? ts.name : ""
                                 )}
                             /{branch.address}
@@ -115,7 +124,7 @@ export default function MenuCategories() {
                     spacing={1}
                     sx={{ mt: 2, width: 200 }}
                 >
-                    {menuCategories.map((item) => (
+                    {menuCategories.map((item: MenuCategory) => (
                         <Chip
                             key={item.id}
                             label={item.name}

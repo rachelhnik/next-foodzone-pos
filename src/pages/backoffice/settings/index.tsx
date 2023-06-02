@@ -14,7 +14,10 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
-import { BranchesData, Company } from "../../../typings/Types";
+import type {
+    branches as BranchesData,
+    companies as Company,
+} from "@prisma/client";
 
 import { config } from "../../../config/Config";
 
@@ -31,7 +34,7 @@ export default function Settings() {
     const currentBranchId = getselectedLocationId();
     const [companyName, setCompanyName] = useState<Company>({
         name: company?.name || "",
-    });
+    } as Company);
 
     const [branchesData, setBranchesData] = useState<BranchesData[]>(branches);
 
@@ -177,7 +180,10 @@ export default function Settings() {
                             value={companyName.name}
                             size="small"
                             onChange={(evt) =>
-                                setCompanyName({ name: evt.target.value })
+                                setCompanyName({
+                                    ...companyName,
+                                    name: evt.target.value,
+                                })
                             }
                         />
                         <Button

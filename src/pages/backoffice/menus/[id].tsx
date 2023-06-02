@@ -14,16 +14,13 @@ import {
 
 import FileDropZone from "@/components/FileDropZone";
 
-import MenusData from "@/typings/Types";
+import type { menus as MenusData } from "@prisma/client";
 
 import { useRouter } from "next/router";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { config } from "@/config/Config";
-<<<<<<< HEAD
 import { getselectedLocationId } from "@/utils";
-=======
 import { useState } from "react";
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
 
 export default function CenteredTabs() {
     const [value, setValue] = React.useState(0);
@@ -92,15 +89,6 @@ export default function CenteredTabs() {
 
     if (menuId) {
         menu = menus.find((menu) => String(menu.id) === menuId);
-<<<<<<< HEAD
-    }
-
-    const [updatedMenu, setUpdatedMenu] = React.useState({
-        name: menu?.name,
-        price: menu?.price,
-        asset_url: menu?.asset_url,
-        description: menu?.description,
-=======
 
         if (menu) {
             const branchMenu = branchesMenucategoriesMenus.find(
@@ -113,7 +101,6 @@ export default function CenteredTabs() {
         price: 0,
         asset_url: "",
         description: "",
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
     });
 
     React.useEffect(() => {
@@ -122,7 +109,7 @@ export default function CenteredTabs() {
                 name: menu.name,
                 price: menu.price,
                 asset_url: "",
-                description: menu.description,
+                description: menu.description as string,
             });
         }
     }, [menu]);
@@ -145,8 +132,6 @@ export default function CenteredTabs() {
                 );
                 const responseJSON = await response.json();
                 updatedMenu.asset_url = responseJSON.assetUrl;
-<<<<<<< HEAD
-=======
                 const responseUpdateMenu = await fetch(
                     `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
                     {
@@ -159,7 +144,6 @@ export default function CenteredTabs() {
                 );
                 fetchData();
                 router.push("/backoffice/menus");
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
             }
             const responseUpdateMenu = await fetch(
                 `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
@@ -229,13 +213,9 @@ export default function CenteredTabs() {
             <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                 <Tabs value={value} onChange={handleChange} centered>
                     <Tab label="update menu data" />
-<<<<<<< HEAD
-                    <Tab label="update menucategory data" />
-                    <Tab label="add addon datas for menu" />
-=======
+
                     <Tab label="update menucategory data " />
                     <Tab label="update addons datas " />
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
                 </Tabs>
                 <TabPanel value={value} index={0}>
                     {menu ? (
@@ -256,10 +236,6 @@ export default function CenteredTabs() {
                                 <Typography variant="caption">Name</Typography>
                                 <TextField
                                     variant="outlined"
-<<<<<<< HEAD
-=======
-                                    autoFocus
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
                                     defaultValue={updatedMenu.name}
                                     sx={{ mb: 2 }}
                                     onChange={(evt) => {
@@ -273,10 +249,6 @@ export default function CenteredTabs() {
                                 <TextField
                                     variant="outlined"
                                     type="number"
-<<<<<<< HEAD
-=======
-                                    autoFocus
->>>>>>> 72b7030be54f75827cc30adcec12991b4d2dcd3d
                                     defaultValue={updatedMenu.price}
                                     sx={{ mb: 2 }}
                                     onChange={(evt) => {
@@ -304,21 +276,7 @@ export default function CenteredTabs() {
                                         });
                                     }}
                                 />
-                                <Typography variant="caption">
-                                    Description
-                                </Typography>
-                                <TextField
-                                    id="outlined-basic"
-                                    variant="outlined"
-                                    defaultValue={updatedMenu.description}
-                                    sx={{ mb: 2 }}
-                                    onChange={(evt) => {
-                                        setUpdatedMenu({
-                                            ...updatedMenu,
-                                            description: evt.target.value,
-                                        });
-                                    }}
-                                />
+
                                 <Typography>change Image ?</Typography>
                                 <FileDropZone onFileSelected={onFileSelected} />
                                 <Button
