@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import Layout from "../../../components/Layout";
 import { useState } from "react";
-import MenusData from "../../../typings/Types";
+import { menus as MenusData } from "@prisma/client";
 import { config } from "../../../config/Config";
 import FileDropZone from "../../../components/FileDropZone";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
@@ -39,7 +39,7 @@ const CreateMenu = () => {
         (item) => item.id && validMenuCategoryIds.includes(item.id)
     );
 
-    const [menu, setMenu] = useState<MenusData>({
+    const [menu, setMenu] = useState({
         name: "",
         price: 0,
         isAvailable: true,
@@ -153,7 +153,7 @@ const CreateMenu = () => {
                             sx={{ mb: 2 }}
                             value={menuCategoryIds}
                             onChange={(evt) => {
-                                const values = evt.target.value as number[];
+                                const values = evt.target.value as [];
                                 setMenuCategoryIds(values);
                                 setMenu({ ...menu, menucategoryIds: values });
                             }}

@@ -13,14 +13,17 @@ import {
     Stack,
     FormHelperText,
 } from "@mui/material";
-import { Addon } from "../../../typings/Types";
+import { addons as Addon } from "@prisma/client";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 
 import { config } from "../../../config/Config";
 import { useRouter } from "next/router";
 
 export default function Addons() {
-    const [addon, setAddon] = useState<Addon | null>(null);
+    const [addon, setAddon] = useState<Addon>({
+        name: "",
+        addon_categories_id: null,
+    } as Addon);
     const branchId = localStorage.getItem("selectedLocation");
     const [checked, setIsChecked] = useState<boolean>(false);
 
@@ -72,25 +75,8 @@ export default function Addons() {
                     sx={{ mb: 2 }}
                     onChange={(e) => {
                         setAddon({
+                            ...addon,
                             name: e.target.value,
-                            price: addon?.price ? addon.price : 0,
-                            addon_categories_id: addon?.addon_categories_id
-                                ? addon.addon_categories_id
-                                : null,
-                        });
-                    }}
-                />
-                <TextField
-                    label="Price"
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                    onChange={(e) => {
-                        setAddon({
-                            name: addon?.name ? addon.name : "",
-                            price: parseInt(e.target.value),
-                            addon_categories_id: addon?.addon_categories_id
-                                ? addon.addon_categories_id
-                                : null,
                         });
                     }}
                 />
@@ -108,8 +94,7 @@ export default function Addons() {
                             value={cat.id}
                             onClick={() => {
                                 setAddon({
-                                    name: addon?.name ? addon.name : "",
-                                    price: addon?.price ? addon?.price : 0,
+                                    ...addon,
                                     addon_categories_id: cat.id,
                                 });
                             }}

@@ -3,15 +3,23 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Layout from "@/components/Layout";
-import { Button, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+    Button,
+    Chip,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from "@mui/material";
 
 import FileDropZone from "@/components/FileDropZone";
 
-import MenusData from "@/typings/Types";
+import type { menus as MenusData } from "@prisma/client";
 
 import { useRouter } from "next/router";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { config } from "@/config/Config";
+import { getselectedLocationId } from "@/utils";
 import { useState } from "react";
 
 export default function CenteredTabs() {
@@ -36,11 +44,7 @@ export default function CenteredTabs() {
                 aria-labelledby={`vertical-tab-${index}`}
                 {...other}
             >
-                {value === index && (
-                    <Box sx={{ p: 3 }}>
-                        <Typography>{children}</Typography>
-                    </Box>
-                )}
+                {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
             </div>
         );
     }
@@ -65,6 +69,21 @@ export default function CenteredTabs() {
 
     // finding current menu
     const menuId = router.query.id as string;
+    const branchId = getselectedLocationId();
+    const currentenuCategoriesIds = branchesMenucategoriesMenus
+        .filter(
+            (data) =>
+                String(data.menu_id) === menuId &&
+                String(data.branch_id) === branchId
+        )
+        .map((data) => data.menucategory_id);
+
+    const newMenuCategories = menuCategories.filter(
+        (data) => !currentenuCategoriesIds.includes(data.id as number)
+    );
+    const currentMenuCategories = menuCategories.filter((data) =>
+        currentenuCategoriesIds.includes(data.id as number)
+    );
 
     let menu: MenusData | undefined;
 
@@ -90,7 +109,7 @@ export default function CenteredTabs() {
                 name: menu.name,
                 price: menu.price,
                 asset_url: "",
-                description: menu.description,
+                description: menu.description as string,
             });
         }
     }, [menu]);
@@ -126,14 +145,22 @@ export default function CenteredTabs() {
                 fetchData();
                 router.push("/backoffice/menus");
             }
+            const responseUpdateMenu = await fetch(
+                `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(updatedMenu),
+                }
+            );
+            fetchData();
+            router.push("/backoffice/menus");
         } catch (error) {
             return null;
         }
     };
-
-    const categories = menuCategories.map((menucat) => ({
-        title: menucat.name,
-    }));
 
     const addMenuCategory = async () => {
         const response = await fetch(
@@ -143,11 +170,23 @@ export default function CenteredTabs() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ menuCatIds: selectedMenuCategoryIds }),
+                body: JSON.stringify({
+                    menuCatIds: selectedMenuCategoryIds,
+                    branchId: branchId,
+                }),
             }
         );
         fetchData();
         setSelectedMenuCategoryIds([]);
+    };
+    const deleteMenuCategory = async (menucatId: number) => {
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/menus/menus-menucats?menuId=${menuId}`,
+            {
+                method: "DELETE",
+            }
+        );
+        fetchData();
     };
 
     const addAddonData = async () => {
@@ -174,10 +213,10 @@ export default function CenteredTabs() {
             <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                 <Tabs value={value} onChange={handleChange} centered>
                     <Tab label="update menu data" />
+
                     <Tab label="update menucategory data " />
                     <Tab label="update addons datas " />
                 </Tabs>
-
                 <TabPanel value={value} index={0}>
                     {menu ? (
                         <Box
@@ -196,9 +235,7 @@ export default function CenteredTabs() {
                             >
                                 <Typography variant="caption">Name</Typography>
                                 <TextField
-                                    id="outlined-basic"
                                     variant="outlined"
-                                    autoFocus
                                     defaultValue={updatedMenu.name}
                                     sx={{ mb: 2 }}
                                     onChange={(evt) => {
@@ -210,10 +247,8 @@ export default function CenteredTabs() {
                                 />
                                 <Typography variant="caption">Price</Typography>
                                 <TextField
-                                    id="outlined-basic"
                                     variant="outlined"
                                     type="number"
-                                    autoFocus
                                     defaultValue={updatedMenu.price}
                                     sx={{ mb: 2 }}
                                     onChange={(evt) => {
@@ -271,6 +306,16 @@ export default function CenteredTabs() {
                                 margin: "0 auto",
                             }}
                         >
+                            {currentMenuCategories.map((data) => (
+                                <Chip
+                                    label={data.name}
+                                    sx={{ mb: 1, width: 200 }}
+                                    key={data.id}
+                                    onDelete={(id) =>
+                                        deleteMenuCategory(data.id as number)
+                                    }
+                                />
+                            ))}
                             <Typography variant="caption">
                                 Select menu categories
                             </Typography>
@@ -284,7 +329,7 @@ export default function CenteredTabs() {
                                     setSelectedMenuCategoryIds(values);
                                 }}
                             >
-                                {menuCategories.map((menucat) => (
+                                {newMenuCategories.map((menucat) => (
                                     <MenuItem
                                         key={menucat.id}
                                         value={menucat.id}

@@ -18,19 +18,25 @@ export default async function handler(
     if (req.method === "PUT") {
         const menuId = parseInt(req.query.menuId as string, 10);
         const { name, price, asset_url, description } = req.body;
-        const updatedMenu = await prisma.menus.update({
+        const menu = await prisma.menus.findUnique({
             where: {
                 id: menuId,
             },
-            data: {
-                name: name,
-                price: price,
-                asset_url: asset_url,
-                description: description,
-            },
         });
-        console.log(req.body);
-        console.log(updatedMenu);
+        const assetUrl = menu?.asset_url;
+        if (!asset_url)
+            await prisma.menus.update({
+                where: {
+                    id: menuId,
+                },
+                data: {
+                    name: name,
+                    price: price,
+                    asset_url: asset_url === "" ? assetUrl : asset_url,
+                    description: description,
+                },
+            });
+
         res.send(200);
     }
 }

@@ -1,14 +1,15 @@
 import { Box, TextField, Checkbox, Button, Chip, Stack } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import Layout from "../../../components/Layout";
-import { AddonCategory } from "../../../typings/Types";
+import type { addon_categories as AddonCategory } from "@prisma/client";
 import { config } from "../../../config/Config";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 
 export default function AddonCategories() {
-    const [addonCategory, setAddonCategory] = useState<AddonCategory | null>(
-        null
-    );
+    const [addonCategory, setAddonCategory] = useState<AddonCategory>({
+        name: "",
+        is_required: false,
+    } as AddonCategory);
     const accessToken = localStorage.getItem("accessToken");
 
     const { fetchData, addonCategories } = useContext(BackofficeContext);
@@ -63,10 +64,8 @@ export default function AddonCategories() {
                     sx={{ mb: 2 }}
                     onChange={(e) => {
                         setAddonCategory({
+                            ...addonCategory,
                             name: e.target.value,
-                            isRequired: addonCategory?.isRequired
-                                ? addonCategory.isRequired
-                                : false,
                         });
                     }}
                 />
@@ -77,10 +76,8 @@ export default function AddonCategories() {
                         color="success"
                         onChange={() => {
                             setAddonCategory({
-                                name: addonCategory?.name
-                                    ? addonCategory?.name
-                                    : "",
-                                isRequired: !addonCategory?.isRequired,
+                                ...addonCategory,
+                                is_required: !addonCategory?.is_required,
                             });
                         }}
                     />
