@@ -1,16 +1,14 @@
-import type {
-    GetServerSidePropsContext,
-    InferGetServerSidePropsType,
-} from "next";
-import { getProviders, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]";
-import Layout from "@/components/Layout";
-import { Box, Button, TextField } from "@mui/material";
+import { signIn } from "next-auth/react";
+
+import { Box, Button } from "@mui/material";
+import NavBar from "@/components/Navbar";
 
 const SignIn = () => {
     return (
-        <Layout title="Happy POS - Sign in">
+        <Box>
+            <Box sx={{ position: "relative", zIndex: 999 }}>
+                <NavBar />
+            </Box>
             <Box
                 sx={{
                     display: "flex",
@@ -28,7 +26,7 @@ const SignIn = () => {
                     Sign in with Google
                 </Button>
             </Box>
-        </Layout>
+        </Box>
     );
 };
 
