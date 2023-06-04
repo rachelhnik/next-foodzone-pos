@@ -154,7 +154,11 @@ const Menus = () => {
                                 <Card sx={{ width: 200, height: 280 }}>
                                     <CardMedia
                                         sx={{ height: 140 }}
-                                        image={menu && menu.asset_url}
+                                        image={
+                                            menu.asset_url !== null
+                                                ? menu.asset_url
+                                                : "undefined"
+                                        }
                                         title="green iguana"
                                     />
                                     <CardContent>

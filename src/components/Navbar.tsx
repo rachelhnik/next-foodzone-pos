@@ -3,57 +3,14 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import logo from "../asset/logo.png";
 
-import SettingsIcon from "@mui/icons-material/Settings";
-import ClassIcon from "@mui/icons-material/Class";
-import CategoryIcon from "@mui/icons-material/Category";
-import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
-import LocalMallIcon from "@mui/icons-material/LocalMall";
-import TapasIcon from "@mui/icons-material/Tapas";
 import { BackofficeContext } from "../contexts/BackofficeContext";
 import { useContext } from "react";
 import { getselectedLocationId } from "@/utils";
 import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
-export const sidebarMenuItems = [
-    {
-        id: 1,
-        icon: <LocalMallIcon />,
-        label: "Orders",
-        link: "/backoffice/orders",
-    },
-    {
-        id: 2,
-        icon: <RestaurantMenuIcon />,
-        label: "Menu",
-        link: "/backoffice/menus",
-    },
-    {
-        id: 3,
-        icon: <CategoryIcon />,
-        label: "Menu Category",
-        link: "/backoffice/menu-categories",
-    },
-    {
-        id: 4,
-        icon: <TapasIcon />,
-        label: "Add on",
-        link: "/backoffice/addons",
-    },
-    {
-        id: 5,
-        icon: <ClassIcon />,
-        label: "Add on Category",
-        link: "/backoffice/addon-categories",
-    },
-
-    {
-        id: 6,
-        icon: <SettingsIcon />,
-        label: "Settings",
-        link: "/backoffice/settings",
-    },
-];
 interface Props {
     title?: string;
 }
@@ -80,6 +37,14 @@ export default function NavBar({ title }: Props) {
                 >
                     {data ? (
                         <>
+                            <Box>
+                                <Image
+                                    alt="logo"
+                                    width={200}
+                                    height={30}
+                                    src={logo}
+                                />
+                            </Box>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <Typography
                                     component="div"
@@ -98,15 +63,6 @@ export default function NavBar({ title }: Props) {
                                         : ""}
                                 </Typography>
                             </Box>
-                            <Box>
-                                <Typography
-                                    component="div"
-                                    sx={{ flexGrow: 1, color: "#FEE8B0" }}
-                                >
-                                    FOODZONE POS
-                                </Typography>
-                            </Box>
-
                             <Typography
                                 onClick={() => signOut()}
                                 sx={{ cursor: "pointer", color: "#FEE8B0" }}
@@ -115,13 +71,7 @@ export default function NavBar({ title }: Props) {
                             </Typography>
                         </>
                     ) : (
-                        <Typography
-                            variant="h6"
-                            component="div"
-                            sx={{ flexGrow: 1, textAlign: "center" }}
-                        >
-                            Happy POS
-                        </Typography>
+                        <Image alt="logo" width={100} height={100} src={logo} />
                     )}
                 </Toolbar>
             </AppBar>
