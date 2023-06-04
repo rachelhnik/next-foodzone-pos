@@ -3,6 +3,7 @@ import Layout from "../../../components/Layout";
 import {
     Box,
     Button,
+    Chip,
     MenuItem,
     Radio,
     Select,
@@ -36,12 +37,6 @@ export default function Settings() {
         name: company?.name || "",
     } as Company);
 
-    const [branchesData, setBranchesData] = useState<BranchesData[]>(branches);
-
-    const [selectedTownshipId, setSelectdTownshipId] = useState("");
-
-    const [newAddress, setNewAddress] = useState("");
-
     const [selectedBranch, setSelectedBranch] = useState<
         BranchesData | undefined
     >();
@@ -69,7 +64,6 @@ export default function Settings() {
                 setSelectedBranch(currentBranch);
             }
         }
-        setBranchesData(branches);
     }, [session, branches, router, selectedBranch?.id]);
 
     const handleOnchange = (evt: SelectChangeEvent<number>) => {
@@ -99,60 +93,6 @@ export default function Settings() {
         setCompanyName(newCompany.name);
     };
 
-    const createNewBranch = async () => {
-        if (!selectedTownshipId || !newAddress) return;
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/branches/create/${company?.id}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    townshipId: selectedTownshipId,
-                    address: newAddress,
-                }),
-            }
-        );
-        fetchData();
-        setSelectdTownshipId("");
-        setNewAddress("");
-    };
-
-    const updateLocation = async (branch: BranchesData) => {
-        const branchId = branch.id;
-        const oldBranch = branches.find((branch) => branch.id === branchId);
-        const newBranch = branchesData.find(
-            (updateBranch) => updateBranch.id === branchId
-        );
-
-        if (oldBranch?.address !== newBranch?.address) {
-            await fetch(`${config.backofficeApiBaseUrl}/branches/${branchId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newBranch),
-            });
-            fetchData();
-        }
-    };
-
-    const deleteLocation = async (branch: BranchesData) => {
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/branches/${branch.id}`,
-            {
-                method: "DELETE",
-            }
-        );
-        if (response.ok) {
-            return fetchData();
-        }
-        alert(
-            "Cannot delete this branch. Please delete relations associated with it first."
-        );
-    };
-
     return (
         <Layout>
             <Box
@@ -166,11 +106,12 @@ export default function Settings() {
                 autoComplete="off"
             >
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <label>name</label>
+                    <Typography>name</Typography>
                     <div
                         style={{
                             display: "flex",
                             justifyContent: "space-between",
+                            flexFlow: "column",
                             alignItems: "center",
                             marginBottom: "2rem",
                         }}
@@ -188,174 +129,63 @@ export default function Settings() {
                         />
                         <Button
                             variant="contained"
-                            sx={{ width: 100 }}
+                            sx={{ mt: 2 }}
                             size="small"
                             onClick={updateCompany}
+                            fullWidth
                         >
                             update
                         </Button>
                     </div>
                 </div>
                 <Typography>Select current location</Typography>
-                <FormControl>
-                    <RadioGroup
-                        aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue=""
-                        name="radio-buttons-group"
+                {branches.map((branch) => (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            mt: 2,
+                        }}
+                        key={branch.id}
                     >
-                        {branchesData.map((branch, index) => (
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                }}
-                                key={branch.id}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <FormControlLabel
-                                        value={branch.id}
-                                        control={
-                                            <Radio
-                                                onChange={handleOnchange}
-                                                checked={
-                                                    currentBranchId ===
-                                                    String(branch.id)
-                                                        ? true
-                                                        : false
-                                                }
-                                            />
-                                        }
-                                        label=""
-                                    />
-                                    <TextField
-                                        id="outlined-select-currency"
-                                        defaultValue={
-                                            townships.find((data) => {
-                                                if (
-                                                    data.id ===
-                                                    branch.township_id
-                                                )
-                                                    return data;
-                                            })?.name
-                                        }
-                                        size="small"
-                                        sx={{ mt: 1, width: 100 }}
-                                    />
-
-                                    <TextField
-                                        label="address"
-                                        id="outlined-size-small"
-                                        value={branch.address}
-                                        size="small"
-                                        sx={{ mt: 1, ml: 1 }}
-                                        onChange={(evt) => {
-                                            const newAddress = branchesData.map(
-                                                (branchData) => {
-                                                    if (
-                                                        branchData.id ===
-                                                        branch.id
-                                                    ) {
-                                                        return {
-                                                            ...branchData,
-                                                            address:
-                                                                evt.target
-                                                                    .value,
-                                                        };
-                                                    }
-                                                    return branchData;
-                                                }
-                                            );
-                                            setBranchesData(newAddress);
-                                        }}
-                                    />
-                                </Box>
-                                <div
-                                    style={{
-                                        marginTop: "0.5rem",
-                                        display: "flex",
-                                        justifyContent: "flex-end",
-                                    }}
-                                >
-                                    <Button
-                                        variant="contained"
-                                        sx={{ mr: 2 }}
-                                        onClick={() => updateLocation(branch)}
-                                    >
-                                        Update
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="error"
-                                        onClick={() => deleteLocation(branch)}
-                                    >
-                                        delete
-                                    </Button>
-                                </div>
-                            </Box>
-                        ))}
-                    </RadioGroup>
-                </FormControl>
-                <Typography>Add new location</Typography>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <FormControl>
                         <Box
                             sx={{
                                 display: "flex",
-                                justifyContent: "space-between",
-                                mb: 2,
+
+                                alignItems: "center",
                             }}
                         >
-                            <Select
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={
-                                    selectedTownshipId ? selectedTownshipId : ""
+                            <FormControlLabel
+                                value={branch.id}
+                                control={
+                                    <Radio
+                                        onChange={handleOnchange}
+                                        checked={
+                                            currentBranchId ===
+                                            String(branch.id)
+                                                ? true
+                                                : false
+                                        }
+                                        sx={{ mr: -2 }}
+                                    />
                                 }
-                                label="township"
-                                sx={{ width: 100 }}
-                                size="small"
-                                onChange={(evt) =>
-                                    setSelectdTownshipId(
-                                        String(evt.target.value)
-                                    )
-                                }
-                            >
-                                {townships.map((township) => (
-                                    <MenuItem
-                                        key={township.id}
-                                        value={township.id}
-                                    >
-                                        {township.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-
-                            <TextField
-                                id="outlined-size-small"
-                                value={newAddress}
-                                placeholder="enter address"
-                                size="small"
-                                onChange={(evt) =>
-                                    setNewAddress(evt.target.value)
-                                }
+                                label=""
                             />
-                        </Box>
-                    </FormControl>
+                            <Chip
+                                label={
+                                    townships.find((township) =>
+                                        township.id === branch.township_id
+                                            ? township.name
+                                            : ""
+                                    )?.name
+                                }
+                                sx={{ mr: 1 }}
+                            />
 
-                    <Button
-                        variant="contained"
-                        color="success"
-                        onClick={createNewBranch}
-                    >
-                        create
-                    </Button>
-                </Box>
+                            <Chip label={branch.address} />
+                        </Box>
+                    </Box>
+                ))}
             </Box>
         </Layout>
     );
