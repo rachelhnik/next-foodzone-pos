@@ -67,6 +67,7 @@ const BackofficeAppProvider = ({ children }: any) => {
         console.log(data);
 
         const branchId = data.branches[0].id;
+        console.log(branchId);
         if (!selectedBranch) setselectedLocationId(branchId);
 
         const {

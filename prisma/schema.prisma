@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client"
+ 
 }
 
 
@@ -50,8 +50,8 @@ model branches_menucategories_menus {
   menu_id      Int?
   branch_id    Int
   menucategory_id Int
-  is_available_menu Boolean @default(true)
-  is_available_menucategory Boolean @default(true)
+  is_available Boolean @default(true)
+ 
   menus        menus?   @relation(fields: [menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "location_menus_menu_id_fkey")
   menu_categories    menu_categories @relation(fields: [menucategory_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   branches   branches @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

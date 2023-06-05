@@ -33,13 +33,14 @@ export default function Settings() {
     const router = useRouter();
     const { data: session } = useSession();
     const currentBranchId = getselectedLocationId();
+
     const [companyName, setCompanyName] = useState<Company>({
         name: company?.name || "",
     } as Company);
 
     const [selectedBranch, setSelectedBranch] = useState<
         BranchesData | undefined
-    >();
+    >(branches[0]);
 
     useEffect(() => {
         if (!session) {
