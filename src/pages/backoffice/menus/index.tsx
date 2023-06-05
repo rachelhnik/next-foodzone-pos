@@ -112,7 +112,7 @@ const Menus = () => {
             >
                 <Box sx={{ display: "flex", mt: 5 }}>
                     <Link
-                        href={`/backoffice/menus/menuId`}
+                        href={`/backoffice/menus/create`}
                         style={{ textDecoration: "none", color: "black" }}
                     >
                         <Box

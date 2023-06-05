@@ -35,10 +35,30 @@ export default async function handler(
                 role: "admin",
             },
         });
+
+        const townshipsNames = [
+            { name: "Hledan" },
+            { name: "Tamwe" },
+            { name: "South Okkala" },
+            { name: "Mayangone" },
+            { name: "Insein" },
+            { name: "Thingangyun" },
+            { name: "Ahlone" },
+            { name: "Yankin" },
+        ];
+
+        const townships = await prisma.$transaction(
+            townshipsNames.map((townshipName) =>
+                prisma.townships.create({
+                    data: townshipName,
+                })
+            )
+        );
+
         const newBranch = await prisma.branches.create({
             data: {
                 address: "default address",
-                township_id: 1,
+                township_id: townships[0].id,
                 company_id: newCompany.id,
             },
         });
@@ -65,27 +85,33 @@ export default async function handler(
                 menu_id: newMenus[0].id,
                 menucategory_id: newMenuCategories[0].id,
                 branch_id: newBranch.id,
+                is_available: true,
             },
             {
                 menu_id: newMenus[0].id,
                 menucategory_id: newMenuCategories[1].id,
                 branch_id: newBranch.id,
+                is_available: true,
             },
             {
                 menu_id: newMenus[1].id,
                 menucategory_id: newMenuCategories[0].id,
                 branch_id: newBranch.id,
+                is_available: true,
             },
             {
                 menu_id: newMenus[1].id,
                 menucategory_id: newMenuCategories[1].id,
                 branch_id: newBranch.id,
+                is_available: true,
             },
         ];
 
         const newBranchesMenucategoriesMenus = await prisma.$transaction(
-            newBranchesMenucategoriesMenusData.map((data1) =>
-                prisma.branches_menucategories_menus.create({ data: data1 })
+            newBranchesMenucategoriesMenusData.map((item) =>
+                prisma.branches_menucategories_menus.create({
+                    data: item,
+                })
             )
         );
 
@@ -125,12 +151,7 @@ export default async function handler(
                 prisma.addons.create({ data: newAddon })
             )
         );
-        const townships = await prisma.townships.findMany({
-            select: {
-                id: true,
-                name: true,
-            },
-        });
+
         return res.send({
             menus: newMenus,
             menuCategories: newMenuCategories,
@@ -149,11 +170,13 @@ export default async function handler(
                 id: companyId,
             },
         });
+
         const branches = await prisma.branches.findMany({
             where: {
                 company_id: companyId,
             },
         });
+
         const branchesId = branches.map((branch) => branch.id);
 
         const branchesMenucategoriesMenus =
