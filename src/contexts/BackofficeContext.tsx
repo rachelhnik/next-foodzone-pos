@@ -10,6 +10,7 @@ import type {
     menu_categories as MenuCategory,
     branches_menucategories_menus as BranchesMenucategoriesMenus,
     townships as Townships,
+    menu_addoncategories as MenuAddonCategories,
 } from "@prisma/client";
 import { config } from "../config/Config";
 import { getAccessToken, setselectedLocationId } from "@/utils";
@@ -26,7 +27,7 @@ export interface AppContextType {
     company: Company | null;
     townships: Townships[];
     branches: BranchesData[];
-
+    menuAddonCategories: MenuAddonCategories[];
     setPosData: (data: any) => void;
     fetchData: () => void;
 }
@@ -41,7 +42,7 @@ export const defaultContext: AppContextType = {
     company: null,
     townships: [],
     branches: [],
-
+    menuAddonCategories: [],
     setPosData: () => {},
     fetchData: () => {},
 };
@@ -64,6 +65,7 @@ const BackofficeAppProvider = ({ children }: any) => {
         const response = await fetch(`${config.backofficeApiBaseUrl}/app`);
 
         const data = await response.json();
+        console.log(data);
 
         const branchId = data.branches[0].id;
 
@@ -76,6 +78,7 @@ const BackofficeAppProvider = ({ children }: any) => {
             addonCategories,
             branches,
             branchesMenucategoriesMenus,
+            menuAddonCategories,
             company,
             townships,
             user,
@@ -88,6 +91,7 @@ const BackofficeAppProvider = ({ children }: any) => {
             menuCategories: menuCategories,
             addons: addons,
             addonCategories: addonCategories,
+            menuAddonCategories: menuAddonCategories,
             company: company,
             townships: townships,
             branches: branches,

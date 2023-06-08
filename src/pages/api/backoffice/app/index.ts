@@ -124,18 +124,19 @@ export default async function handler(
                 prisma.addon_categories.create({ data: addonCategory })
             )
         );
-        await prisma.menu_addoncategories.createMany({
-            data: [
-                {
-                    menu_id: newMenus[0].id,
-                    addoncategory_id: newAddonCategories[0].id,
-                },
-                {
-                    menu_id: newMenus[1].id,
-                    addoncategory_id: newAddonCategories[1].id,
-                },
-            ],
-        });
+        const menuAddonCategories =
+            await prisma.menu_addoncategories.createMany({
+                data: [
+                    {
+                        menu_id: newMenus[0].id,
+                        addoncategory_id: newAddonCategories[0].id,
+                    },
+                    {
+                        menu_id: newMenus[1].id,
+                        addoncategory_id: newAddonCategories[1].id,
+                    },
+                ],
+            });
         const newAddonsData = [
             {
                 name: "Cola",
@@ -169,7 +170,7 @@ export default async function handler(
             menuCategories: newMenuCategories,
             addons: newAddons,
             addonCategories: newAddonCategories,
-
+            menuAddonCategories: menuAddonCategories,
             branches: newBranch,
             branchesMenucategoriesMenus: newBranchesMenucategoriesMenus,
             company: newCompany,
@@ -227,6 +228,13 @@ export default async function handler(
                 },
             },
         });
+        const menuAddonCategories = await prisma.menu_addoncategories.findMany({
+            select: {
+                id: true,
+                menu_id: true,
+                addoncategory_id: true,
+            },
+        });
         const menuAddonCategoryIds = await prisma.menu_addoncategories.findMany(
             {
                 where: {
@@ -267,6 +275,7 @@ export default async function handler(
             menuCategories: menuCategories,
             addons: addons,
             addonCategories: addonCategories,
+            menuAddonCategories: menuAddonCategories,
             branches: branches,
             branchesMenucategoriesMenus: branchesMenucategoriesMenus,
             company: company,
