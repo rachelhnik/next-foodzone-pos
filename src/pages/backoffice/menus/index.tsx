@@ -4,10 +4,12 @@ import {
     Card,
     CardContent,
     CardMedia,
+    Dialog,
+    DialogContent,
     Typography,
 } from "@mui/material";
 import Layout from "../../../components/Layout";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import {
     BackofficeContext,
@@ -19,8 +21,10 @@ import { config } from "../../../config/Config";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import { getselectedLocationId } from "@/utils";
+import CreateMenu from "./create";
 
 const Menus = () => {
+    const [open, setOpen] = useState(false);
     const branchId = getselectedLocationId();
 
     const { fetchData, menus, branchesMenucategoriesMenus } =
@@ -106,34 +110,35 @@ const Menus = () => {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    m: "0 auto",
-                    px: 4,
+                    margin: "0 auto",
                 }}
             >
-                <Box sx={{ display: "flex", mt: 5 }}>
-                    <Link
-                        href={`/backoffice/menus/create`}
-                        style={{ textDecoration: "none", color: "black" }}
+                <Box
+                    sx={{
+                        right: 10,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                    }}
+                >
+                    <Button
+                        onClick={() => setOpen(true)}
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        sx={{
+                            backgroundColor: "#4C4C6D",
+                            width: "fit-content",
+                            color: "#E8F6EF",
+                            mb: 2,
+                            ":hover": {
+                                bgcolor: "#1B9C85", // theme.palette.primary.main
+                                color: "white",
+                            },
+                        }}
                     >
-                        <Box
-                            sx={{
-                                width: "200px",
-                                height: "280px",
-                                border: "2px dotted lightgray",
-                                borderRadius: 2,
-                                mr: 2,
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                flexDirection: "column",
-                                cursor: "pointer",
-                                userSelect: "none",
-                            }}
-                        >
-                            <AddIcon fontSize="large" />
-                            <Typography>Add new menu</Typography>
-                        </Box>
-                    </Link>
+                        New menu
+                    </Button>
+                </Box>
+                <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                     {filteredMenus.map((menu) => (
                         <Box
                             sx={{
@@ -236,6 +241,23 @@ const Menus = () => {
                     ))}
                 </Box>
             </Box>
+            <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogContent
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+
+                        m: "0 auto",
+                    }}
+                >
+                    <CreateMenu />
+                </DialogContent>
+            </Dialog>
         </Layout>
     );
 };

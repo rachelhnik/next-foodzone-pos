@@ -105,79 +105,87 @@ const CreateMenu = () => {
     };
 
     return (
-        <Layout>
-            <Box>
-                <Box
+        <Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    maxWidth: 350,
+                    margin: "0 auto",
+                }}
+            >
+                <h1 style={{ textAlign: "center" }}>Create a new menu</h1>
+                <TextField
+                    label="Name"
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                    onChange={(evt) =>
+                        setMenu({ ...menu, name: evt.target.value })
+                    }
+                />
+                <TextField
+                    label="Price"
+                    variant="outlined"
+                    type="number"
+                    sx={{ mb: 2 }}
+                    onChange={(evt) =>
+                        setMenu({
+                            ...menu,
+                            price: parseInt(evt.target.value, 10),
+                        })
+                    }
+                />
+                <TextField
+                    label="Description"
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                    onChange={(evt) =>
+                        setMenu({ ...menu, description: evt.target.value })
+                    }
+                />
+                <FormControl>
+                    <InputLabel id="demo-multiple-name-label">
+                        Select menu categories
+                    </InputLabel>
+                    <Select
+                        multiple
+                        sx={{ mb: 2 }}
+                        value={menuCategoryIds}
+                        onChange={(evt) => {
+                            const values = evt.target.value as [];
+                            setMenuCategoryIds(values);
+                            setMenu({ ...menu, menucategoryIds: values });
+                        }}
+                    >
+                        {validMenuCategories.map((menucat) => (
+                            <MenuItem key={menucat.id} value={menucat.id}>
+                                {menucat.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FileDropZone onFileSelected={onFileSelected} />
+
+                <Button
+                    variant="contained"
+                    onClick={createMenu}
+                    disabled={isDisabled}
                     sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        maxWidth: 350,
-                        margin: "0 auto",
+                        backgroundColor: "#4C4C6D",
+                        mt: 2,
+                        color: "#E8F6EF",
+                        mb: 2,
+
+                        ":hover": {
+                            bgcolor: "#1B9C85", // theme.palette.primary.main
+                            color: "white",
+                        },
                     }}
                 >
-                    <h1 style={{ textAlign: "center" }}>Create a new menu</h1>
-                    <TextField
-                        label="Name"
-                        variant="outlined"
-                        sx={{ mb: 2 }}
-                        onChange={(evt) =>
-                            setMenu({ ...menu, name: evt.target.value })
-                        }
-                    />
-                    <TextField
-                        label="Price"
-                        variant="outlined"
-                        type="number"
-                        sx={{ mb: 2 }}
-                        onChange={(evt) =>
-                            setMenu({
-                                ...menu,
-                                price: parseInt(evt.target.value, 10),
-                            })
-                        }
-                    />
-                    <TextField
-                        label="Description"
-                        variant="outlined"
-                        sx={{ mb: 2 }}
-                        onChange={(evt) =>
-                            setMenu({ ...menu, description: evt.target.value })
-                        }
-                    />
-                    <FormControl>
-                        <InputLabel id="demo-multiple-name-label">
-                            Select menu categories
-                        </InputLabel>
-                        <Select
-                            multiple
-                            sx={{ mb: 2 }}
-                            value={menuCategoryIds}
-                            onChange={(evt) => {
-                                const values = evt.target.value as [];
-                                setMenuCategoryIds(values);
-                                setMenu({ ...menu, menucategoryIds: values });
-                            }}
-                        >
-                            {validMenuCategories.map((menucat) => (
-                                <MenuItem key={menucat.id} value={menucat.id}>
-                                    {menucat.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FileDropZone onFileSelected={onFileSelected} />
-
-                    <Button
-                        variant="contained"
-                        onClick={createMenu}
-                        sx={{ mt: 2 }}
-                        disabled={isDisabled}
-                    >
-                        Create
-                    </Button>
-                </Box>
+                    Create
+                </Button>
             </Box>
-        </Layout>
+        </Box>
     );
 };
 

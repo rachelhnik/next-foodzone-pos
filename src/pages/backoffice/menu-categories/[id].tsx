@@ -82,7 +82,6 @@ const MenucategoryDetail = () => {
                     multiple
                     options={branches}
                     defaultValue={selectedBranches}
-                    value={newMenuCategory.branches}
                     disableCloseOnSelect
                     isOptionEqualToValue={(option, value) =>
                         option.id === value.id

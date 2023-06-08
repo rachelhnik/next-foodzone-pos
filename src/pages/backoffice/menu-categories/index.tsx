@@ -28,22 +28,16 @@ import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
+import NewMenuCategory from "./create";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);
-    const [menuCategory, setMenuCategory] = useState({
-        name: "",
-    } as MenuCategory);
 
     const currentBranchId = parseInt(getselectedLocationId() as string, 10);
 
-    const [selectedBranchIds, setSelectedBranchIds] = useState<number[]>();
-
     const {
-        fetchData,
         menuCategories,
-        branches,
-        townships,
+
         branchesMenucategoriesMenus,
     } = useContext(BackofficeContext);
     const { data: session } = useSession();
@@ -73,84 +67,78 @@ const MenuCategories = () => {
         ).length;
     };
 
-    const addNewMenucategory = async () => {
-        if (!menuCategory?.name || !selectedBranchIds?.length) return;
-
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    menuCategory: menuCategory,
-                    selectedBranchIds: selectedBranchIds,
-                }),
-            }
-        );
-
-        fetchData();
-        setMenuCategory({ ...menuCategory, name: "" });
-        setSelectedBranchIds([]);
-        setOpen(false);
-    };
-
     return (
         <Layout>
-            <Box sx={{ display: "flex" }}>
-                <Box sx={{ textAlign: "center", mr: 4 }}>
-                    <Box
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    margin: "0 auto",
+                }}
+            >
+                <Box
+                    sx={{
+                        right: 10,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                    }}
+                >
+                    <Button
                         onClick={() => setOpen(true)}
+                        variant="contained"
+                        startIcon={<AddIcon />}
                         sx={{
-                            width: "170px",
-                            height: "170px",
-                            borderRadius: 2,
-                            border: "2px solid #EBEBEB",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            cursor: "pointer",
-                            textAlign: "center",
+                            backgroundColor: "#4C4C6D",
+                            width: "fit-content",
+                            color: "#E8F6EF",
+                            mb: 2,
+
+                            ":hover": {
+                                bgcolor: "#1B9C85", // theme.palette.primary.main
+                                color: "white",
+                            },
                         }}
                     >
-                        <AddIcon fontSize="large" />
-                    </Box>
-                    <Typography sx={{ mt: 1 }}>
-                        Add new menu category
-                    </Typography>
+                        New menu category
+                    </Button>
                 </Box>
-
-                {filteredMenuCategories.map((menuCategory) => (
-                    <Link
-                        key={menuCategory.id}
-                        href={`/backoffice/menu-categories/${menuCategory.id}`}
-                        style={{ textDecoration: "none", color: "#000000" }}
-                    >
-                        <Box sx={{ textAlign: "center", mr: 4 }}>
-                            <Box
-                                sx={{
-                                    width: "170px",
-                                    height: "170px",
-                                    borderRadius: 2,
-                                    border: "2px solid #EBEBEB",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    cursor: "pointer",
-                                    textAlign: "center",
-                                }}
-                            >
-                                <Typography>
-                                    {getMenusCount(menuCategory.id)} menus
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                    }}
+                >
+                    {filteredMenuCategories.map((menuCategory) => (
+                        <Link
+                            key={menuCategory.id}
+                            href={`/backoffice/menu-categories/${menuCategory.id}`}
+                            style={{ textDecoration: "none", color: "#000000" }}
+                        >
+                            <Box sx={{ textAlign: "center", mr: 4 }}>
+                                <Box
+                                    sx={{
+                                        width: "170px",
+                                        height: "170px",
+                                        borderRadius: 2,
+                                        border: "2px solid #EBEBEB",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    <Typography>
+                                        {getMenusCount(menuCategory.id)} menus
+                                    </Typography>
+                                </Box>
+                                <Typography sx={{ mt: 1 }}>
+                                    {menuCategory.name}
                                 </Typography>
                             </Box>
-                            <Typography sx={{ mt: 1 }}>
-                                {menuCategory.name}
-                            </Typography>
-                        </Box>
-                    </Link>
-                ))}
+                        </Link>
+                    ))}
+                </Box>
             </Box>
 
             <Dialog
@@ -163,50 +151,11 @@ const MenuCategories = () => {
                     sx={{
                         display: "flex",
                         flexDirection: "column",
-                        maxWidth: 250,
+                        width: 250,
                         m: "0 auto",
                     }}
                 >
-                    <h1 style={{ textAlign: "center" }}>
-                        Create a new menu category
-                    </h1>
-                    <Typography>enter new menucategory name</Typography>
-                    <TextField
-                        variant="outlined"
-                        sx={{ mb: 2 }}
-                        onChange={(e) =>
-                            setMenuCategory({
-                                ...menuCategory,
-                                name: e.target.value,
-                            })
-                        }
-                    />
-                    <Typography>select branches</Typography>
-                    <Select
-                        value={selectedBranchIds ? selectedBranchIds : []}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        multiple
-                        onChange={(evt: any) => {
-                            const values = evt.target.value as number[];
-                            setSelectedBranchIds(values);
-                        }}
-                    >
-                        {branches.map((branch: branches) => (
-                            <MenuItem key={branch.id} value={branch.id}>
-                                {townships &&
-                                    townships.map((ts: townships) =>
-                                        ts.id === branch.township_id
-                                            ? ts.name
-                                            : ""
-                                    )}
-                                /{branch.address}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    <Button variant="contained" onClick={addNewMenucategory}>
-                        Create
-                    </Button>
+                    <NewMenuCategory />
                 </DialogContent>
             </Dialog>
         </Layout>
