@@ -1,4 +1,12 @@
-import { Box, TextField, Checkbox, Button, Chip, Stack } from "@mui/material";
+import {
+    Box,
+    TextField,
+    Checkbox,
+    Button,
+    Chip,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import Layout from "../../../components/Layout";
 import type { addon_categories as AddonCategory } from "@prisma/client";
@@ -10,9 +18,11 @@ export default function AddonCategories() {
         name: "",
         is_required: false,
     } as AddonCategory);
-    const accessToken = localStorage.getItem("accessToken");
 
-    const { fetchData, addonCategories } = useContext(BackofficeContext);
+    const { fetchData, addonCategories, addons } =
+        useContext(BackofficeContext);
+
+    console.log(addonCategories);
 
     const updateAddonCategory = async () => {
         if (!addonCategory?.name) return;
@@ -23,7 +33,6 @@ export default function AddonCategories() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify(addonCategory),
             }
@@ -37,9 +46,6 @@ export default function AddonCategories() {
             `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
             {
                 method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
             }
         );
 

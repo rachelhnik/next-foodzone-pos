@@ -124,6 +124,18 @@ export default async function handler(
                 prisma.addon_categories.create({ data: addonCategory })
             )
         );
+        await prisma.menu_addoncategories.createMany({
+            data: [
+                {
+                    menu_id: newMenus[0].id,
+                    addoncategory_id: newAddonCategories[0].id,
+                },
+                {
+                    menu_id: newMenus[1].id,
+                    addoncategory_id: newAddonCategories[1].id,
+                },
+            ],
+        });
         const newAddonsData = [
             {
                 name: "Cola",
@@ -157,6 +169,7 @@ export default async function handler(
             menuCategories: newMenuCategories,
             addons: newAddons,
             addonCategories: newAddonCategories,
+
             branches: newBranch,
             branchesMenucategoriesMenus: newBranchesMenucategoriesMenus,
             company: newCompany,
@@ -214,31 +227,34 @@ export default async function handler(
                 },
             },
         });
-        const menuAddonIds = await prisma.menu_addons.findMany({
-            where: {
-                menu_id: {
-                    in: menusIds,
+        const menuAddonCategoryIds = await prisma.menu_addoncategories.findMany(
+            {
+                where: {
+                    menu_id: {
+                        in: menusIds,
+                    },
                 },
-            },
-        });
-        const addonIds = menuAddonIds.map((data) => data.addon_id) as number[];
-        const addons = await prisma.addons.findMany({
-            where: {
-                id: {
-                    in: addonIds,
-                },
-            },
-        });
-        const addonCategoriesIds = addons.map(
-            (data) => data.addon_categories_id
+            }
+        );
+        const addonCategoryIds = menuAddonCategoryIds.map(
+            (menuAddonCategoryId) => menuAddonCategoryId.addoncategory_id
         ) as number[];
         const addonCategories = await prisma.addon_categories.findMany({
             where: {
                 id: {
-                    in: addonCategoriesIds,
+                    in: addonCategoryIds,
                 },
             },
         });
+
+        const addons = await prisma.addons.findMany({
+            where: {
+                addon_categories_id: {
+                    in: addonCategoryIds,
+                },
+            },
+        });
+
         const townships = await prisma.townships.findMany({
             select: {
                 id: true,
@@ -252,7 +268,7 @@ export default async function handler(
             addons: addons,
             addonCategories: addonCategories,
             branches: branches,
-            branchesMenucategoriesMenus: validBranchesMenucatsMenus,
+            branchesMenucategoriesMenus: branchesMenucategoriesMenus,
             company: company,
             townships: townships,
             user: userFromDB,

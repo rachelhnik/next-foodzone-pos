@@ -15,7 +15,9 @@ export default async function handler(
             menucategoryIds,
             asset_url,
         } = menu;
-        const branchId = parseInt(currentBranchId);
+
+        const branchId = parseInt(currentBranchId as string, 10);
+
         const newMenu = await prisma.menus.create({
             data: {
                 name: name,
@@ -24,14 +26,13 @@ export default async function handler(
                 description: description,
             },
         });
-        const newBranchMenucatsMenu = await prisma.$transaction(
-            menucategoryIds.map((menucat: any) =>
-                prisma.branches_menucategories_menus.create({
+        const branchesMenucatsMenus = await prisma.$transaction(
+            menucategoryIds.map((menucatId: number) =>
+                prisma.branches_menucategories_menus.createMany({
                     data: {
-                        branch_id: branchId,
                         menu_id: newMenu.id,
-                        menucategory_id: menucat,
-                        is_available_menu: isAvailable,
+                        menucategory_id: menucatId,
+                        branch_id: branchId,
                     },
                 })
             )
