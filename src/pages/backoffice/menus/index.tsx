@@ -181,7 +181,7 @@ const Menus = () => {
                                                 String(data.branch_id) ===
                                                     branchId &&
                                                 data.menu_id === menu.id
-                                        )?.is_available_menu === false ? (
+                                        )?.is_available === false ? (
                                             <Typography
                                                 variant="h5"
                                                 sx={{ color: "red", mt: 2 }}

@@ -13,7 +13,7 @@ model addon_categories {
   id                     Int                      @id @default(autoincrement())
   name                   String
   is_required            Boolean                  @default(false)
-  menu_addons menu_addons[]
+  menu_addoncategories menu_addoncategories[]
 }
 
 model addons {
@@ -22,7 +22,7 @@ model addons {
   
   addon_categories_id    Int?
   branches_addons        branches_addons[]
-  menu_addons menu_addons[]
+ 
 }
 
 model branches {
@@ -48,13 +48,13 @@ model branches_addons {
 model branches_menucategories_menus {
   id           Int     @id(map: "location_menus_pkey") @default(autoincrement())
   menu_id      Int?
-  branch_id    Int
+  branch_id    Int?
   menucategory_id Int
   is_available Boolean @default(true)
  
   menus        menus?   @relation(fields: [menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "location_menus_menu_id_fkey")
   menu_categories    menu_categories @relation(fields: [menucategory_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  branches   branches @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branches   branches? @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model companies {
@@ -73,24 +73,21 @@ model menu_categories {
 model menus {
   id                     Int                      @id @default(autoincrement())
   name                   String
-  price                  Int
- 
+ price                   Int
   asset_url              String?
   description            String?
   branches_menucategories_menus         branches_menucategories_menus[]
-  menus_addoncats_addons menu_addons[]
+  menus_addoncats_addons menu_addoncategories[]
   
 }
 
-model menu_addons {
+model menu_addoncategories {
   id                 Int             @id @default(autoincrement())
  menu  menus @relation(fields: [menu_id], references: [id])
  menu_id Int
- addon addons @relation(fields: [addon_id],references: [id])
- addon_id Int
- price  Int
- addon_categories addon_categories[]
-
+ addon_categories addon_categories @relation(fields: [addoncategory_id],references: [id])
+ addoncategory_id Int
+ 
 }
 
 
