@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import { fetchData } from "next-auth/client/_utils";
+import { getselectedLocationId } from "@/utils";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -27,31 +27,20 @@ const MenucategoryDetail = () => {
         (data) => data.id === menuCategoryId
     );
 
-    const branchIds = [
-        ...new Set(
-            branchesMenucategoriesMenus
-                .filter((item) => item.menucategory_id === menuCategory?.id)
-                .map((item) => item.branch_id)
-        ),
-    ];
     const menuIds = branchesMenucategoriesMenus
         .filter((item) => item.menucategory_id === menuCategoryId)
         .map((item) => item.menu_id);
 
-    const selectedBranches = branches.filter((branch) =>
-        branchIds.includes(branch.id)
-    );
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
 
     const selectedMenus = menus.filter((menu) => menuIds.includes(menu.id));
-    console.log(selectedBranches);
-    console.log("selected Menus", selectedMenus);
 
     const [newMenuCategory, setNewMenuCategory] = useState({
         name: menuCategory?.name,
-        branches: selectedBranches,
+        branchId: selectedBranchId,
         menus: selectedMenus,
     });
-
+    console.log(newMenuCategory);
     if (!menuCategory) return;
 
     const updateMenuCategory = async () => {
@@ -90,43 +79,6 @@ const MenucategoryDetail = () => {
                 />
 
                 <Autocomplete
-                    sx={{ width: 300 }}
-                    multiple
-                    options={branches}
-                    defaultValue={selectedBranches}
-                    disableCloseOnSelect
-                    isOptionEqualToValue={(option, value) =>
-                        option.id === value.id
-                    }
-                    getOptionLabel={(option) => option.address}
-                    onChange={(evt, values) => {
-                        setNewMenuCategory({
-                            ...newMenuCategory,
-                            branches: values,
-                        });
-                    }}
-                    renderOption={(props, option) => (
-                        <li {...props}>
-                            <Checkbox
-                                icon={icon}
-                                checkedIcon={checkedIcon}
-                                style={{ marginRight: 8 }}
-                                checked={
-                                    newMenuCategory.branches.find(
-                                        (branch) => branch.id === option.id
-                                    )
-                                        ? true
-                                        : false
-                                }
-                            />
-                            {option.address}
-                        </li>
-                    )}
-                    renderInput={(params) => (
-                        <TextField {...params} label="Locations" />
-                    )}
-                />
-                <Autocomplete
                     sx={{ width: 300, mt: 2 }}
                     multiple
                     options={menus}
@@ -149,8 +101,8 @@ const MenucategoryDetail = () => {
                                 checkedIcon={checkedIcon}
                                 style={{ marginRight: 8 }}
                                 checked={
-                                    newMenuCategory.branches.find(
-                                        (branch) => branch.id === option.id
+                                    newMenuCategory.menus.find(
+                                        (menu) => menu.id === option.id
                                     )
                                         ? true
                                         : false
@@ -166,7 +118,18 @@ const MenucategoryDetail = () => {
                 <Button
                     variant="contained"
                     onClick={updateMenuCategory}
-                    sx={{ mt: 2, width: 200 }}
+                    fullWidth
+                    sx={{
+                        backgroundColor: "#606C5D",
+
+                        color: "#E8F6EF",
+                        mt: 2,
+
+                        ":hover": {
+                            bgcolor: "#7C9070", // theme.palette.primary.main
+                            color: "white",
+                        },
+                    }}
                 >
                     Update
                 </Button>

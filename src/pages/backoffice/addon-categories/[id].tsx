@@ -7,6 +7,7 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
+    Switch,
     TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
@@ -37,25 +38,14 @@ const AddonCategoryDetail = () => {
     const selectedAddons = addons.filter(
         (addon) => addon.addon_categories_id === currentAddonCategory?.id
     );
-    const validMenuIds = branchesMenucategoriesMenus
-        .filter((item) => item.branch_id === selectedBranchId)
-        .map((item) => item.menu_id);
-    const validMenus = menus.filter((menu) => validMenuIds.includes(menu.id));
-
-    const selectedMenusIds = menuAddonCategories
-        .filter((item) => item.addoncategory_id === addonCategoryId)
-        .map((data) => data.menu_id);
-    const selectedMenus = menus.filter((menu) =>
-        selectedMenusIds.includes(menu?.id)
-    );
+    const [newSelectedAddons, setNewSelectedAddons] =
+        useState<addons[]>(selectedAddons);
 
     const [newAddonCategory, setNewAddonCategory] = useState({
         name: currentAddonCategory?.name,
         is_required: currentAddonCategory?.is_required,
+        selectedAddons: newSelectedAddons,
     });
-
-    const [selectedMenusData, setSelectedMensData] =
-        useState<menus[]>(selectedMenus);
 
     const updateAddonCategory = async () => {
         const response = await fetch(
@@ -65,11 +55,7 @@ const AddonCategoryDetail = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    addonCategory: newAddonCategory,
-
-                    selectedMenus: selectedMenusData,
-                }),
+                body: JSON.stringify(newAddonCategory),
             }
         );
         fetchData();
@@ -108,19 +94,12 @@ const AddonCategoryDetail = () => {
                     renderInput={(params) => (
                         <TextField {...params} label="selected addons" />
                     )}
-                />
-                <Autocomplete
-                    sx={{ width: 300 }}
-                    multiple
-                    options={validMenus}
-                    defaultValue={selectedMenus}
-                    disableCloseOnSelect
-                    isOptionEqualToValue={(option, value) =>
-                        option.id === value.id
-                    }
-                    getOptionLabel={(option) => option.name}
                     onChange={(evt, values) => {
-                        setSelectedMensData(values);
+                        setNewSelectedAddons(values),
+                            setNewAddonCategory({
+                                ...newAddonCategory,
+                                selectedAddons: values,
+                            });
                     }}
                     renderOption={(props, option) => (
                         <li {...props}>
@@ -129,7 +108,7 @@ const AddonCategoryDetail = () => {
                                 checkedIcon={checkedIcon}
                                 style={{ marginRight: 8 }}
                                 checked={
-                                    menus.find((menu) => menu.id === option.id)
+                                    addons.find((menu) => menu.id === option.id)
                                         ? true
                                         : false
                                 }
@@ -137,34 +116,36 @@ const AddonCategoryDetail = () => {
                             {option.name}
                         </li>
                     )}
-                    renderInput={(params) => (
-                        <TextField {...params} label="selected menus" />
-                    )}
                 />
-                <FormGroup>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                sx={{ ml: 2 }}
-                                disableRipple
-                                defaultChecked={
-                                    currentAddonCategory?.is_required
-                                }
-                                onChange={(e) => {
-                                    setNewAddonCategory({
-                                        ...newAddonCategory,
-                                        is_required: e.target.checked,
-                                    });
-                                }}
-                            />
-                        }
-                        label="is required"
-                    />
-                </FormGroup>
+
+                <FormControlLabel
+                    control={
+                        <Switch
+                            defaultChecked={currentAddonCategory?.is_required}
+                            onChange={(evt) =>
+                                setNewAddonCategory({
+                                    ...newAddonCategory,
+                                    is_required: evt.target.checked,
+                                })
+                            }
+                        />
+                    }
+                    label="required"
+                />
                 <Button
                     variant="contained"
                     onClick={updateAddonCategory}
-                    sx={{ mt: 2, width: 200, alignSelf: "center" }}
+                    sx={{
+                        backgroundColor: "#606C5D",
+
+                        color: "#E8F6EF",
+                        mt: 2,
+
+                        ":hover": {
+                            bgcolor: "#7C9070", // theme.palette.primary.main
+                            color: "white",
+                        },
+                    }}
                 >
                     Update
                 </Button>

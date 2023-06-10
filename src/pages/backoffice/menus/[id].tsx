@@ -47,8 +47,10 @@ export default function CenteredTabs() {
         price: menu?.price,
         asset_url: "",
         description: menu?.description,
-        addonCategoriesIds: selectedAddonCategories,
+        addonCategories: selectedAddonCategories,
     });
+
+    console.log(updatedMenu);
 
     const updateMenu = async () => {
         try {
@@ -170,7 +172,7 @@ export default function CenteredTabs() {
                                 onChange={(evt, values) => {
                                     setUpdatedMenu({
                                         ...updatedMenu,
-                                        addonCategoriesIds: values,
+                                        addonCategories: values,
                                     });
                                 }}
                                 renderOption={(props, option) => (
@@ -180,7 +182,7 @@ export default function CenteredTabs() {
                                             checkedIcon={checkedIcon}
                                             style={{ marginRight: 8 }}
                                             checked={
-                                                updatedMenu.addonCategoriesIds.find(
+                                                updatedMenu.addonCategories.find(
                                                     (addoncat) =>
                                                         addoncat.id ===
                                                         option.id

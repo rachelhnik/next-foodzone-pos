@@ -1,4 +1,5 @@
 import { prisma } from "@/utils/db";
+import { private_safeAlpha } from "@mui/system";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Press_Start_2P } from "next/font/google";
 
@@ -6,33 +7,36 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const addoncatId = parseInt(req.query.id as string, 10);
-    const { selectedMenus, addonCategory } = req.body;
-    const { name, is_required } = addonCategory;
-    // const updatedAddonCategory = await prisma.addon_categories.update({
-    //     where:{id:addoncatId},
-    //     data:{
-    //         name:name,
-    //         is_required:is_required
-    //     }
-    // });
-    const selectedMenuIds = selectedMenus.map((data: any) => data.id);
+    const addonCategoryId = parseInt(req.query.id as string, 10);
+    const { name, is_required, selectedAddons } = req.body;
+    await prisma.addon_categories.update({
+        data: {
+            name: name,
+            is_required: is_required,
+        },
+        where: { id: addonCategoryId },
+    });
+    const selectedAddonsIds = selectedAddons.map(
+        (addon: any) => addon.id
+    ) as number[];
+    const currentAddons = await prisma.addons.findMany({
+        where: { addon_categories_id: addonCategoryId },
+    });
+    const currentAddonsIds = currentAddons.map((addon) => addon.id) as number[];
 
-    const alreadyExistMenuAddoncat = await prisma.$transaction(
-        selectedMenuIds.map(async (id: number) => {
-            const alreadyExist = await prisma.menu_addoncategories.findFirst({
-                where: { menu_id: id, addoncategory_id: addoncatId },
-            });
-            if (alreadyExist) return;
-            if (!alreadyExist)
-                await prisma.menu_addoncategories.create({
-                    data: {
-                        menu_id: id,
-                        addoncategory_id: addoncatId,
-                    },
-                });
-        })
+    const addedAddonsIds = selectedAddonsIds.filter(
+        (selectedId) => !currentAddonsIds.includes(selectedId)
+    );
+    const removedAddonsIds = currentAddonsIds.filter(
+        (removedId) => !selectedAddonsIds.includes(removedId)
     );
 
+    // if (removedAddonsIds) {
+    //     removedAddonsIds.forEach(async (removedId) => {
+    //         await prisma.addons.delete({
+    //             where: { id: removedId },
+    //         });
+    //     });
+    // }
     res.send(200);
 }
