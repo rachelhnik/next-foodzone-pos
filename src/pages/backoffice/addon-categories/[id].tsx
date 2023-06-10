@@ -13,20 +13,34 @@ import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { config } from "@/config/Config";
+import { addons, menus } from "@prisma/client";
+import { getselectedLocationId } from "@/utils";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const AddonCategoryDetail = () => {
-    const { addonCategories, addons, menuAddonCategories, menus } =
-        useContext(BackofficeContext);
+    const {
+        addonCategories,
+        addons,
+        menuAddonCategories,
+        branchesMenucategoriesMenus,
+        menus,
+        fetchData,
+    } = useContext(BackofficeContext);
     const router = useRouter();
     const addonCategoryId = parseInt(router.query.id as string, 10);
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
     const currentAddonCategory = addonCategories.find(
         (addoncat) => addoncat.id === addonCategoryId
     );
     const selectedAddons = addons.filter(
         (addon) => addon.addon_categories_id === currentAddonCategory?.id
     );
+    const validMenuIds = branchesMenucategoriesMenus
+        .filter((item) => item.branch_id === selectedBranchId)
+        .map((item) => item.menu_id);
+    const validMenus = menus.filter((menu) => validMenuIds.includes(menu.id));
 
     const selectedMenusIds = menuAddonCategories
         .filter((item) => item.addoncategory_id === addonCategoryId)
@@ -40,8 +54,25 @@ const AddonCategoryDetail = () => {
         is_required: currentAddonCategory?.is_required,
     });
 
-    const updateAddonCategory = () => {
-        console.log(newAddonCategory);
+    const [selectedMenusData, setSelectedMensData] =
+        useState<menus[]>(selectedMenus);
+
+    const updateAddonCategory = async () => {
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    addonCategory: newAddonCategory,
+
+                    selectedMenus: selectedMenusData,
+                }),
+            }
+        );
+        fetchData();
     };
     return (
         <Layout>
@@ -64,6 +95,7 @@ const AddonCategoryDetail = () => {
                     }
                 />
                 <Autocomplete
+                    readOnly
                     sx={{ width: 300, mb: 2 }}
                     multiple
                     options={addons}
@@ -73,23 +105,6 @@ const AddonCategoryDetail = () => {
                         option.id === value.id
                     }
                     getOptionLabel={(option) => option.name}
-                    renderOption={(props, option) => (
-                        <li {...props}>
-                            <Checkbox
-                                icon={icon}
-                                checkedIcon={checkedIcon}
-                                style={{ marginRight: 8 }}
-                                checked={
-                                    addons.find(
-                                        (addon) => addon.id === option.id
-                                    )
-                                        ? true
-                                        : false
-                                }
-                            />
-                            {option.name}
-                        </li>
-                    )}
                     renderInput={(params) => (
                         <TextField {...params} label="selected addons" />
                     )}
@@ -97,13 +112,16 @@ const AddonCategoryDetail = () => {
                 <Autocomplete
                     sx={{ width: 300 }}
                     multiple
-                    options={menus}
+                    options={validMenus}
                     defaultValue={selectedMenus}
                     disableCloseOnSelect
                     isOptionEqualToValue={(option, value) =>
                         option.id === value.id
                     }
                     getOptionLabel={(option) => option.name}
+                    onChange={(evt, values) => {
+                        setSelectedMensData(values);
+                    }}
                     renderOption={(props, option) => (
                         <li {...props}>
                             <Checkbox

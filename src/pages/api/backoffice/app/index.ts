@@ -206,7 +206,7 @@ export default async function handler(
             (data) => data.menu_id !== null
         );
 
-        const menusIds = validBranchesMenucatsMenus.map(
+        const menusIds = validBranchesMenucatsMenus.flatMap(
             (data) => data.menu_id
         ) as number[];
 
@@ -217,9 +217,10 @@ export default async function handler(
                 },
             },
         });
-        const menuCategoriesIds = branchesMenucategoriesMenus.map(
-            (data) => data.menucategory_id
-        ) as number[];
+
+        const menuCategoriesIds = branchesMenucategoriesMenus
+            .filter((data) => data.menucategory_id !== null)
+            .map((data) => data.menucategory_id) as number[];
 
         const menuCategories = await prisma.menu_categories.findMany({
             where: {

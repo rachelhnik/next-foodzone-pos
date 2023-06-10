@@ -1,8 +1,10 @@
 import {
     Box,
     Button,
+    Checkbox,
     FormControl,
     InputLabel,
+    ListItemText,
     MenuItem,
     Select,
     SelectChangeEvent,
@@ -17,11 +19,13 @@ import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { useContext } from "react";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const CreateMenu = () => {
     const [menuImage, setMenuImage] = useState<File>();
-
-    const [menuCategoryIds, setMenuCategoryIds] = useState<number[]>([]);
     const router = useRouter();
     const currentBranchId = getselectedLocationId();
 
@@ -39,17 +43,20 @@ const CreateMenu = () => {
         (item) => item.id && validMenuCategoryIds.includes(item.id)
     );
 
+    const [selectedMenuCategoryIds, setSelectedMenuCategoryIds] = useState<
+        number[]
+    >([]);
+
     const [menu, setMenu] = useState({
         name: "",
         price: 0,
         isAvailable: true,
         description: "",
-        menucategoryIds: [],
+        menuCategoryIds: selectedMenuCategoryIds,
         asset_url: "",
     });
 
-    const isDisabled =
-        !menu.name || !menu.price || !menu.description || !menu.menucategoryIds;
+    const isDisabled = !menu.name || !menu.price || !menu.description;
 
     const onFileSelected = (files: File[]) => {
         setMenuImage(files[0]);
@@ -150,20 +157,57 @@ const CreateMenu = () => {
                     <Select
                         multiple
                         sx={{ mb: 2 }}
-                        value={menuCategoryIds}
+                        value={selectedMenuCategoryIds}
                         onChange={(evt) => {
                             const values = evt.target.value as [];
-                            setMenuCategoryIds(values);
-                            setMenu({ ...menu, menucategoryIds: values });
+
+                            setSelectedMenuCategoryIds(values);
+                            setMenu({
+                                ...menu,
+                                menuCategoryIds: values,
+                            });
+                        }}
+                        renderValue={(values) => {
+                            const selectedMenuCategories =
+                                selectedMenuCategoryIds.map(
+                                    (selectedMenuCategoryId) => {
+                                        return menuCategories.find(
+                                            (menuCategory) =>
+                                                menuCategory.id ===
+                                                selectedMenuCategoryId
+                                        );
+                                    }
+                                );
+                            return selectedMenuCategories
+                                .map(
+                                    (selectedMenuCategory) =>
+                                        selectedMenuCategory &&
+                                        selectedMenuCategory.name
+                                )
+                                .join(", ");
                         }}
                     >
-                        {validMenuCategories.map((menucat) => (
-                            <MenuItem key={menucat.id} value={menucat.id}>
-                                {menucat.name}
+                        {validMenuCategories.map((menuCategory) => (
+                            <MenuItem
+                                key={menuCategory.id}
+                                value={menuCategory.id}
+                            >
+                                <Checkbox
+                                    checked={
+                                        menuCategory.id &&
+                                        selectedMenuCategoryIds.includes(
+                                            menuCategory.id
+                                        )
+                                            ? true
+                                            : false
+                                    }
+                                />
+                                <ListItemText primary={menuCategory.name} />
                             </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
+
                 <FileDropZone onFileSelected={onFileSelected} />
 
                 <Button
@@ -171,13 +215,13 @@ const CreateMenu = () => {
                     onClick={createMenu}
                     disabled={isDisabled}
                     sx={{
-                        backgroundColor: "#4C4C6D",
-                        mt: 2,
+                        backgroundColor: "#606C5D",
+
                         color: "#E8F6EF",
-                        mb: 2,
+                        mt: 2,
 
                         ":hover": {
-                            bgcolor: "#1B9C85", // theme.palette.primary.main
+                            bgcolor: "#7C9070", // theme.palette.primary.main
                             color: "white",
                         },
                     }}

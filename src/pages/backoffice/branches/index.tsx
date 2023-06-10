@@ -235,6 +235,17 @@ const Branches = () => {
                     variant="contained"
                     color="success"
                     onClick={createNewBranch}
+                    sx={{
+                        backgroundColor: "#606C5D",
+
+                        color: "#E8F6EF",
+                        mb: 2,
+
+                        ":hover": {
+                            bgcolor: "#7C9070", // theme.palette.primary.main
+                            color: "white",
+                        },
+                    }}
                 >
                     create
                 </Button>

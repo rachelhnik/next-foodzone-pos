@@ -29,7 +29,6 @@ const Menus = () => {
 
     const { fetchData, menus, branchesMenucategoriesMenus } =
         useContext(BackofficeContext);
-    console.log(branchesMenucategoriesMenus, menus);
 
     const validMenusIds = branchesMenucategoriesMenus
         .filter((data) => String(data.branch_id) === branchId)
@@ -125,12 +124,13 @@ const Menus = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         sx={{
-                            backgroundColor: "#4C4C6D",
+                            backgroundColor: "#606C5D",
                             width: "fit-content",
                             color: "#E8F6EF",
                             mb: 2,
+
                             ":hover": {
-                                bgcolor: "#1B9C85", // theme.palette.primary.main
+                                bgcolor: "#7C9070", // theme.palette.primary.main
                                 color: "white",
                             },
                         }}

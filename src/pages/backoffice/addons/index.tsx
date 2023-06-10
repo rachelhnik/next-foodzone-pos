@@ -1,137 +1,114 @@
-import { useState, useContext, useEffect } from "react";
-import Layout from "../../../components/Layout";
+import Layout from "@/components/Layout";
+import { BackofficeContext } from "@/contexts/BackofficeContext";
+import { getselectedLocationId } from "@/utils";
 import {
     Box,
-    TextField,
     Button,
-    Checkbox,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Chip,
-    Stack,
-    FormHelperText,
+    Dialog,
+    DialogContent,
+    Link,
+    Typography,
 } from "@mui/material";
-import { addons as Addon } from "@prisma/client";
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
+import { useContext, useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import CreateAddonCategory from "../addon-categories/create";
+import NewAddons from "./create";
 
-import { config } from "../../../config/Config";
-import { useRouter } from "next/router";
+const Addon = () => {
+    const [open, setOpen] = useState(false);
+    const {
+        addons,
+        addonCategories,
+        fetchData,
+        menus,
+        menuAddonCategories,
+        branchesMenucategoriesMenus,
+    } = useContext(BackofficeContext);
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
+    const validMenuIds = branchesMenucategoriesMenus
+        .filter((item) => item.branch_id === selectedBranchId)
+        .map((item) => item.menu_id);
+    const validMenus = menus.filter((menu) => validMenuIds.includes(menu.id));
 
-export default function Addons() {
-    const [addon, setAddon] = useState<Addon>({
-        name: "",
-        addon_categories_id: null,
-    } as Addon);
-    const branchId = localStorage.getItem("selectedLocation");
-    const [checked, setIsChecked] = useState<boolean>(false);
+    const validAddonCategoriesIds = menuAddonCategories
+        .filter((item) => validMenuIds.includes(item.menu_id))
+        .map((item) => item.addoncategory_id) as number[];
+    console.log(validAddonCategoriesIds);
+    const validAddons = addons.filter((addon) =>
+        validAddonCategoriesIds.includes(addon.addon_categories_id as number)
+    );
 
-    const accessToken = localStorage.getItem("accessToken");
-    const { fetchData, addons, addonCategories, branches } =
-        useContext(BackofficeContext);
-    const router = useRouter();
-
-    const updateAddon = async () => {
-        if (addon?.name.length === 0 || addon?.addon_categories_id === null)
-            return;
-        const response = await fetch(`${config.backofficeApiBaseUrl}/addons`, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(addon),
-        });
-
-        fetchData();
-    };
-
-    const deleteAddon = async (addonId: number | undefined) => {
-        if (addonId === undefined) return;
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addons/${addonId}`,
-            {
-                method: "DELETE",
-            }
-        );
-        fetchData();
-    };
     return (
         <Layout>
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    maxWidth: 300,
-                    m: "0 auto",
-                }}
-            >
-                <h1 style={{ textAlign: "center" }}>Create a new add on</h1>
-                <TextField
-                    label="Name"
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                    onChange={(e) => {
-                        setAddon({
-                            ...addon,
-                            name: e.target.value,
-                        });
-                    }}
-                />
+            <Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                        onClick={() => setOpen(true)}
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        sx={{
+                            backgroundColor: "#606C5D",
+                            width: "fit-content",
+                            color: "#E8F6EF",
+                            mb: 2,
 
-                <TextField
-                    id="outlined-select-currency"
-                    select
-                    label="Select"
-                    helperText="Please select category"
-                    sx={{ width: 300 }}
-                >
-                    {addonCategories.map((cat) => (
-                        <MenuItem
-                            key={cat.id}
-                            value={cat.id}
-                            onClick={() => {
-                                setAddon({
-                                    ...addon,
-                                    addon_categories_id: cat.id,
-                                });
-                            }}
-                        >
-                            {cat.name}
-                        </MenuItem>
-                    ))}
-                </TextField>
-
-                <Box sx={{ display: "flex", mb: 2 }}>
-                    <Checkbox
-                        disableRipple
-                        color="success"
-                        checked={checked}
-                        onChange={() => setIsChecked(!checked)}
-                    />
-                    <p>is avalilable</p>
+                            ":hover": {
+                                bgcolor: "#7C9070", // theme.palette.primary.main
+                                color: "white",
+                            },
+                        }}
+                    >
+                        New addon
+                    </Button>
                 </Box>
-
-                <Button variant="contained" onClick={updateAddon}>
-                    Create
-                </Button>
-                <Stack
-                    direction="column"
-                    spacing={1}
-                    sx={{ mt: 2, width: 200 }}
-                >
-                    {addons.map((item) => (
-                        <Chip
-                            key={item.id}
-                            label={item.name}
-                            variant="outlined"
-                            onDelete={() => deleteAddon(item.id)}
-                        />
+                <Box sx={{ display: "flex" }}>
+                    {validAddons.map((addon) => (
+                        <Link
+                            key={addon.id}
+                            href={`/backoffice/addons/${addon.id}`}
+                            style={{ textDecoration: "none", color: "#000000" }}
+                        >
+                            <Box sx={{ textAlign: "center", mr: 4 }}>
+                                <Box
+                                    sx={{
+                                        width: "120px",
+                                        height: "120px",
+                                        borderRadius: 2,
+                                        border: "2px solid #EBEBEB",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    <Typography sx={{ mt: 1 }}>
+                                        {addon.name}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </Link>
                     ))}
-                </Stack>
+                </Box>
             </Box>
+            <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogContent
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        maxWidth: 280,
+                        m: "0 auto",
+                    }}
+                >
+                    <NewAddons />
+                </DialogContent>
+            </Dialog>
         </Layout>
     );
-}
+};
+export default Addon;

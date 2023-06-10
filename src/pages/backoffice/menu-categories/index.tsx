@@ -3,27 +3,13 @@ import {
     Box,
     Button,
     Dialog,
-    DialogActions,
     DialogContent,
-    DialogContentText,
     Link,
-    ListItemText,
-    MenuItem,
-    Select,
-    Stack,
-    TextField,
     Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useContext, useEffect, useState } from "react";
 
-import {
-    menu_categories as MenuCategory,
-    branches,
-    townships,
-} from "@prisma/client";
-
-import { config } from "@/config/Config";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -40,11 +26,13 @@ const MenuCategories = () => {
 
         branchesMenucategoriesMenus,
     } = useContext(BackofficeContext);
+    console.log(menuCategories, branchesMenucategoriesMenus);
     const { data: session } = useSession();
 
     const menuCatIds = branchesMenucategoriesMenus
         .filter((data) => data.branch_id === currentBranchId)
         .map((data) => data.menucategory_id);
+    console.log(menuCatIds);
 
     const filteredMenuCategories = menuCategories.filter(
         (data) => data.id && menuCatIds.includes(data.id)
@@ -88,13 +76,13 @@ const MenuCategories = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         sx={{
-                            backgroundColor: "#4C4C6D",
+                            backgroundColor: "#606C5D",
                             width: "fit-content",
                             color: "#E8F6EF",
                             mb: 2,
 
                             ":hover": {
-                                bgcolor: "#1B9C85", // theme.palette.primary.main
+                                bgcolor: "#7C9070", // theme.palette.primary.main
                                 color: "white",
                             },
                         }}
@@ -151,7 +139,7 @@ const MenuCategories = () => {
                     sx={{
                         display: "flex",
                         flexDirection: "column",
-                        width: 250,
+                        width: 280,
                         m: "0 auto",
                     }}
                 >

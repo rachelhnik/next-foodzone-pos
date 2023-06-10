@@ -10,9 +10,9 @@ export default async function handler(
         const {
             name,
             price,
-            isAvailable,
+
             description,
-            menucategoryIds,
+            menuCategoryIds,
             asset_url,
         } = menu;
 
@@ -26,17 +26,35 @@ export default async function handler(
                 description: description,
             },
         });
-        const branchesMenucatsMenus = await prisma.$transaction(
-            menucategoryIds.map((menucatId: number) =>
-                prisma.branches_menucategories_menus.createMany({
+
+        menuCategoryIds.forEach(async (menucatId: number) => {
+            const onlyMenuIdNeededRow =
+                await prisma.branches_menucategories_menus.findFirst({
+                    where: {
+                        menucategory_id: menucatId,
+                        branch_id: branchId,
+                        menu_id: null,
+                    },
+                });
+            if (onlyMenuIdNeededRow !== null) {
+                await prisma.branches_menucategories_menus.update({
+                    data: {
+                        menu_id: newMenu.id,
+                    },
+                    where: {
+                        id: onlyMenuIdNeededRow.id,
+                    },
+                });
+            } else {
+                await prisma.branches_menucategories_menus.create({
                     data: {
                         menu_id: newMenu.id,
                         menucategory_id: menucatId,
                         branch_id: branchId,
                     },
-                })
-            )
-        );
+                });
+            }
+        });
 
         res.send(200);
     }
