@@ -8,6 +8,9 @@ import {
     Select,
     MenuItem,
     Button,
+    Checkbox,
+    FormControl,
+    InputLabel,
 } from "@mui/material";
 import {
     branches,
@@ -27,12 +30,8 @@ const NewMenuCategory = () => {
 
     const isDisabled = !menuCategory.name || !selectedBranchIds;
 
-    const {
-        fetchData,
-
-        branches,
-        townships,
-    } = useContext(BackofficeContext);
+    const { fetchData, menus, branches, townships } =
+        useContext(BackofficeContext);
     const addNewMenucategory = async () => {
         if (!menuCategory?.name || !selectedBranchIds?.length) return;
 
@@ -91,19 +90,20 @@ const NewMenuCategory = () => {
                     </MenuItem>
                 ))}
             </Select>
+
             <Button
                 variant="contained"
                 onClick={addNewMenucategory}
                 fullWidth
                 disabled={isDisabled ? true : false}
                 sx={{
-                    backgroundColor: "#4C4C6D",
+                    backgroundColor: "#606C5D",
 
                     color: "#E8F6EF",
                     mb: 2,
 
                     ":hover": {
-                        bgcolor: "#1B9C85", // theme.palette.primary.main
+                        bgcolor: "#7C9070", // theme.palette.primary.main
                         color: "white",
                     },
                 }}

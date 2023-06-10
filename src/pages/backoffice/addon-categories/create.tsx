@@ -7,6 +7,8 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    FormControlLabel,
+    Switch,
 } from "@mui/material";
 import { useContext, useState } from "react";
 
@@ -14,6 +16,7 @@ import type { addon_categories as AddonCategory } from "@prisma/client";
 import { config } from "../../../config/Config";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
+import { useRouter } from "next/router";
 
 export default function CreateAddonCategory() {
     const [addonCategory, setAddonCategory] = useState<AddonCategory>({
@@ -22,15 +25,16 @@ export default function CreateAddonCategory() {
     } as AddonCategory);
     const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
 
-    const isDisabled =
-        !addonCategory.name || !addonCategory.is_required || !selectedMenuIds;
+    console.log(addonCategory, selectedMenuIds);
+
+    const isDisabled = !addonCategory.name || !selectedMenuIds.length;
+    const router = useRouter();
     const currentBranchId = getselectedLocationId();
 
-    const { fetchData, addonCategories, menus } = useContext(BackofficeContext);
+    const { fetchData, addonCategories, menus, addons } =
+        useContext(BackofficeContext);
 
-    console.log(addonCategories);
-
-    const updateAddonCategory = async () => {
+    const createAddonCategory = async () => {
         if (!addonCategory?.name) return;
 
         const response = await fetch(
@@ -40,23 +44,15 @@ export default function CreateAddonCategory() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(addonCategory),
+                body: JSON.stringify({
+                    addonCategory: addonCategory,
+                    selectedMenuIds: selectedMenuIds,
+                }),
             }
         );
         fetchData();
     };
 
-    const deleteAddonCategory = async (addonCategoryId: number | undefined) => {
-        if (!addonCategoryId) return;
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
-            {
-                method: "DELETE",
-            }
-        );
-
-        fetchData();
-    };
     return (
         <Box
             sx={{
@@ -123,31 +119,33 @@ export default function CreateAddonCategory() {
                 </Select>
             </FormControl>
 
-            <Box sx={{ display: "flex", mb: 2 }}>
-                <Checkbox
-                    disableRipple
-                    color="success"
-                    onChange={() => {
-                        setAddonCategory({
-                            ...addonCategory,
-                            is_required: !addonCategory?.is_required,
-                        });
-                    }}
-                />
-                <p>is required</p>
-            </Box>
+            <FormControlLabel
+                sx={{ mt: 2 }}
+                control={
+                    <Switch
+                        checked={addonCategory.is_required}
+                        onChange={(evt) =>
+                            setAddonCategory({
+                                ...addonCategory,
+                                is_required: evt.target.checked,
+                            })
+                        }
+                    />
+                }
+                label="required"
+            />
             <Button
                 variant="contained"
-                onClick={updateAddonCategory}
+                onClick={createAddonCategory}
                 disabled={isDisabled ? true : false}
                 sx={{
-                    backgroundColor: "#4C4C6D",
+                    backgroundColor: "#606C5D",
 
                     color: "#E8F6EF",
                     mb: 2,
 
                     ":hover": {
-                        bgcolor: "#1B9C85", // theme.palette.primary.main
+                        bgcolor: "#7C9070", // theme.palette.primary.main
                         color: "white",
                     },
                 }}

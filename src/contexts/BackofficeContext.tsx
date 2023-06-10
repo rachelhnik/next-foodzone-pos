@@ -65,7 +65,6 @@ const BackofficeAppProvider = ({ children }: any) => {
         const response = await fetch(`${config.backofficeApiBaseUrl}/app`);
 
         const data = await response.json();
-        console.log(data);
 
         const branchId = data.branches[0].id;
 

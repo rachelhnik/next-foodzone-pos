@@ -13,8 +13,13 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const MenucategoryDetail = () => {
     const router = useRouter();
-    const { branches, branchesMenucategoriesMenus, menuCategories, fetchData } =
-        useContext(BackofficeContext);
+    const {
+        branches,
+        branchesMenucategoriesMenus,
+        menuCategories,
+        fetchData,
+        menus,
+    } = useContext(BackofficeContext);
 
     const menuCategoryId = parseInt(router.query.id as string, 10);
 
@@ -29,15 +34,22 @@ const MenucategoryDetail = () => {
                 .map((item) => item.branch_id)
         ),
     ];
+    const menuIds = branchesMenucategoriesMenus
+        .filter((item) => item.menucategory_id === menuCategoryId)
+        .map((item) => item.menu_id);
 
     const selectedBranches = branches.filter((branch) =>
         branchIds.includes(branch.id)
     );
+
+    const selectedMenus = menus.filter((menu) => menuIds.includes(menu.id));
     console.log(selectedBranches);
+    console.log("selected Menus", selectedMenus);
 
     const [newMenuCategory, setNewMenuCategory] = useState({
         name: menuCategory?.name,
         branches: selectedBranches,
+        menus: selectedMenus,
     });
 
     if (!menuCategory) return;
@@ -51,7 +63,7 @@ const MenucategoryDetail = () => {
                 body: JSON.stringify(newMenuCategory),
             }
         );
-        console.log(await response.json());
+
         fetchData();
     };
 
@@ -112,6 +124,43 @@ const MenucategoryDetail = () => {
                     )}
                     renderInput={(params) => (
                         <TextField {...params} label="Locations" />
+                    )}
+                />
+                <Autocomplete
+                    sx={{ width: 300, mt: 2 }}
+                    multiple
+                    options={menus}
+                    defaultValue={selectedMenus}
+                    disableCloseOnSelect
+                    isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                    }
+                    getOptionLabel={(option) => option.name}
+                    onChange={(evt, values) => {
+                        setNewMenuCategory({
+                            ...newMenuCategory,
+                            menus: values,
+                        });
+                    }}
+                    renderOption={(props, option) => (
+                        <li {...props}>
+                            <Checkbox
+                                icon={icon}
+                                checkedIcon={checkedIcon}
+                                style={{ marginRight: 8 }}
+                                checked={
+                                    newMenuCategory.branches.find(
+                                        (branch) => branch.id === option.id
+                                    )
+                                        ? true
+                                        : false
+                                }
+                            />
+                            {option.name}
+                        </li>
+                    )}
+                    renderInput={(params) => (
+                        <TextField {...params} label="menus" />
                     )}
                 />
                 <Button

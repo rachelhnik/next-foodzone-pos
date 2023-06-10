@@ -18,6 +18,7 @@ const AddonCategories = () => {
             (addon) => addon.addon_categories_id === addonCategoryId
         ).length;
     };
+
     return (
         <Layout>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -33,13 +34,13 @@ const AddonCategories = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         sx={{
-                            backgroundColor: "#4C4C6D",
+                            backgroundColor: "#606C5D",
                             width: "fit-content",
                             color: "#E8F6EF",
                             mb: 2,
 
                             ":hover": {
-                                bgcolor: "#1B9C85", // theme.palette.primary.main
+                                bgcolor: "#7C9070", // theme.palette.primary.main
                                 color: "white",
                             },
                         }}
