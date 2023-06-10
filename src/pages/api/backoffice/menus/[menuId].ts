@@ -5,19 +5,10 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    if (req.method === "DELETE") {
-        const menuId = parseInt(req.query.menuId as string, 10);
-        console.log(typeof menuId);
-        await prisma.menu_addons.deleteMany({ where: { menu_id: menuId } });
-        await prisma.branches_menucategories_menus.deleteMany({
-            where: { menu_id: menuId },
-        });
-        await prisma.menus.delete({ where: { id: menuId } });
-        res.send(200);
-    }
     if (req.method === "PUT") {
         const menuId = parseInt(req.query.menuId as string, 10);
-        const { name, price, asset_url, description } = req.body;
+        const { name, price, asset_url, description, addonCategories } =
+            req.body;
         const menu = await prisma.menus.findUnique({
             where: {
                 id: menuId,
@@ -37,6 +28,42 @@ export default async function handler(
                 },
             });
 
+        const addonCategoryIds = addonCategories.map(
+            (addoncat: any) => addoncat.id
+        ) as number[];
+
+        const currentAddoncategories =
+            await prisma.menu_addoncategories.findMany({
+                where: { menu_id: menuId },
+            });
+        const currentAddoncatIds = currentAddoncategories.map(
+            (addoncat) => addoncat.addoncategory_id
+        ) as number[];
+        const addedAddoncatIds = addonCategoryIds.filter(
+            (id) => !currentAddoncatIds.includes(id)
+        );
+        const removedAddoncatIds = currentAddoncatIds.filter(
+            (id) => !addonCategoryIds.includes(id)
+        );
+        if (addedAddoncatIds) {
+            addedAddoncatIds.forEach(async (addedId) => {
+                await prisma.menu_addoncategories.create({
+                    data: { menu_id: menuId, addoncategory_id: addedId },
+                });
+            });
+        }
+        if (removedAddoncatIds) {
+            removedAddoncatIds.forEach(async (removedId) => {
+                const rowToDelete = await prisma.menu_addoncategories.findFirst(
+                    {
+                        where: { menu_id: menuId, addoncategory_id: removedId },
+                    }
+                );
+                await prisma.menu_addoncategories.delete({
+                    where: { id: rowToDelete?.id },
+                });
+            });
+        }
         res.send(200);
     }
 }

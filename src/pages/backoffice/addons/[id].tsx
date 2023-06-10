@@ -15,7 +15,10 @@ const AddonDetail = () => {
     const currentAddon = addons.find(
         (addon) => addon.id === Number(currentAddonId)
     );
-    const [newAddon, setNewAddon] = useState({ name: currentAddon?.name });
+
+    const [newAddon, setNewAddon] = useState({ name: "" });
+
+    if (!currentAddon) return;
 
     const updateAddon = async () => {
         const response = await fetch(
@@ -29,13 +32,14 @@ const AddonDetail = () => {
             }
         );
         fetchData();
+        router.push("/backoffice/addons");
     };
 
     return (
         <Layout title="Edit Addon">
             <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <TextField
-                    defaultValue={currentAddon?.name}
+                    defaultValue={currentAddon.name}
                     sx={{ mb: 2 }}
                     onChange={(evt) => setNewAddon({ name: evt.target.value })}
                 />
