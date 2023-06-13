@@ -34,6 +34,7 @@ model branches {
   townships       townships         @relation(fields: [township_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   branches_addons branches_addons[]
   branches_menucategories_menus branches_menucategories_menus[]
+  tables tables[]
 }
 
 model branches_addons {
@@ -111,4 +112,13 @@ model users {
 enum Role {
   admin 
   manager
+}
+
+model tables {
+   id         Int       @id @default(autoincrement())
+  name       String
+  asset_url  String
+  branch_id  Int
+  branches branches @relation(fields: [branch_id],references: [id], onDelete: NoAction , onUpdate: NoAction)
+
 }

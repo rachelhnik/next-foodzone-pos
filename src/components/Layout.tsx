@@ -16,7 +16,7 @@ export default function Layout(props: Props) {
             <NavBar />
             <Box sx={{ display: "flex", height: "100vh" }}>
                 <Sidebar />
-                <Box sx={{ p: 3, margin: "0 auto" }}>{props.children}</Box>
+                <Box sx={{ p: 3, ml: 8 }}>{props.children}</Box>
             </Box>
         </Box>
     );

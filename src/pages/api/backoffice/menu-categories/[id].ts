@@ -17,74 +17,115 @@ export default async function handler(
     }
 
     if (req.method === "PUT") {
-        const menuCategoryId = parseInt(req.query.id as string, 10);
-        const { name, menus, branchId } = req.body;
+        const { newMenuCategory, menuCategoryId } = req.body;
+
+        const { name, branches } = newMenuCategory;
+
+        const branchIds = branches.map((branch: any) => branch.id) as number[];
 
         await prisma.menu_categories.update({
             data: { name: name },
             where: { id: menuCategoryId },
         });
-        const menusIds = menus.map((menu: any) => menu.id) as number[];
 
-        const branchesMenucatMenus =
+        if (!branchIds.length) {
+            // find the row in which menuId is already null to delete that row
+            const bothNull =
+                await prisma.branches_menucategories_menus.findMany({
+                    where: {
+                        menu_id: null,
+                        menucategory_id: menuCategoryId,
+                    },
+                });
+
+            const nullIds = bothNull.map((data) => data.id);
+
+            await prisma.branches_menucategories_menus.deleteMany({
+                where: {
+                    id: {
+                        in: nullIds,
+                    },
+                },
+            });
+
+            //if menu_id is not null , just update the branch_id column null
+            await prisma.branches_menucategories_menus.updateMany({
+                data: { branch_id: null },
+                where: { menucategory_id: menuCategoryId },
+            });
+            return res.send(200);
+        }
+
+        // finding branches asscociated with current menucategory
+        const branchesMenucategoriesMenus =
             await prisma.branches_menucategories_menus.findMany({
                 where: { menucategory_id: menuCategoryId },
             });
-        const currentMenuIds = branchesMenucatMenus.map(
-            (data) => data.menu_id
+
+        const existingBranchIds = branchesMenucategoriesMenus.map(
+            (item) => item.branch_id
         ) as number[];
 
-        const addedMenuIds = menusIds.filter(
-            (menuId: number) => !currentMenuIds.includes(menuId)
-        );
-        const removedMenuIds = currentMenuIds.filter(
-            (currentmenuId: number) => !menusIds.includes(currentmenuId)
+        // if payload branchIds are not included in existing ids , it is added
+
+        const addedBranchIds = branchIds.filter(
+            (branchId: number) => !existingBranchIds.includes(branchId)
         ) as number[];
 
-        if (addedMenuIds) {
-            addedMenuIds.forEach(async (addedMenuId) => {
-                const onlyMenuNullRow =
+        // if existing branchIds are not included in payload branchIds, it is removed
+
+        const removedBranchIds = existingBranchIds.filter(
+            (id) => !branchIds.includes(id)
+        ) as number[];
+
+        if (addedBranchIds.length) {
+            addedBranchIds.forEach(async (addedBranchId) => {
+                const rowWithNullBranchId =
                     await prisma.branches_menucategories_menus.findFirst({
                         where: {
-                            menu_id: null,
                             menucategory_id: menuCategoryId,
-                            branch_id: branchId,
+                            branch_id: null,
                         },
                     });
-                if (onlyMenuNullRow) {
+                if (rowWithNullBranchId) {
                     await prisma.branches_menucategories_menus.update({
-                        data: { menu_id: addedMenuId },
-                        where: { id: onlyMenuNullRow.id },
+                        data: { branch_id: addedBranchId },
+                        where: { id: rowWithNullBranchId.id },
                     });
                 } else {
                     await prisma.branches_menucategories_menus.create({
                         data: {
-                            menu_id: addedMenuId,
-                            branch_id: branchId,
                             menucategory_id: menuCategoryId,
+                            branch_id: addedBranchId,
                         },
                     });
                 }
             });
-        }
-        if (removedMenuIds) {
-            removedMenuIds.forEach(async (removedMenuId) => {
-                const rowToDelete =
-                    await prisma.branches_menucategories_menus.findFirst({
-                        where: {
-                            menu_id: removedMenuId,
-                            menucategory_id: menuCategoryId,
-                            branch_id: branchId,
-                        },
-                    });
-                if (rowToDelete) {
-                    await prisma.branches_menucategories_menus.delete({
-                        where: { id: rowToDelete.id },
-                    });
-                }
-            });
+            res.send(200);
         }
 
-        res.send(200);
+        if (removedBranchIds.length) {
+            removedBranchIds.forEach(async (branchId) => {
+                const row =
+                    await prisma.branches_menucategories_menus.findFirst({
+                        where: {
+                            menucategory_id: menuCategoryId,
+                            branch_id: branchId,
+                        },
+                    });
+                if (row && row.menu_id) {
+                    await prisma.branches_menucategories_menus.update({
+                        data: { branch_id: null },
+                        where: { id: row.id },
+                    });
+                } else if (row && row.menu_id === null) {
+                    await prisma.branches_menucategories_menus.delete({
+                        where: { id: row.id },
+                    });
+                }
+            });
+            res.send(200);
+        }
     }
+    res.send(200);
 }
