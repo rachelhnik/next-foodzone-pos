@@ -70,6 +70,7 @@ export const Sidebar = () => {
             sx={{
                 minWidth: 250,
                 backgroundColor: "#7C9070",
+                height: "100%",
             }}
         >
             <List sx={{ width: 250, mt: 2 }}>
