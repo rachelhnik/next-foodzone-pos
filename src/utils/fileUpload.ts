@@ -1,7 +1,9 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import multer from "multer";
 import multerS3 from "multer-s3";
 import { config } from "../config/Config";
+import QRCode from "qrcode";
+import { generateLinkForQRCode } from ".";
 
 // Set S3 endpoint to DigitalOcean Spaces
 const s3Config = new S3Client({
@@ -12,6 +14,32 @@ const s3Config = new S3Client({
         secretAccessKey: config.spaceSecretAccessKey,
     },
 });
+
+export const qrCodeImageUpload = async (
+    locationId: number,
+    tableId: number
+) => {
+    try {
+        const qrImageData = await QRCode.toDataURL(
+            generateLinkForQRCode(locationId, tableId)
+        );
+        const input = {
+            Bucket: "msquarefdc",
+            Key: `happy-pos/qrcode/sho/locationId-${locationId}-tableId-${tableId}.png`,
+            ACL: "public-read",
+            Body: Buffer.from(
+                qrImageData.replace(/^data:image\/\w+;base64,/, ""),
+                "base64"
+            ),
+        };
+
+        const command = new PutObjectCommand(input);
+        const response = await s3Config.send(command);
+    } catch (err) {
+        console.log("error");
+        console.error(err);
+    }
+};
 
 export const fileUpload = multer({
     storage: multerS3({

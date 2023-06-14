@@ -117,7 +117,7 @@ enum Role {
 model tables {
    id         Int       @id @default(autoincrement())
   name       String
-  asset_url  String
+  asset_url  String?
   branch_id  Int
   branches branches @relation(fields: [branch_id],references: [id], onDelete: NoAction , onUpdate: NoAction)
 
