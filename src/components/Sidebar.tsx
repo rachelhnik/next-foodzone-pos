@@ -5,6 +5,7 @@ import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import TapasIcon from "@mui/icons-material/Tapas";
 import PinDropIcon from "@mui/icons-material/PinDrop";
+import TableBarIcon from "@mui/icons-material/TableBar";
 import {
     Box,
     List,
@@ -51,13 +52,19 @@ export const sidebarMenuItems = [
     },
     {
         id: 6,
+        icon: <TableBarIcon />,
+        label: "Tables",
+        link: "/backoffice/tables",
+    },
+    {
+        id: 7,
         icon: <PinDropIcon />,
         label: "Branches",
         link: "/backoffice/branches",
     },
 
     {
-        id: 7,
+        id: 8,
         icon: <SettingsIcon />,
         label: "Settings",
         link: "/backoffice/settings",
