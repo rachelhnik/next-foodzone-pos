@@ -14,11 +14,15 @@ import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import { getselectedLocationId } from "@/utils";
+import {
+    getBranchesByMenucategoryId,
+    getMenusByMenucategoryId,
+    getselectedLocationId,
+} from "@/utils";
 import MenuCard from "@/components/MenuCard";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveMenuFromMenuCategory from "./RemoveMenuFromCategory";
-import NewMenuCategory from "./create";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -40,31 +44,25 @@ const MenucategoryDetail = () => {
     const [selectedMenuToRemove, setSelectedMenuToRemove] = useState<Menu>();
 
     const menuCategoryId = parseInt(router.query.id as string, 10);
-    console.log(router.query.id);
 
     const menuCategory = menuCategories.find(
         (data) => data.id === menuCategoryId
     );
-
-    const menuIds = branchesMenucategoriesMenus
-        .filter((item) => item.menucategory_id === menuCategoryId)
-        .map((item) => item.menu_id);
-
-    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
-
-    const branchIds = [
-        ...new Set(
-            branchesMenucategoriesMenus
-                .filter((item) => item.menucategory_id === menuCategory?.id)
-                .map((item) => item.branch_id)
-        ),
-    ];
-
-    const selectedBranches = branches.filter((branch) =>
-        branchIds.includes(branch.id)
+    const validMenus = getMenusByMenucategoryId(
+        menuCategoryId,
+        branchesMenucategoriesMenus,
+        menus
     );
 
-    const selectedMenus = menus.filter((menu) => menuIds.includes(menu.id));
+    const menuIds = validMenus.map((item) => item.id);
+
+    const selectedBranches = getBranchesByMenucategoryId(
+        branchesMenucategoriesMenus,
+        menuCategoryId,
+        branches
+    );
+
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
 
     const [newMenuCategory, setNewMenuCategory] = useState({
         name: menuCategory?.name,
@@ -202,11 +200,18 @@ const MenucategoryDetail = () => {
                         Update
                     </Button>
                 </Box>
-                <Box sx={{ my: 3 }}>
+                <Box>
                     <Typography variant="h6" sx={{ mb: 2 }}>
                         Menus
                     </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+
+                            mb: 3,
+                        }}
+                    >
                         <Autocomplete
                             sx={{ minWidth: 300, mr: 3 }}
                             value={selectedMenu}
@@ -237,16 +242,26 @@ const MenucategoryDetail = () => {
                         <Button
                             variant="contained"
                             onClick={addMenuToMenuCategory}
+                            sx={{
+                                backgroundColor: "#606C5D",
+                                color: "#E8F6EF",
+                                mt: 2,
+                                ":hover": {
+                                    bgcolor: "#7C9070",
+                                    color: "white",
+                                },
+                            }}
                         >
                             Add
                         </Button>
                     </Box>
                     <Box sx={{ display: "flex" }}>
-                        {selectedMenus.map((item) => (
+                        {validMenus.map((item) => (
                             <Box
                                 key={item.id}
                                 sx={{
                                     mr: 2,
+
                                     display: "flex",
                                     flexDirection: "column",
                                     alignItems: "center",
@@ -255,8 +270,12 @@ const MenucategoryDetail = () => {
                                 <MenuCard menu={item} />
                                 <Button
                                     variant="outlined"
+                                    color="inherit"
                                     startIcon={<DeleteIcon />}
-                                    sx={{ width: "fit-content" }}
+                                    sx={{
+                                        width: "fit-content",
+                                        color: "#7C9070",
+                                    }}
                                     onClick={() => {
                                         setSelectedMenuToRemove(item);
                                         setOpen(true);

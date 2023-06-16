@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import NavBar from "./Navbar";
 import { Box } from "@mui/material";
-import Link from "next/link";
+
 import { Sidebar } from "./Sidebar";
+import { BackofficeContext } from "@/contexts/BackofficeContext";
 
 interface Props {
     title?: string;
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export default function Layout(props: Props) {
+    const { isLoading } = useContext(BackofficeContext);
+    if (isLoading) return null;
     return (
         <Box>
             <NavBar />

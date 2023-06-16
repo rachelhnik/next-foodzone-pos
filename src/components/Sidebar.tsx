@@ -77,11 +77,10 @@ export const Sidebar = () => {
             sx={{
                 minWidth: 250,
                 backgroundColor: "#7C9070",
-                height: "100%",
             }}
         >
             <List sx={{ width: 250, mt: 2 }}>
-                {sidebarMenuItems.slice(0, 6).map((item) => (
+                {sidebarMenuItems.slice(0, 7).map((item) => (
                     <Link
                         key={item.id}
                         href={item.link}

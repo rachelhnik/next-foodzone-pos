@@ -7,7 +7,9 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    Link,
     TextField,
+    Typography,
 } from "@mui/material";
 import { useContext, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,13 +18,18 @@ import { config } from "@/config/Config";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 
 const Tables = () => {
-    const { fetchData } = useContext(BackofficeContext);
+    const { fetchData, tables } = useContext(BackofficeContext);
     const [open, setOpen] = useState(false);
     const selectedBranchId = getselectedLocationId();
     const [newTable, setNewTable] = useState({
         name: "",
         branchId: selectedBranchId,
     });
+
+    const tablesForCurrentBranch = tables.filter(
+        (table) => table.branch_id === Number(selectedBranchId)
+    );
+    console.log(tablesForCurrentBranch);
 
     const createNewTable = async () => {
         const isValid = newTable.name;
@@ -60,13 +67,34 @@ const Tables = () => {
                         New table
                     </Button>
                 </Box>
-                <Card>
-                    <CardMedia
-                        sx={{ height: 100 }}
-                        image="https://msquarefdc.sgp1.cdn.digitaloceanspaces.com/happy-pos/qrcode/sho/locationId-1-tableId-5.png"
-                        title="green iguana"
-                    />
-                </Card>
+                <Box sx={{ display: "flex" }}>
+                    {tablesForCurrentBranch.map((table) => (
+                        <Box sx={{ textAlign: "center", mr: 4 }} key={table.id}>
+                            <Link
+                                href={`/backoffice/tables/${table.id}`}
+                                style={{
+                                    textDecoration: "none",
+                                    color: "#000000",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: "120px",
+                                        height: "120px",
+                                        borderRadius: 2,
+                                        border: "2px solid #EBEBEB",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                    }}
+                                ></Box>
+                            </Link>
+                            <Typography sx={{ mt: 1 }}>{table.name}</Typography>
+                        </Box>
+                    ))}
+                </Box>
             </Box>
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle>Create new table</DialogTitle>
