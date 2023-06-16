@@ -107,6 +107,7 @@ const Menus = () => {
         <Layout title="Menus">
             <Box
                 sx={{
+                    width: "900px",
                     display: "flex",
                     flexDirection: "column",
                     margin: "0 auto",

@@ -4,7 +4,9 @@ import {
     Button,
     Dialog,
     DialogContent,
+    Grid,
     Link,
+    Paper,
     Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -15,6 +17,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import NewMenuCategory from "./create";
+import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);
@@ -57,13 +60,7 @@ const MenuCategories = () => {
 
     return (
         <Layout>
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    margin: "0 auto",
-                }}
-            >
+            <Box sx={{ width: "900px" }}>
                 <Box
                     sx={{
                         right: 10,
@@ -103,49 +100,50 @@ const MenuCategories = () => {
                             style={{ textDecoration: "none", color: "#000000" }}
                         >
                             <Box sx={{ textAlign: "center", mr: 4 }}>
-                                <Box
+                                <Paper
+                                    elevation={2}
                                     sx={{
-                                        width: "170px",
-                                        height: "170px",
-                                        borderRadius: 2,
-                                        border: "2px solid #EBEBEB",
+                                        width: 170,
+                                        height: 170,
+                                        mr: 4,
+                                        mb: 5,
                                         display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
+                                        flexDirection: "column",
+                                        justifyContent: "flex-end",
+                                        pl: 2,
+                                        pb: 2,
                                     }}
                                 >
                                     <Typography>
                                         {getMenusCount(menuCategory.id)} menus
                                     </Typography>
-                                </Box>
-                                <Typography sx={{ mt: 1 }}>
-                                    {menuCategory.name}
-                                </Typography>
+
+                                    <Typography sx={{ mt: 1 }}>
+                                        {menuCategory.name}
+                                    </Typography>
+                                </Paper>
                             </Box>
                         </Link>
                     ))}
                 </Box>
-            </Box>
-
-            <Dialog
-                open={open}
-                onClose={() => setOpen(false)}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogContent
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: 280,
-                        m: "0 auto",
-                    }}
+                <Dialog
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
                 >
-                    <NewMenuCategory />
-                </DialogContent>
-            </Dialog>
+                    <DialogContent
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            width: 280,
+                            m: "0 auto",
+                        }}
+                    >
+                        <NewMenuCategory />
+                    </DialogContent>
+                </Dialog>
+            </Box>
         </Layout>
     );
 };

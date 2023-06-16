@@ -188,6 +188,7 @@ export default async function handler(
         const branches = await prisma.branches.findMany({
             where: {
                 company_id: companyId,
+                is_archived: false,
             },
         });
 
@@ -271,6 +272,14 @@ export default async function handler(
             },
         });
 
+        const tables = await prisma.tables.findMany({
+            where: {
+                branch_id: {
+                    in: branchesId,
+                },
+            },
+        });
+
         res.send({
             menus: menus,
             menuCategories: menuCategories,
@@ -282,6 +291,7 @@ export default async function handler(
             company: company,
             townships: townships,
             user: userFromDB,
+            tables: tables,
         });
     }
 }

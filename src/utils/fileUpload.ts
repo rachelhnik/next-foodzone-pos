@@ -15,17 +15,14 @@ const s3Config = new S3Client({
     },
 });
 
-export const qrCodeImageUpload = async (
-    locationId: number,
-    tableId: number
-) => {
+export const qrCodeImageUpload = async (branchId: number, tableId: number) => {
     try {
         const qrImageData = await QRCode.toDataURL(
-            generateLinkForQRCode(locationId, tableId)
+            generateLinkForQRCode(branchId, tableId)
         );
         const input = {
             Bucket: "msquarefdc",
-            Key: `happy-pos/qrcode/sho/locationId-${locationId}-tableId-${tableId}.png`,
+            Key: `happy-pos/qrcode/sho/branchId-${branchId}-tableId-${tableId}.png`,
             ACL: "public-read",
             Body: Buffer.from(
                 qrImageData.replace(/^data:image\/\w+;base64,/, ""),

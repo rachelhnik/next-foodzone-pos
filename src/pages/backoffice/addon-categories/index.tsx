@@ -21,7 +21,13 @@ const AddonCategories = () => {
 
     return (
         <Layout>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "900px",
+                }}
+            >
                 <Box
                     sx={{
                         right: 10,

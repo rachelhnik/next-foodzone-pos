@@ -40,7 +40,7 @@ const Addon = () => {
 
     return (
         <Layout>
-            <Box>
+            <Box sx={{ width: "900px" }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                     <Button
                         onClick={() => setOpen(true)}
