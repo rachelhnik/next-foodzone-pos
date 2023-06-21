@@ -1,7 +1,9 @@
 import { config } from "@/config/Config";
 import {
+    addon_categories,
     branches,
     branches_menucategories_menus,
+    menu_addoncategories,
     menu_categories,
     menus,
 } from "@prisma/client";
@@ -34,12 +36,10 @@ export const getQrCodeUrl = (branchId: number, tableId: number) => {
 };
 export const getMenusByMenucategoryId = (
     menuCategoryId: number,
-
     branchesMenucategoriesMenus: branches_menucategories_menus[],
-
-    menus: menus[]
+    menus: menus[],
+    selectedBranchId: number
 ) => {
-    const selectedBranchId = getselectedLocationId() as string;
     const validMenuIds = branchesMenucategoriesMenus
         .filter(
             (item) =>
@@ -49,6 +49,18 @@ export const getMenusByMenucategoryId = (
         )
         .map((item) => item.menu_id);
     return menus.filter((item) => validMenuIds.includes(item.id));
+};
+export const getAddonCategoriesByMenuId = (
+    addoncategories: addon_categories[],
+    menuId: number,
+    menusAddonCategories: menu_addoncategories[]
+) => {
+    const currentAddonCategoriesIds = menusAddonCategories
+        .filter((item) => item.menu_id === menuId)
+        .map((item) => item.addoncategory_id);
+    return addoncategories.filter((addoncat) =>
+        currentAddonCategoriesIds.includes(addoncat.id)
+    );
 };
 
 export const getBranchesByMenucategoryId = (
