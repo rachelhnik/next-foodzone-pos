@@ -216,6 +216,7 @@ export default async function handler(
                 id: {
                     in: menusIds,
                 },
+                is_archived: false,
             },
         });
 
@@ -228,6 +229,7 @@ export default async function handler(
                 id: {
                     in: menuCategoriesIds,
                 },
+                is_archived: false,
             },
         });
         const menuAddonCategories = await prisma.menu_addoncategories.findMany({
@@ -254,6 +256,7 @@ export default async function handler(
                 id: {
                     in: addonCategoryIds,
                 },
+                is_archived: false,
             },
         });
 
@@ -262,6 +265,7 @@ export default async function handler(
                 addon_categories_id: {
                     in: addonCategoryIds,
                 },
+                is_archived: false,
             },
         });
 
@@ -277,6 +281,7 @@ export default async function handler(
                 branch_id: {
                     in: branchesId,
                 },
+                is_archived: false,
             },
         });
 
