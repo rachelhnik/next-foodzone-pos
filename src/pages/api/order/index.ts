@@ -45,5 +45,6 @@ export default async function handler(
         addoncategories: addonCategories,
         addons: addons,
         branchesMenucategoriesMenus: branchesMenucategoriesMenus,
+        menuAddonCategories: menuAddonCategories,
     });
 }
