@@ -9,9 +9,9 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { menus as Menu, branches } from "@prisma/client";
+import { menus as Menu, branches, menu_categories } from "@prisma/client";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { use, useContext, useState } from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import {
@@ -22,6 +22,7 @@ import {
 import MenuCard from "@/components/MenuCard";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveMenuFromMenuCategory from "./RemoveMenuFromCategory";
+import DeleteDialog from "@/components/DeleteDialog";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -41,6 +42,7 @@ const MenucategoryDetail = () => {
         menus,
     } = useContext(BackofficeContext);
     const [open, setOpen] = useState(false);
+    const [openMenucat, setOpenMenucat] = useState(false);
     const [selectedMenuToRemove, setSelectedMenuToRemove] = useState<Menu>();
 
     const menuCategoryId = parseInt(router.query.id as string, 10);
@@ -68,6 +70,8 @@ const MenucategoryDetail = () => {
         name: menuCategory?.name,
         branches: selectedBranches,
     });
+    const [menuCategoryToRemove, setMenucategoryToRemove] =
+        useState<menu_categories>();
 
     const [selectedMenu, setSelectedMenu] = useState<AutocompleteProps | null>(
         null
@@ -123,20 +127,60 @@ const MenucategoryDetail = () => {
         setOpen(false);
     };
 
+    const handleRemoveMenuCategory = async () => {
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/menu-categories/${menuCategoryId}`,
+            {
+                method: "DELETE",
+            }
+        );
+        fetchData();
+        router.push("/backoffice/menu-categories");
+    };
+
     return (
         <Layout>
             <Box
                 sx={{
-                    width: 300,
+                    width: 900,
                     display: "flex",
                     flexDirection: "column",
                 }}
             >
+                <Box
+                    sx={{
+                        right: 10,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                    }}
+                >
+                    <Button
+                        onClick={() => {
+                            setOpenMenucat(true),
+                                setMenucategoryToRemove(menuCategory);
+                        }}
+                        variant="contained"
+                        startIcon={<DeleteIcon />}
+                        sx={{
+                            backgroundColor: "#AFAFAF",
+                            width: "fit-content",
+                            color: "#000000",
+                            mb: 2,
+
+                            ":hover": {
+                                bgcolor: "#000000",
+                                color: "white",
+                            },
+                        }}
+                    >
+                        Delete Menu Category
+                    </Button>
+                </Box>
                 <Box sx={{ my: 3 }}>
                     <TextField
                         defaultValue={menuCategory.name}
                         fullWidth
-                        sx={{ mb: 2 }}
+                        sx={{ mb: 2, width: 300 }}
                         onChange={(evt) =>
                             setNewMenuCategory({
                                 ...newMenuCategory,
@@ -184,13 +228,12 @@ const MenucategoryDetail = () => {
                     <Button
                         variant="contained"
                         onClick={updateMenuCategory}
-                        fullWidth
                         sx={{
                             backgroundColor: "#606C5D",
 
                             color: "#E8F6EF",
                             mt: 2,
-
+                            width: 300,
                             ":hover": {
                                 bgcolor: "#7C9070", // theme.palette.primary.main
                                 color: "white",
@@ -291,6 +334,12 @@ const MenucategoryDetail = () => {
                         open={open}
                         setOpen={setOpen}
                         handleRemoveMenu={handleRemoveMenu}
+                    />
+                    <DeleteDialog
+                        title="Are you sure you want to delete this menu category?"
+                        open={openMenucat}
+                        setOpen={setOpenMenucat}
+                        callback={handleRemoveMenuCategory}
                     />
                 </Box>
             </Box>

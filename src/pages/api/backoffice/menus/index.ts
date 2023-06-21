@@ -58,4 +58,6 @@ export default async function handler(
 
         res.send(200);
     }
+
+    res.send(200);
 }

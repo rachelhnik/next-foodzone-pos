@@ -13,6 +13,7 @@ interface Props {
 
 export default function Layout(props: Props) {
     const { isLoading } = useContext(BackofficeContext);
+
     if (isLoading) return null;
     return (
         <Box>

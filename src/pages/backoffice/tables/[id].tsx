@@ -4,17 +4,22 @@ import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
 import { Box, TextField, Button } from "@mui/material";
 import { fetchData } from "next-auth/client/_utils";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
+import { tables } from "@prisma/client";
+import DeleteDialog from "@/components/DeleteDialog";
+import { table } from "console";
 
 const TableDetail = () => {
     const router = useRouter();
     const tableId = router.query.id as string;
+    const [open, setOpen] = useState(false);
     const selectedLocationId = getselectedLocationId() as string;
     const { tables, fetchData } = useContext(BackofficeContext);
-    const table = tables.find((table) => table.id === Number(tableId));
-    const [tableName, setTableName] = useState(table?.name);
-
+    const currentTable = tables.find((table) => table.id === Number(tableId));
+    const [tableName, setTableName] = useState(currentTable?.name);
+    const [tableToRemove, setTableToRemove] = useState<tables>();
     const updateTable = async () => {
         await fetch(`${config.backofficeApiBaseUrl}/tables`, {
             method: "PUT",
@@ -25,22 +30,67 @@ const TableDetail = () => {
         });
         fetchData();
     };
-
+    const handleRemoveTable = async () => {
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/tables/${tableId}`,
+            {
+                method: "DELETE",
+            }
+        );
+        fetchData();
+        router.push("/backoffice/tables");
+    };
     return (
         <Layout>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <TextField
-                    defaultValue={tableName}
-                    sx={{ mb: 2 }}
-                    onChange={(evt) => setTableName(evt.target.value)}
-                />
-                <Button
-                    variant="contained"
-                    onClick={updateTable}
-                    sx={{ width: "fit-content", mt: 3 }}
+            <Box sx={{ width: 900 }}>
+                <Box
+                    sx={{
+                        right: 10,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                    }}
                 >
-                    Update
-                </Button>
+                    <Button
+                        onClick={() => {
+                            setOpen(true), setTableToRemove(currentTable);
+                        }}
+                        variant="contained"
+                        startIcon={<DeleteIcon />}
+                        sx={{
+                            backgroundColor: "#AFAFAF",
+                            width: "fit-content",
+                            color: "#000000",
+                            mb: 2,
+
+                            ":hover": {
+                                bgcolor: "#000000",
+                                color: "white",
+                            },
+                        }}
+                    >
+                        Delete Table
+                    </Button>
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <TextField
+                        defaultValue={tableName}
+                        sx={{ mb: 2, width: 300 }}
+                        onChange={(evt) => setTableName(evt.target.value)}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={updateTable}
+                        sx={{ width: "fit-content", mt: 3 }}
+                    >
+                        Update
+                    </Button>
+                </Box>
+                <DeleteDialog
+                    title="Are you sure you want to delete this table?"
+                    open={open}
+                    setOpen={setOpen}
+                    callback={handleRemoveTable}
+                />
             </Box>
         </Layout>
     );

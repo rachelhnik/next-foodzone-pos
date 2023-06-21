@@ -65,5 +65,15 @@ export default async function handler(
             });
         }
         res.send(200);
+    } else if (req.method === "DELETE") {
+        console.log(req.query);
+        const menuId = parseInt(req.query.menuId as string, 10);
+        await prisma.menus.update({
+            data: {
+                is_archived: true,
+            },
+            where: { id: menuId },
+        });
+        return res.send(200);
     }
 }

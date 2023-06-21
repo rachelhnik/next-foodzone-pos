@@ -1,11 +1,9 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-
 import Layout from "@/components/Layout";
-
 import { useRouter } from "next/router";
 import { menus as MenusData } from "@prisma/client";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import FileDropZone from "@/components/FileDropZone";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import {
@@ -17,7 +15,9 @@ import {
 } from "@mui/material";
 import { config } from "@/config/Config";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import DeleteDialog from "@/components/DeleteDialog";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -50,7 +50,9 @@ export default function CenteredTabs() {
         addonCategories: selectedAddonCategories,
     });
 
-    console.log(updatedMenu);
+    const [menuToRemove, setMenuToRemove] = useState<MenusData>();
+
+    const [open, setOpen] = useState(false);
 
     const updateMenu = async () => {
         try {
@@ -96,128 +98,174 @@ export default function CenteredTabs() {
             return null;
         }
     };
-    // finding current menu
+
+    const handleRemoveMenu = async () => {
+        const response = await fetch(
+            `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
+            {
+                method: "DELETE",
+            }
+        );
+        fetchData();
+        router.push("/backoffice/menus");
+    };
 
     return (
         <Layout>
-            <Box>
-                {menu ? (
+            {menu ? (
+                <Box
+                    sx={{
+                        display: "flex",
+                        width: 900,
+                        flexDirection: "column",
+                    }}
+                >
+                    <Box
+                        sx={{
+                            right: 10,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                        }}
+                    >
+                        <Button
+                            onClick={() => {
+                                setOpen(true), setMenuToRemove(menu);
+                            }}
+                            variant="contained"
+                            startIcon={<DeleteIcon />}
+                            sx={{
+                                backgroundColor: "#AFAFAF",
+                                width: "fit-content",
+                                color: "#000000",
+                                mb: 2,
+
+                                ":hover": {
+                                    bgcolor: "#000000",
+                                    color: "white",
+                                },
+                            }}
+                        >
+                            Delete menu
+                        </Button>
+                    </Box>
                     <Box
                         sx={{
                             display: "flex",
-                            maxWidth: 300,
-                            margin: "0 auto",
+                            flexDirection: "column",
+                            mr: 2,
+                            mt: -5,
                         }}
                     >
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                mr: 2,
+                        <Typography variant="caption">Name</Typography>
+                        <TextField
+                            variant="outlined"
+                            defaultValue={updatedMenu.name}
+                            sx={{ mb: 2, maxWidth: 300 }}
+                            onChange={(evt) => {
+                                setUpdatedMenu({
+                                    ...updatedMenu,
+                                    name: evt.target.value,
+                                });
                             }}
-                        >
-                            <Typography variant="caption">Name</Typography>
-                            <TextField
-                                variant="outlined"
-                                defaultValue={updatedMenu.name}
-                                sx={{ mb: 2 }}
-                                onChange={(evt) => {
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        name: evt.target.value,
-                                    });
-                                }}
-                            />
-                            <Typography variant="caption">Price</Typography>
-                            <TextField
-                                variant="outlined"
-                                type="number"
-                                defaultValue={updatedMenu.price}
-                                sx={{ mb: 2 }}
-                                onChange={(evt) => {
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        price: parseInt(evt.target.value, 10),
-                                    });
-                                }}
-                            />
-                            <Typography variant="caption">
-                                description
-                            </Typography>
-                            <TextField
-                                id="outlined-basic"
-                                variant="outlined"
-                                defaultValue={updatedMenu.description}
-                                sx={{ mb: 2 }}
-                                onChange={(evt) => {
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        description: evt.target.value,
-                                    });
-                                }}
-                            />
+                        />
+                        <Typography variant="caption">Price</Typography>
+                        <TextField
+                            variant="outlined"
+                            type="number"
+                            defaultValue={updatedMenu.price}
+                            sx={{ mb: 2, maxWidth: 300 }}
+                            onChange={(evt) => {
+                                setUpdatedMenu({
+                                    ...updatedMenu,
+                                    price: parseInt(evt.target.value, 10),
+                                });
+                            }}
+                        />
+                        <Typography variant="caption">description</Typography>
+                        <TextField
+                            id="outlined-basic"
+                            variant="outlined"
+                            defaultValue={updatedMenu.description}
+                            sx={{ mb: 2, maxWidth: 300 }}
+                            onChange={(evt) => {
+                                setUpdatedMenu({
+                                    ...updatedMenu,
+                                    description: evt.target.value,
+                                });
+                            }}
+                        />
 
-                            <Typography>change Image ?</Typography>
-                            <FileDropZone onFileSelected={onFileSelected} />
-                            <Autocomplete
-                                sx={{ width: 300, mt: 2 }}
-                                multiple
-                                options={addonCategories}
-                                defaultValue={selectedAddonCategories}
-                                disableCloseOnSelect
-                                isOptionEqualToValue={(option, value) =>
-                                    option.id === value.id
-                                }
-                                getOptionLabel={(option) => option.name}
-                                onChange={(evt, values) => {
-                                    setUpdatedMenu({
-                                        ...updatedMenu,
-                                        addonCategories: values,
-                                    });
-                                }}
-                                renderOption={(props, option) => (
-                                    <li {...props}>
-                                        <Checkbox
-                                            icon={icon}
-                                            checkedIcon={checkedIcon}
-                                            style={{ marginRight: 8 }}
-                                            checked={
-                                                updatedMenu.addonCategories.find(
-                                                    (addoncat) =>
-                                                        addoncat.id ===
-                                                        option.id
-                                                )
-                                                    ? true
-                                                    : false
-                                            }
-                                        />
-                                        {option.name}
-                                    </li>
-                                )}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="addon categories"
+                        <Typography>change Image ?</Typography>
+                        <FileDropZone onFileSelected={onFileSelected} />
+                        <Autocomplete
+                            sx={{ width: 300, mt: 2 }}
+                            multiple
+                            options={addonCategories}
+                            defaultValue={selectedAddonCategories}
+                            disableCloseOnSelect
+                            isOptionEqualToValue={(option, value) =>
+                                option.id === value.id
+                            }
+                            getOptionLabel={(option) => option.name}
+                            onChange={(evt, values) => {
+                                setUpdatedMenu({
+                                    ...updatedMenu,
+                                    addonCategories: values,
+                                });
+                            }}
+                            renderOption={(props, option) => (
+                                <li {...props}>
+                                    <Checkbox
+                                        icon={icon}
+                                        checkedIcon={checkedIcon}
+                                        style={{ marginRight: 8 }}
+                                        checked={
+                                            updatedMenu.addonCategories.find(
+                                                (addoncat) =>
+                                                    addoncat.id === option.id
+                                            )
+                                                ? true
+                                                : false
+                                        }
                                     />
-                                )}
-                            />
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    width: 300,
-                                    margin: "auto",
-                                    mt: 2,
-                                }}
-                                onClick={updateMenu}
-                            >
-                                Update
-                            </Button>
-                        </Box>
+                                    {option.name}
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="addon categories"
+                                />
+                            )}
+                        />
+                        <Button
+                            variant="contained"
+                            sx={{
+                                backgroundColor: "#606C5D",
+                                width: 300,
+                                color: "#E8F6EF",
+                                mt: 2,
+
+                                ":hover": {
+                                    bgcolor: "#7C9070",
+                                    color: "white",
+                                },
+                            }}
+                            onClick={updateMenu}
+                        >
+                            Update
+                        </Button>
                     </Box>
-                ) : (
-                    <Typography>Menu not found</Typography>
-                )}
-            </Box>
+                    <DeleteDialog
+                        title="Are you sure you want to delete this menu category?"
+                        open={open}
+                        setOpen={setOpen}
+                        callback={handleRemoveMenu}
+                    />
+                </Box>
+            ) : (
+                <Typography>Menu not found</Typography>
+            )}
         </Layout>
     );
 }

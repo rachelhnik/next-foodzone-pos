@@ -27,6 +27,7 @@ const FileDropZone = ({ onFileSelected }: Props) => {
                 textAlign: "center",
                 p: 1,
                 cursor: "pointer",
+                maxWidth: 300,
             }}
         >
             <input {...getInputProps()} />
