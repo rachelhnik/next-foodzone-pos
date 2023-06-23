@@ -8,7 +8,7 @@ export enum OrderlineStatus {
 
 export interface Orderline {
     menu: Menu;
-    addon?: Addon[];
+    addon: Addon[];
     quantity: number;
     status: OrderlineStatus;
 }

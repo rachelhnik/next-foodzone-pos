@@ -23,6 +23,7 @@ model addons {
   is_archived            Boolean                   @default(false) 
   addon_categories_id    Int?
   branches_addons        branches_addons[]
+  orderlines orderlines[]
  
 }
 
@@ -37,6 +38,7 @@ model branches {
   branches_addons branches_addons[]
   branches_menucategories_menus branches_menucategories_menus[]
   tables tables[]
+  orders orders[]
 }
 
 model branches_addons {
@@ -84,6 +86,7 @@ model menus {
  is_archived            Boolean                   @default(false)
   branches_menucategories_menus         branches_menucategories_menus[]
   menus_addoncats_addons menu_addoncategories[]
+  orderlines orderlines[]
   
 }
 
@@ -126,5 +129,32 @@ model tables {
   branch_id  Int
    is_archived            Boolean                   @default(false)
   branches branches @relation(fields: [branch_id],references: [id], onDelete: NoAction , onUpdate: NoAction)
+  orders orders[]
+}
 
+model orders {
+  id           Int          @id @default(autoincrement())
+  branch_id  Int
+  table_id     Int
+  order_status OrderStatus  @default(PENDING)
+  is_paid      Boolean      @default(false)
+  branches    branches    @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tables       tables       @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderlines   orderlines[]
+}
+
+model orderlines {
+  id        Int    @id @default(autoincrement())
+  orders_id Int
+  menus_id  Int
+  addons_id Int
+  orders    orders @relation(fields: [orders_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  menus     menus  @relation(fields: [menus_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addons    addons @relation(fields: [addons_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  COMPLETE
 }
