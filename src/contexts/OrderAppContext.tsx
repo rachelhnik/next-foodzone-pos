@@ -1,5 +1,5 @@
 import { config } from "@/config/Config";
-import { Order } from "@/typings/Types";
+import { Order, Orderline } from "@/typings/Types";
 import {
     menus as Menus,
     menu_categories as Menucategories,
@@ -8,6 +8,7 @@ import {
     branches as Branches,
     branches_menucategories_menus,
     menu_addoncategories as MenuAddonCategories,
+    orderlines,
 } from "@prisma/client";
 import { useRouter } from "next/router";
 
@@ -23,10 +24,11 @@ export interface OrderAppContextType {
     branchesMenucategoriesMenus: branches_menucategories_menus[];
     branches: Branches[];
     order: Order | null;
-    orderdata: null;
+
     setOrderData: (data: any) => void;
     fetchData: () => void;
     isLoading: boolean;
+    orderlines: Orderline[];
 }
 
 export const defaultContext: OrderAppContextType = {
@@ -38,10 +40,11 @@ export const defaultContext: OrderAppContextType = {
     menuAddonCategories: [],
     branchesMenucategoriesMenus: [],
     order: null,
-    orderdata: null,
+
     setOrderData: (data: any) => {},
     fetchData: () => {},
     isLoading: true,
+    orderlines: [],
 };
 
 export const OrderAppContext =
@@ -54,6 +57,7 @@ const OrderAppContextProvider = (props: any) => {
     const branchId = query.branchId;
 
     const [orderdata, setOrderData] = useState(defaultContext);
+    console.log(orderdata);
 
     useEffect(() => {
         fetchData();
