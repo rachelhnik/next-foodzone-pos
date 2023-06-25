@@ -73,3 +73,10 @@ export const getBranchesByMenucategoryId = (
         .map((item) => item.branch_id);
     return branches.filter((item) => validBranchIds.includes(item.id));
 };
+
+export const getOrderlineToEdit = () => {
+    if (typeof window !== "undefined") {
+        return localStorage.getItem("orderlinetoedit");
+    }
+    return "";
+};

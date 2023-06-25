@@ -14,8 +14,10 @@ export default function NewAddons() {
         useState<number>();
     const [newAddon, setNewAddon] = useState({
         name: "",
+        price: 0,
         addoncategoryId: selectedAddonCategoryId,
     });
+    console.log(newAddon);
 
     const isDisabled = !newAddon.name || !selectedAddonCategoryId;
 
@@ -62,6 +64,19 @@ export default function NewAddons() {
                         setNewAddon({
                             ...newAddon,
                             name: e.target.value,
+                        });
+                    }}
+                />
+                <TextField
+                    label="price"
+                    fullWidth
+                    type="number"
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                    onChange={(e) => {
+                        setNewAddon({
+                            ...newAddon,
+                            price: parseInt(e.target.value, 10),
                         });
                     }}
                 />

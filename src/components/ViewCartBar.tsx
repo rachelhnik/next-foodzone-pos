@@ -8,11 +8,14 @@ import { OrderAppContext } from "@/contexts/OrderAppContext";
 interface Props {
     value: number;
 }
-const ViewCartBar = ({ value }: Props) => {
+const ViewCartBar = () => {
     const router = useRouter();
-    console.log(value);
+
     const { orderlines } = useContext(OrderAppContext);
-    const cartText = `You have ${value} item in cart.`;
+
+    const cartText = `You have ${orderlines.length} ${
+        orderlines.length === 1 ? "item" : "items"
+    } in cart.`;
     return (
         <Box sx={{ flexGrow: 1 }}>
             <Box
