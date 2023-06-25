@@ -1,7 +1,6 @@
 import QuantitySelector from "@/components/QuantitySelector";
-import ViewCartBar from "@/components/ViewCartBar";
 import { OrderAppContext } from "@/contexts/OrderAppContext";
-import { getAddonCategoriesByMenuId } from "@/utils";
+import { getAddonCategoriesByMenuId, getOrderlineToEdit } from "@/utils";
 import {
     Box,
     Button,
@@ -35,11 +34,26 @@ const Menu = () => {
         orderlines,
     } = useContext(OrderAppContext);
     const { ...orderdata } = useContext(OrderAppContext);
+    const orderlineIdToEdit = getOrderlineToEdit();
+    const orderlineToEdit = orderlines.find(
+        (item) => item.id === Number(orderlineIdToEdit)
+    );
 
-    const [value, setValue] = useState(1);
-    console.log(value);
+    const checkedAddonsIds = orderlineToEdit?.addons.map((item) => item.id);
+    const checkedAddons = addons.filter((item) =>
+        checkedAddonsIds?.includes(item.id)
+    );
+    const addonIdsToEdit = checkedAddons.map((item) => item.id);
+
+    const [value, setValue] = useState(
+        orderlineToEdit ? orderlineToEdit.quantity : 1
+    );
+
     const [disable, setDisable] = useState(false);
-    const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
+    const [selectedAddons, setSelectedAddons] = useState<Addon[]>(
+        orderlineToEdit ? orderlineToEdit.addons : []
+    );
+
     const currentMenu = menus.find((menu) => menu.id === Number(menuId));
     const validAddonCategories = getAddonCategoriesByMenuId(
         addoncategories,
@@ -61,18 +75,35 @@ const Menu = () => {
 
         return addons.map((item) => {
             return (
-                <Box key={item.id}>
+                <Box
+                    key={item.id}
+                    sx={{ display: "flex", alignItems: "center" }}
+                >
                     <FormControlLabel
                         value={item.name}
                         control={
                             addonCategory.is_required ? (
                                 <Radio
-                                    onChange={(evt, value) =>
-                                        handleAddonSelect(value, item)
+                                    checked={
+                                        selectedAddons.find(
+                                            (addon) => addon.id === item.id
+                                        )
+                                            ? true
+                                            : false
                                     }
+                                    onChange={(evt, value) => {
+                                        handleAddonSelect(value, item);
+                                    }}
                                 />
                             ) : (
                                 <Checkbox
+                                    checked={
+                                        selectedAddons.find(
+                                            (addon) => addon.id === item.id
+                                        )
+                                            ? true
+                                            : false
+                                    }
                                     onChange={(evt, value) =>
                                         handleAddonSelect(value, item)
                                     }
@@ -81,29 +112,33 @@ const Menu = () => {
                         }
                         label={item.name}
                     />
+                    <Typography>{item.price}</Typography>
                 </Box>
             );
         });
     };
 
     useEffect(() => {
-        const hasAddoncatWithRequired = validAddonCategories.filter(
+        const isRequiredAddoncat = validAddonCategories.filter(
             (item) => item.is_required === true
         );
 
-        if (hasAddoncatWithRequired.length) {
+        if (isRequiredAddoncat.length) {
             if (!selectedAddons.length) {
                 setDisable(true);
             } else {
                 const requiredAddons = selectedAddons.filter((item) => {
-                    const addonCategory = hasAddoncatWithRequired.find(
-                        (addoncat) => addoncat.id === item.addon_categories_id
+                    const addonCategory = isRequiredAddoncat.find(
+                        (addoncat: AddonCategory) =>
+                            addoncat.id === item.addon_categories_id
                     );
                     if (addonCategory?.is_required) {
                         return item;
                     } else return null;
                 });
-                requiredAddons.length ? setDisable(false) : setDisable(true);
+                requiredAddons.length === isRequiredAddoncat.length
+                    ? setDisable(false)
+                    : setDisable(true);
             }
         } else {
             setDisable(false);
@@ -149,14 +184,40 @@ const Menu = () => {
     };
 
     const addToCart = () => {
+        const currentId = orderlines.length === 0 ? 1 : orderlines.length + 1;
+
         setOrderData({
             ...orderdata,
             orderlines: [
                 ...orderdata.orderlines,
-                { currentMenu, value, selectedAddons },
+                {
+                    id: currentId,
+                    menu: currentMenu,
+                    addons: selectedAddons,
+                    quantity: value,
+                },
             ],
         });
         router.push({ pathname: "/order", query });
+    };
+    const updateCart = () => {
+        if (orderlineToEdit) {
+            const otherOrderLines = orderlines.filter(
+                (item) => item.id !== orderlineToEdit.id
+            );
+            const newOrderlines = [
+                ...otherOrderLines,
+                {
+                    id: orderlineToEdit.id,
+                    menu: orderlineToEdit.menu,
+                    addons: selectedAddons,
+                    quantity: value,
+                },
+            ];
+            setOrderData({ ...orderdata, orderlines: newOrderlines });
+            localStorage.removeItem("orderlinetoedit");
+            router.push({ pathname: "/order/cart", query });
+        }
     };
     if (!currentMenu) return;
     return (
@@ -215,11 +276,10 @@ const Menu = () => {
                 variant="contained"
                 sx={{ mt: 3, width: "fit-content" }}
                 disabled={disable}
-                onClick={addToCart}
+                onClick={orderlineToEdit ? updateCart : addToCart}
             >
-                Add to cart
+                {orderlineToEdit ? "Update" : "Add to cart"}
             </Button>
-            <ViewCartBar value={value} />
         </Box>
     );
 };

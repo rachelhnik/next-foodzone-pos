@@ -5,9 +5,13 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { name, addoncategoryId } = req.body;
+    const { name, price, addoncategoryId } = req.body;
     await prisma.addons.create({
-        data: { name: name, addon_categories_id: addoncategoryId },
+        data: {
+            name: name,
+            price: price,
+            addon_categories_id: addoncategoryId,
+        },
     });
 
     res.send(200);

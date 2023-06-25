@@ -22,6 +22,7 @@ model addons {
   name                   String
   is_archived            Boolean                   @default(false) 
   addon_categories_id    Int?
+  price                   Int?
   branches_addons        branches_addons[]
   orderlines orderlines[]
  

@@ -1,4 +1,5 @@
 import MenuCard from "@/components/MenuCard";
+import ViewCartBar from "@/components/ViewCartBar";
 import { OrderAppContext } from "@/contexts/OrderAppContext";
 import { getMenusByMenucategoryId } from "@/utils";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
@@ -61,6 +62,7 @@ const Order = () => {
                 </Tabs>
             </Box>
             {renderMenus()}
+            <ViewCartBar />
         </Box>
     );
 };
