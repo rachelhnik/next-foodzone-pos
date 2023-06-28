@@ -140,22 +140,22 @@ export default async function handler(
         const newAddonsData = [
             {
                 name: "Cola",
-
+                price: 500,
                 addon_categories_id: newAddonCategories[0].id,
             },
             {
                 name: "Pepsi",
-
+                price: 500,
                 addon_categories_id: newAddonCategories[0].id,
             },
             {
                 name: "Large",
-
+                price: 0,
                 addon_categories_id: newAddonCategories[1].id,
             },
             {
                 name: "Normal",
-
+                price: 0,
                 addon_categories_id: newAddonCategories[1].id,
             },
         ];
@@ -284,6 +284,13 @@ export default async function handler(
                 is_archived: false,
             },
         });
+        const orders = await prisma.orders.findMany({
+            where: { branch_id: { in: branchesId } },
+        });
+        const orderIds = orders.map((item) => item.id);
+        const orderlines = await prisma.orderlines.findMany({
+            where: { orders_id: { in: orderIds } },
+        });
 
         res.send({
             menus: menus,
@@ -297,6 +304,8 @@ export default async function handler(
             townships: townships,
             user: userFromDB,
             tables: tables,
+            orders: orders,
+            orderlines: orderlines,
         });
     }
 }

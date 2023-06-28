@@ -5,7 +5,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const branchId = req.query.branchId as string;
+    const branchId = parseInt(req.query.branchId as string, 10);
 
     const branchesMenucategoriesMenus =
         await prisma.branches_menucategories_menus.findMany({
@@ -39,6 +39,15 @@ export default async function handler(
     const addons = await prisma.addons.findMany({
         where: { addon_categories_id: { in: addoncategoriesIds } },
     });
+    const orders = await prisma.orders.findMany({
+        where: {
+            branch_id: { in: branchId },
+        },
+    });
+    const orderIds = orders.map((item) => item.id) as number[];
+    const orderlines = await prisma.orderlines.findMany({
+        where: { orders_id: { in: orderIds } },
+    });
     res.send({
         menucat: menuCategoriesForCurrentBranch,
         menus: menusForCurrentBranch,
@@ -46,5 +55,7 @@ export default async function handler(
         addons: addons,
         branchesMenucategoriesMenus: branchesMenucategoriesMenus,
         menuAddonCategories: menuAddonCategories,
+        orders: orders,
+        orderlines: orderlines,
     });
 }

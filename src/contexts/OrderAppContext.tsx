@@ -8,7 +8,8 @@ import {
     branches as Branches,
     branches_menucategories_menus,
     menu_addoncategories as MenuAddonCategories,
-    orderlines,
+    orderlines as OrderlineData,
+    orders as OrderData,
 } from "@prisma/client";
 import { useRouter } from "next/router";
 
@@ -24,7 +25,8 @@ export interface OrderAppContextType {
     branchesMenucategoriesMenus: branches_menucategories_menus[];
     branches: Branches[];
     order: Order | null;
-
+    clientOrders: OrderData[];
+    clientOrderlines: OrderlineData[];
     setOrderData: (data: any) => void;
     fetchData: () => void;
     isLoading: boolean;
@@ -40,7 +42,9 @@ export const defaultContext: OrderAppContextType = {
     menuAddonCategories: [],
     branchesMenucategoriesMenus: [],
     order: null,
+    clientOrderlines: [],
 
+    clientOrders: [],
     setOrderData: (data: any) => {},
     fetchData: () => {},
     isLoading: true,
@@ -77,6 +81,8 @@ const OrderAppContextProvider = (props: any) => {
             addons,
             branchesMenucategoriesMenus,
             menuAddonCategories,
+            orders,
+            orderlines,
         } = data;
         setOrderData({
             ...orderdata,
@@ -86,6 +92,8 @@ const OrderAppContextProvider = (props: any) => {
             addons: addons,
             branchesMenucategoriesMenus: branchesMenucategoriesMenus,
             menuAddonCategories: menuAddonCategories,
+            clientOrders: orders,
+            clientOrderlines: orderlines,
         });
     };
 
