@@ -1,13 +1,16 @@
 import { OrderAppContext } from "@/contexts/OrderAppContext";
-import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { Avatar, Box, IconButton, Typography, Button } from "@mui/material";
 import { useContext } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Order, Orderline } from "@/typings/Types";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { useRouter } from "next/router";
+import { config } from "@/config/Config";
+import { response } from "express";
+import { fetchData } from "next-auth/client/_utils";
 
 const Cart = () => {
-    const { orderlines, setOrderData } = useContext(OrderAppContext);
+    const { orderlines, setOrderData, fetchData } = useContext(OrderAppContext);
     const { ...orderdata } = useContext(OrderAppContext);
     const router = useRouter();
     const query = router.query;
@@ -30,8 +33,32 @@ const Cart = () => {
             query,
         });
     };
+
+    const confirmOrder = async () => {
+        const { branchId, tableId } = query;
+        if (!branchId || !tableId || !orderlines.length)
+            alert("Please order menus");
+        const response = await fetch(
+            `${config.orderAppApiBaseUrl}/confirm?branchId=${branchId}&tableId=${tableId}`,
+            {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ orderlines }),
+            }
+        );
+        const responseJSON = await response.json();
+        const order = responseJSON.order;
+        fetchData();
+        router.push({ pathname: `/order/activeOrder/${order.id}`, query });
+    };
     return (
-        <Box>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+            }}
+        >
             <Typography variant="h4" sx={{ textAlign: "center" }}>
                 Cart
             </Typography>
@@ -101,6 +128,9 @@ const Cart = () => {
                     </Box>
                 </Box>
             ))}
+            <Button variant="contained" sx={{ mt: 2 }} onClick={confirmOrder}>
+                Confirm Order
+            </Button>
         </Box>
     );
 };

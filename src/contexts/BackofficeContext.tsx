@@ -12,6 +12,8 @@ import type {
     townships as Townships,
     menu_addoncategories as MenuAddonCategories,
     tables as Tables,
+    orders as Order,
+    orderlines as Orderline,
 } from "@prisma/client";
 import { config } from "../config/Config";
 import { getAccessToken, setselectedLocationId } from "@/utils";
@@ -30,6 +32,8 @@ export interface AppContextType {
     branches: BranchesData[];
     tables: Tables[];
     menuAddonCategories: MenuAddonCategories[];
+    orders: Order[];
+    orderlines: Orderline[];
     setPosData: (data: any) => void;
     fetchData: () => void;
     isLoading: boolean;
@@ -47,6 +51,8 @@ export const defaultContext: AppContextType = {
     branches: [],
     tables: [],
     menuAddonCategories: [],
+    orders: [],
+    orderlines: [],
     setPosData: () => {},
     fetchData: () => {},
     isLoading: true,
@@ -88,6 +94,8 @@ const BackofficeAppProvider = ({ children }: any) => {
             townships,
             tables,
             user,
+            orders,
+            orderlines,
         } = data;
 
         setPosData({
@@ -104,6 +112,8 @@ const BackofficeAppProvider = ({ children }: any) => {
             tables: tables,
             isLoading: false,
             branchesMenucategoriesMenus: branchesMenucategoriesMenus,
+            orders: orders,
+            orderlines: orderlines,
         });
     };
 
