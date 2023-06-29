@@ -16,13 +16,16 @@ export default async function handler(
     });
     orderlines.forEach(async (orderline: any) => {
         const menu = orderline.menu;
+        const quantity = orderline.quantity;
         const hasAddons = orderline.addons.length;
         if (hasAddons) {
             const addons = orderline.addons;
+
             const orderlineData = addons.map((item: any) => ({
                 menus_id: menu.id,
                 addons_id: item.id,
                 orders_id: newOrder.id,
+                quantity: quantity,
             }));
             await prisma.orderlines.createMany({ data: orderlineData });
         } else {
@@ -30,7 +33,7 @@ export default async function handler(
                 data: {
                     menus_id: menu.id,
                     orders_id: newOrder.id,
-                    addons_id: 1,
+                    quantity: quantity,
                 },
             });
         }

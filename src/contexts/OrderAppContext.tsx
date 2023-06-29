@@ -61,7 +61,6 @@ const OrderAppContextProvider = (props: any) => {
     const branchId = query.branchId;
 
     const [orderdata, setOrderData] = useState(defaultContext);
-    console.log(orderdata);
 
     useEffect(() => {
         fetchData();
