@@ -6,6 +6,8 @@ import {
     menu_addoncategories,
     menu_categories,
     menus,
+    orderlines,
+    orders,
 } from "@prisma/client";
 
 export const getAccessToken = () => {
@@ -79,4 +81,18 @@ export const getOrderlineToEdit = () => {
         return localStorage.getItem("orderlinetoedit");
     }
     return "";
+};
+
+export const getMenusByOrderId = (
+    orderId: number,
+    orderlines: orderlines[],
+    menus: menus[]
+) => {
+    const menuIdsByCurrentOrder = orderlines
+        .filter((orderline) => orderline.orders_id === orderId)
+        .map((item) => item.menus_id);
+    const currentMenus = menus.filter((menu) =>
+        menuIdsByCurrentOrder.includes(menu.id)
+    );
+    return currentMenus;
 };
