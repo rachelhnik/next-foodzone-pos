@@ -1,49 +1,50 @@
 import { OrderAppContext } from "@/contexts/OrderAppContext";
-import { Avatar, Box, IconButton, Typography, Button } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    IconButton,
+    Typography,
+    Button,
+    Divider,
+} from "@mui/material";
 import { useContext } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { Order, Orderline } from "@/typings/Types";
+import { CartItem } from "@/typings/Types";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { useRouter } from "next/router";
 import { config } from "@/config/Config";
-import { response } from "express";
-import { fetchData } from "next-auth/client/_utils";
+import { getTotalPrice } from "@/utils";
 
 const Cart = () => {
-    const { orderlines, setOrderData, fetchData } = useContext(OrderAppContext);
+    const { cart, setOrderData, fetchData } = useContext(OrderAppContext);
     const { ...orderdata } = useContext(OrderAppContext);
     const router = useRouter();
     const query = router.query;
 
-    const removeFromCart = (orderline: Orderline) => {
-        const orderlineToRemove = orderlines.filter(
-            (item) => item.id !== orderline.id
-        );
-        setOrderData({ ...orderdata, orderlines: orderlineToRemove });
+    const removeFromCart = (cartItem: CartItem) => {
+        const cartAfterRemoval = cart.filter((item) => item.id !== cartItem.id);
+        setOrderData({ ...orderdata, cart: cartAfterRemoval });
     };
-    const editCart = (orderline: Orderline) => {
-        const orderlineToEdit = orderlines.find(
-            (item) => item.id === orderline.id
-        );
+    const editCart = (cartItem: CartItem) => {
+        const cartItemToEdit = cart.find((item) => item.id === cartItem.id);
 
-        localStorage.setItem("orderlinetoedit", String(orderline.id));
+        localStorage.setItem("cartItemtoedit", cartItem.id);
 
         router.push({
-            pathname: `/order/menus/${orderlineToEdit?.menu.id}`,
+            pathname: `/order/updateCartMenus/${cartItemToEdit?.menu.id}`,
             query,
         });
     };
 
     const confirmOrder = async () => {
         const { branchId, tableId } = query;
-        if (!branchId || !tableId || !orderlines.length)
-            alert("Please order menus");
+        if (!branchId || !tableId || !cart.length) alert("Please order menus");
         const response = await fetch(
             `${config.orderAppApiBaseUrl}/confirm?branchId=${branchId}&tableId=${tableId}`,
             {
                 method: "POST",
                 headers: { "content-type": "application/json" },
-                body: JSON.stringify({ orderlines }),
+                body: JSON.stringify({ cart }),
             }
         );
         const responseJSON = await response.json();
@@ -62,7 +63,7 @@ const Cart = () => {
             <Typography variant="h4" sx={{ textAlign: "center" }}>
                 Cart
             </Typography>
-            {orderlines.map((orderline, i) => (
+            {cart.map((cartitem, i) => (
                 <Box
                     key={i}
                     sx={{
@@ -92,17 +93,17 @@ const Cart = () => {
                                     bgcolor: "green",
                                 }}
                             >
-                                {orderline.quantity}
+                                {cartitem.quantity}
                             </Avatar>
                             <Typography variant="h5">
-                                {orderline.menu.name}
+                                {cartitem.menu.name}
                             </Typography>
                         </Box>
                         <Typography variant="h5">
-                            {orderline.menu.price}
+                            {cartitem.menu.price}
                         </Typography>
                     </Box>
-                    {orderline.addons.map((addon) => (
+                    {cartitem.addons.map((addon) => (
                         <Box
                             key={addon.id}
                             sx={{
@@ -116,18 +117,30 @@ const Cart = () => {
                             <Typography>{addon.price}</Typography>
                         </Box>
                     ))}
-                    <Box sx={{ display: "flex" }}>
-                        <IconButton onClick={() => removeFromCart(orderline)}>
+
+                    <Box sx={{ display: "flex", alignSelf: "flex-end" }}>
+                        <IconButton onClick={() => removeFromCart(cartitem)}>
                             {" "}
-                            <DeleteForeverIcon />
+                            <DeleteForeverIcon sx={{ color: "red" }} />
                         </IconButton>
-                        <IconButton onClick={() => editCart(orderline)}>
+                        <IconButton onClick={() => editCart(cartitem)}>
                             {" "}
-                            <ModeEditIcon />
+                            <ModeEditIcon sx={{ color: "#1565C0" }} />
                         </IconButton>
                     </Box>
                 </Box>
             ))}
+            <Divider sx={{ width: "40%", my: 2 }} />
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: 300,
+                }}
+            >
+                <Typography>Total Price</Typography>
+                <Typography>{getTotalPrice(cart)}</Typography>
+            </Box>
             <Button variant="contained" sx={{ mt: 2 }} onClick={confirmOrder}>
                 Confirm Order
             </Button>

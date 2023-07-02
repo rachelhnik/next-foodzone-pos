@@ -1,4 +1,5 @@
 import { config } from "@/config/Config";
+import { CartItem } from "@/typings/Types";
 import {
     addon_categories,
     branches,
@@ -76,9 +77,9 @@ export const getBranchesByMenucategoryId = (
     return branches.filter((item) => validBranchIds.includes(item.id));
 };
 
-export const getOrderlineToEdit = () => {
+export const getcartItemToEdit = () => {
     if (typeof window !== "undefined") {
-        return localStorage.getItem("orderlinetoedit");
+        return localStorage.getItem("cartItemtoedit");
     }
     return "";
 };
@@ -95,4 +96,21 @@ export const getMenusByOrderId = (
         menuIdsByCurrentOrder.includes(menu.id)
     );
     return currentMenus;
+};
+
+export const generateRandomId = () =>
+    (Math.random() + 1).toString(36).substring(7);
+
+export const getTotalPrice = (cart: CartItem[]) => {
+    const totalPrice = cart.reduce((prev, curr) => {
+        const menuPrice = curr.menu.price;
+        const totalAddonPrice = curr.addons.reduce(
+            (addonPrice, addon) =>
+                addon.price !== null ? (addonPrice += addon.price) : 0,
+            0
+        );
+        prev += (menuPrice + totalAddonPrice) * curr.quantity;
+        return prev;
+    }, 0);
+    return totalPrice;
 };

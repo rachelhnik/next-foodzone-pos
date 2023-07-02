@@ -6,7 +6,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     const { branchId, tableId } = req.query;
-    const { orderlines } = req.body;
+    const { cart } = req.body;
 
     const newOrder = await prisma.orders.create({
         data: {
@@ -14,12 +14,13 @@ export default async function handler(
             table_id: Number(tableId),
         },
     });
-    orderlines.forEach(async (orderline: any) => {
-        const menu = orderline.menu;
-        const quantity = orderline.quantity;
-        const hasAddons = orderline.addons.length;
+
+    cart.forEach(async (cartitem: any) => {
+        const menu = cartitem.menu;
+        const quantity = cartitem.quantity;
+        const hasAddons = cartitem.addons.length;
         if (hasAddons) {
-            const addons = orderline.addons;
+            const addons = cartitem.addons;
 
             const orderlineData = addons.map((item: any) => ({
                 menus_id: menu.id,
