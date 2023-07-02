@@ -1,16 +1,13 @@
 import AddonCategoriesDisplay from "@/components/AddonCategoriesDisplay";
 import QuantitySelector from "@/components/QuantitySelector";
 import { OrderAppContext } from "@/contexts/OrderAppContext";
-import { generateRandomId, getAddonCategoriesByMenuId } from "@/utils";
+import { getcartItemToEdit, getAddonCategoriesByMenuId } from "@/utils";
 import { Box, Button } from "@mui/material";
-import {
-    addon_categories as AddonCategory,
-    addons as Addon,
-} from "@prisma/client";
+import { addons as Addon } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 
-const Menu = () => {
+const UpdateCartMenus = () => {
     const router = useRouter();
     const query = router.query;
     const menuId = Number(router.query.id as string);
@@ -20,11 +17,16 @@ const Menu = () => {
         addoncategories,
         menuAddonCategories,
         setOrderData,
+        cart,
     } = useContext(OrderAppContext);
     const { ...orderdata } = useContext(OrderAppContext);
+    const cartItemIdToEdit = getcartItemToEdit();
+    const cartItemToEdit = cart.find((item) => item.id === cartItemIdToEdit);
+
     const [value, setValue] = useState(1);
     const [disable, setDisable] = useState(false);
     const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
+
     const currentMenu = menus.find((menu) => menu.id === Number(menuId));
     const validAddonCategories = getAddonCategoriesByMenuId(
         addoncategories,
@@ -40,33 +42,6 @@ const Menu = () => {
             validAddonCategoriesIds.includes(addon.addon_categories_id)
     );
 
-    useEffect(() => {
-        const isRequiredAddoncat = validAddonCategories.filter(
-            (item) => item.is_required === true
-        );
-
-        if (isRequiredAddoncat.length) {
-            if (!selectedAddons.length) {
-                setDisable(true);
-            } else {
-                const requiredAddons = selectedAddons.filter((item) => {
-                    const addonCategory = isRequiredAddoncat.find(
-                        (addoncat: AddonCategory) =>
-                            addoncat.id === item.addon_categories_id
-                    );
-                    if (addonCategory?.is_required) {
-                        return item;
-                    } else return null;
-                });
-                requiredAddons.length === isRequiredAddoncat.length
-                    ? setDisable(false)
-                    : setDisable(true);
-            }
-        } else {
-            setDisable(false);
-        }
-    }, [selectedAddons, validAddonCategories]);
-
     const addMenuQuantity = () => {
         setValue(value + 1);
     };
@@ -74,24 +49,37 @@ const Menu = () => {
     const reduceMenuQuantity = () => {
         value === 1 ? setValue(1) : setValue(value - 1);
     };
+    const updateCart = () => {
+        if (cartItemToEdit) {
+            const otherCartItem = cart.filter(
+                (item) => item.id !== cartItemToEdit.id
+            );
 
-    const addToCart = () => {
-        setOrderData({
-            ...orderdata,
-            cart: [
-                ...orderdata.cart,
+            const newCart = [
+                ...otherCartItem,
                 {
-                    id: generateRandomId(),
-                    menu: currentMenu,
+                    id: cartItemToEdit.id,
+                    menu: cartItemToEdit.menu,
                     addons: selectedAddons,
                     quantity: value,
                 },
-            ],
-        });
-        router.push({ pathname: "/order", query });
+            ];
+            setOrderData({ ...orderdata, cart: newCart });
+            localStorage.removeItem("cartItemtoedit");
+            router.push({ pathname: "/order/cart", query });
+        }
     };
 
-    if (!currentMenu) return;
+    useEffect(() => {
+        if (cartItemToEdit) {
+            const selectedAddon = cart.find(
+                (item) => item.menu.id === cartItemToEdit.menu.id
+            )?.addons as Addon[];
+            setSelectedAddons(selectedAddon);
+            setValue(cartItemToEdit.quantity);
+        }
+    }, [cartItemToEdit, cart]);
+
     return (
         <Box
             sx={{
@@ -101,7 +89,7 @@ const Menu = () => {
                 p: 4,
             }}
         >
-            <h1>{currentMenu.name}</h1>
+            <h1>{currentMenu?.name}</h1>
             <AddonCategoriesDisplay
                 validAddonCategories={validAddonCategories}
                 validAddons={validAddons}
@@ -117,11 +105,12 @@ const Menu = () => {
                 variant="contained"
                 sx={{ mt: 3, width: "fit-content" }}
                 disabled={disable}
-                onClick={addToCart}
+                onClick={updateCart}
             >
-                Add to cart
+                "Update"
             </Button>
         </Box>
     );
 };
-export default Menu;
+
+export default UpdateCartMenus;

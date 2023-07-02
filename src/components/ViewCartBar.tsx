@@ -11,10 +11,10 @@ interface Props {
 const ViewCartBar = () => {
     const router = useRouter();
 
-    const { orderlines } = useContext(OrderAppContext);
+    const { cart } = useContext(OrderAppContext);
 
-    const cartText = `You have ${orderlines.length} ${
-        orderlines.length === 1 ? "item" : "items"
+    const cartText = `You have ${cart.length} ${
+        cart.length === 1 ? "item" : "items"
     } in cart.`;
     return (
         <Box sx={{ flexGrow: 1 }}>

@@ -15,6 +15,8 @@ model addon_categories {
   is_required            Boolean                  @default(false)
   menu_addoncategories menu_addoncategories[]
   is_archived            Boolean                   @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model addons {
@@ -25,7 +27,8 @@ model addons {
   price                   Int?
   branches_addons        branches_addons[]
   orderlines orderlines[]
- 
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model branches {
@@ -40,6 +43,8 @@ model branches {
   branches_menucategories_menus branches_menucategories_menus[]
   tables tables[]
   orders orders[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model branches_addons {
@@ -49,6 +54,8 @@ model branches_addons {
   is_available Boolean? @default(true)
   addons       addons   @relation(fields: [addon_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   branches     branches @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model branches_menucategories_menus {
@@ -61,6 +68,8 @@ model branches_menucategories_menus {
   menus        menus?   @relation(fields: [menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "location_menus_menu_id_fkey")
   menu_categories    menu_categories? @relation(fields: [menucategory_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   branches   branches? @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model companies {
@@ -69,6 +78,8 @@ model companies {
   is_archived            Boolean                   @default(false)
   branches branches[]
   users    users[]
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model menu_categories {
@@ -76,6 +87,8 @@ model menu_categories {
   name                  String
   is_archived            Boolean                   @default(false)
   branches_menucategories_menus branches_menucategories_menus[]
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model menus {
@@ -88,7 +101,8 @@ model menus {
   branches_menucategories_menus         branches_menucategories_menus[]
   menus_addoncats_addons menu_addoncategories[]
   orderlines orderlines[]
-  
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model menu_addoncategories {
@@ -97,7 +111,8 @@ model menu_addoncategories {
  menu_id Int
  addon_categories addon_categories @relation(fields: [addoncategory_id],references: [id])
  addoncategory_id Int
- 
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 
@@ -106,6 +121,8 @@ model townships {
   id       Int        @id @default(autoincrement())
   name     String
   branches branches[]
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model users {
@@ -116,6 +133,8 @@ model users {
   company_id Int
   companies  companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   role Role
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 enum Role {
@@ -131,17 +150,21 @@ model tables {
    is_archived            Boolean                   @default(false)
   branches branches @relation(fields: [branch_id],references: [id], onDelete: NoAction , onUpdate: NoAction)
   orders orders[]
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model orders {
   id           Int          @id @default(autoincrement())
   branch_id  Int
   table_id     Int
-  order_status OrderStatus  @default(PENDING)
   is_paid      Boolean      @default(false)
+  price       Int?         @default(0)
   branches    branches    @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tables       tables       @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderlines   orderlines[]
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model orderlines {
@@ -150,13 +173,17 @@ model orderlines {
   menus_id  Int
   addons_id Int?
   quantity  Int    @default(1)
+  order_status OrderStatus  @default(PENDING)
   orders    orders @relation(fields: [orders_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   menus     menus  @relation(fields: [menus_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   addons    addons? @relation(fields: [addons_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 enum OrderStatus {
   PENDING
   PREPARING
   COMPLETE
+  REJECTED
 }
