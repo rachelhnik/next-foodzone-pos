@@ -11,13 +11,13 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useContext, useEffect, useState } from "react";
-
+import CategoryIcon from "@mui/icons-material/Category";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import NewMenuCategory from "./create";
-import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
+import ItemCard from "@/components/ItemCard";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);
@@ -29,13 +29,12 @@ const MenuCategories = () => {
 
         branchesMenucategoriesMenus,
     } = useContext(BackofficeContext);
-    console.log(menuCategories, branchesMenucategoriesMenus);
+
     const { data: session } = useSession();
 
     const menuCatIds = branchesMenucategoriesMenus
         .filter((data) => data.branch_id === currentBranchId)
         .map((data) => data.menucategory_id);
-    console.log(menuCatIds);
 
     const filteredMenuCategories = menuCategories.filter(
         (data) => data.id && menuCatIds.includes(data.id)
@@ -87,6 +86,7 @@ const MenuCategories = () => {
                         New menu category
                     </Button>
                 </Box>
+
                 <Box
                     sx={{
                         display: "flex",
@@ -94,36 +94,15 @@ const MenuCategories = () => {
                     }}
                 >
                     {filteredMenuCategories.map((menuCategory) => (
-                        <Link
+                        <ItemCard
                             key={menuCategory.id}
+                            icon={<CategoryIcon />}
                             href={`/backoffice/menu-categories/${menuCategory.id}`}
-                            style={{ textDecoration: "none", color: "#000000" }}
-                        >
-                            <Box sx={{ textAlign: "center", mr: 4 }}>
-                                <Paper
-                                    elevation={2}
-                                    sx={{
-                                        width: 170,
-                                        height: 170,
-                                        mr: 4,
-                                        mb: 5,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "flex-end",
-                                        pl: 2,
-                                        pb: 2,
-                                    }}
-                                >
-                                    <Typography>
-                                        {getMenusCount(menuCategory.id)} menus
-                                    </Typography>
-
-                                    <Typography sx={{ mt: 1 }}>
-                                        {menuCategory.name}
-                                    </Typography>
-                                </Paper>
-                            </Box>
-                        </Link>
+                            title={menuCategory.name}
+                            subtitle={`${String(
+                                getMenusCount(menuCategory.id)
+                            )} menus `}
+                        />
                     ))}
                 </Box>
                 <Dialog

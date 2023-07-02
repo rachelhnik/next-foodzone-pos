@@ -2,20 +2,18 @@ import Layout from "@/components/Layout";
 import {
     Box,
     Button,
-    Card,
-    CardMedia,
     Dialog,
     DialogContent,
     DialogTitle,
-    Link,
     TextField,
-    Typography,
 } from "@mui/material";
 import { useContext, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { getselectedLocationId } from "@/utils";
 import { config } from "@/config/Config";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
+import ItemCard from "@/components/ItemCard";
+import TableBarIcon from "@mui/icons-material/TableBar";
 
 const Tables = () => {
     const { fetchData, tables } = useContext(BackofficeContext);
@@ -69,29 +67,21 @@ const Tables = () => {
                 </Box>
                 <Box sx={{ display: "flex" }}>
                     {tablesForCurrentBranch.map((table) => (
-                        <Box sx={{ textAlign: "center", mr: 4 }} key={table.id}>
-                            <Link
+                        <Box
+                            sx={{
+                                position: "relative",
+                                display: "flex",
+                                flexDirection: "column",
+                                mr: 2,
+                            }}
+                            key={table.id}
+                        >
+                            <ItemCard
+                                key={table.id}
+                                icon={<TableBarIcon />}
                                 href={`/backoffice/tables/${table.id}`}
-                                style={{
-                                    textDecoration: "none",
-                                    color: "#000000",
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        width: "120px",
-                                        height: "120px",
-                                        borderRadius: 2,
-                                        border: "2px solid #EBEBEB",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                    }}
-                                ></Box>
-                            </Link>
-                            <Typography sx={{ mt: 1 }}>{table.name}</Typography>
+                                title={table.name}
+                            />
                         </Box>
                     ))}
                 </Box>

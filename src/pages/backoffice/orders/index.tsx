@@ -11,11 +11,27 @@ import BackofficeProvider, {
 } from "@/contexts/BackofficeContext";
 import { useContext, useState } from "react";
 import { getMenusByOrderId, getselectedLocationId } from "@/utils";
-import { orders as Order, orderlines as Orderline } from "@prisma/client";
-import { Box, Collapse, IconButton, Typography } from "@mui/material";
+import {
+    orders as Order,
+    OrderStatus,
+    orderlines as Orderline,
+} from "@prisma/client";
+import {
+    Box,
+    Collapse,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    Typography,
+} from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { OrderAppContext } from "@/contexts/OrderAppContext";
+import { config } from "@/config/Config";
+import { fetchData } from "next-auth/client/_utils";
 
 interface Props {
     order: Order;
@@ -24,10 +40,22 @@ interface Props {
 
 const Row = ({ order, orderlines }: Props) => {
     const [open, setOpen] = useState(false);
-    const { menus } = useContext(BackofficeContext);
+    const { menus, fetchData } = useContext(BackofficeContext);
     const orderId = order.id;
 
     const menusRelatedToOrder = getMenusByOrderId(orderId, orderlines, menus);
+
+    const handleStatusChange = async (
+        e: SelectChangeEvent<"PENDING" | "PREPARING" | "COMPLETE" | "REJECTED">,
+        menuId: number | undefined
+    ) => {
+        const response = await fetch(`${config.backofficeApiBaseUrl}/orders`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: e.target.value, menuId: menuId }),
+        });
+        fetchData();
+    };
 
     const renderMenusForOrders = (id: number) => {
         return (
@@ -37,6 +65,7 @@ const Row = ({ order, orderlines }: Props) => {
                         <TableRow>
                             <TableCell>Menu Name</TableCell>
                             <TableCell>Quantity</TableCell>
+                            <TableCell>Order Status</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -50,6 +79,52 @@ const Row = ({ order, orderlines }: Props) => {
                                                 item.menus_id === menu.id
                                         )?.quantity
                                     }
+                                </TableCell>
+                                <TableCell>
+                                    <FormControl
+                                        sx={{ width: "50%" }}
+                                        variant="standard"
+                                    >
+                                        <Select
+                                            value={
+                                                orderlines.find(
+                                                    (item: Orderline) =>
+                                                        item.menus_id ===
+                                                        menu.id
+                                                )?.order_status
+                                            }
+                                            label="Status"
+                                            onChange={(e) => {
+                                                const menuId = orderlines.find(
+                                                    (item: Orderline) =>
+                                                        item.menus_id ===
+                                                        menu.id
+                                                )?.menus_id;
+                                                handleStatusChange(e, menuId);
+                                            }}
+                                        >
+                                            <MenuItem
+                                                value={OrderStatus.PENDING}
+                                            >
+                                                Pending
+                                            </MenuItem>
+                                            <MenuItem
+                                                value={OrderStatus.PREPARING}
+                                            >
+                                                Preparing
+                                            </MenuItem>
+                                            <MenuItem
+                                                value={OrderStatus.COMPLETE}
+                                            >
+                                                Complete
+                                            </MenuItem>
+                                            <MenuItem
+                                                value={OrderStatus.REJECTED}
+                                            >
+                                                Reject
+                                            </MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -85,7 +160,6 @@ const Row = ({ order, orderlines }: Props) => {
                 <TableCell align="right">
                     {order.is_paid ? "Yes" : "No"}
                 </TableCell>
-                <TableCell align="right">{order.order_status}</TableCell>
             </TableRow>
             <TableRow>
                 <TableCell
@@ -121,7 +195,6 @@ const Orders = () => {
                             <TableCell align="right">Number of Menus</TableCell>
                             <TableCell align="right">Table Id</TableCell>
                             <TableCell align="right">Paid</TableCell>
-                            <TableCell align="right">Status</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

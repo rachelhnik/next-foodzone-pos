@@ -1,25 +1,18 @@
 import Layout from "@/components/Layout";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
-import {
-    Box,
-    Button,
-    Dialog,
-    DialogContent,
-    Link,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Dialog, DialogContent } from "@mui/material";
 import { useContext, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import CreateAddonCategory from "../addon-categories/create";
+import TapasIcon from "@mui/icons-material/Tapas";
 import NewAddons from "./create";
+import ItemCard from "@/components/ItemCard";
 
 const Addon = () => {
     const [open, setOpen] = useState(false);
     const {
         addons,
-        addonCategories,
-        fetchData,
+
         menus,
         menuAddonCategories,
         branchesMenucategoriesMenus,
@@ -28,12 +21,10 @@ const Addon = () => {
     const validMenuIds = branchesMenucategoriesMenus
         .filter((item) => item.branch_id === selectedBranchId)
         .map((item) => item.menu_id);
-    const validMenus = menus.filter((menu) => validMenuIds.includes(menu.id));
 
     const validAddonCategoriesIds = menuAddonCategories
         .filter((item) => validMenuIds.includes(item.menu_id))
         .map((item) => item.addoncategory_id) as number[];
-    console.log(validAddonCategoriesIds);
     const validAddons = addons.filter((addon) =>
         validAddonCategoriesIds.includes(addon.addon_categories_id as number)
     );
@@ -63,31 +54,12 @@ const Addon = () => {
                 </Box>
                 <Box sx={{ display: "flex" }}>
                     {validAddons.map((addon) => (
-                        <Link
+                        <ItemCard
                             key={addon.id}
+                            icon={<TapasIcon />}
                             href={`/backoffice/addons/${addon.id}`}
-                            style={{ textDecoration: "none", color: "#000000" }}
-                        >
-                            <Box sx={{ textAlign: "center", mr: 4 }}>
-                                <Box
-                                    sx={{
-                                        width: "120px",
-                                        height: "120px",
-                                        borderRadius: 2,
-                                        border: "2px solid #EBEBEB",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    <Typography sx={{ mt: 1 }}>
-                                        {addon.name}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Link>
+                            title={addon.name}
+                        />
                     ))}
                 </Box>
             </Box>

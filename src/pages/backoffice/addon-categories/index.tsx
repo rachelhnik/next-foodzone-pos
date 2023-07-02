@@ -1,14 +1,14 @@
 import Layout from "@/components/Layout";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
-import Link from "next/link";
+import ClassIcon from "@mui/icons-material/Class";
 import { useContext, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import CreateAddonCategory from "./create";
+import ItemCard from "@/components/ItemCard";
 
 const AddonCategories = () => {
-    const { addonCategories, addons, branchesMenucategoriesMenus } =
-        useContext(BackofficeContext);
+    const { addonCategories, addons } = useContext(BackofficeContext);
 
     const [open, setOpen] = useState(false);
 
@@ -56,34 +56,15 @@ const AddonCategories = () => {
                 </Box>
                 <Box sx={{ display: "flex", flexWrap: "nowrap" }}>
                     {addonCategories.map((addoncat) => (
-                        <Link
+                        <ItemCard
                             key={addoncat.id}
+                            icon={<ClassIcon />}
                             href={`/backoffice/addon-categories/${addoncat.id}`}
-                            style={{ textDecoration: "none", color: "#000000" }}
-                        >
-                            <Box sx={{ textAlign: "center", mr: 4 }}>
-                                <Box
-                                    sx={{
-                                        width: "170px",
-                                        height: "170px",
-                                        borderRadius: 2,
-                                        border: "2px solid #EBEBEB",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    <Typography>
-                                        {getAddonsCount(addoncat.id)} addons
-                                    </Typography>
-                                </Box>
-                                <Typography sx={{ mt: 1 }}>
-                                    {addoncat.name}
-                                </Typography>
-                            </Box>
-                        </Link>
+                            title={addoncat.name}
+                            subtitle={`${String(
+                                getAddonsCount(addoncat.id)
+                            )} addons `}
+                        />
                     ))}
                 </Box>
             </Box>
