@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterSlice from "./counterSlice";
 import appSlice from "./slices/appSlice";
 import menuSlice from "./slices/menuSlice";
 import menuCategorySlice from "./slices/menuCategorySlice";

@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 interface Props {
     icon: ReactNode;
-    title: string;
+    title?: string;
     href?: string;
     subtitle?: string;
 }

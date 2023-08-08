@@ -9,8 +9,11 @@ import {
     Button,
     MenuItem,
     Select,
+    Dialog,
+    DialogContent,
 } from "@mui/material";
-
+import AddIcon from "@mui/icons-material/Add";
+import AssistantIcon from "@mui/icons-material/Assistant";
 import { useContext, useState, useEffect } from "react";
 import type {
     branches as BranchesData,
@@ -20,14 +23,25 @@ import { config } from "@/config/Config";
 import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
+import {
+    addBranch,
+    deleteBranch,
+    updateBranches,
+} from "@/store/slices/branchSlice";
+import ItemCard from "@/components/ItemCard";
+import NewAddons from "../addons/create";
+import BranchCreateDialog from "@/components/create/branchCreate";
 
 const Branches = () => {
     const { company, branches, townships } = useAppSelector(appData);
+    const [open, setOpen] = useState(false);
 
     const { data: session } = useSession();
     const router = useRouter();
+
+    const dispatch = useAppDispatch();
 
     const [branchesData, setBranchesData] = useState<BranchesData[]>(branches);
 
@@ -53,13 +67,18 @@ const Branches = () => {
         );
 
         if (oldBranch?.address !== newBranch?.address) {
-            await fetch(`${config.apiBaseUrl}/branches/${branchId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newBranch),
-            });
+            const response = await fetch(
+                `${config.apiBaseUrl}/branches/${branchId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newBranch),
+                }
+            );
+            const updatedBranch = await response.json();
+            dispatch(updateBranches(updatedBranch));
         }
     };
 
@@ -71,35 +90,89 @@ const Branches = () => {
             }
         );
         if (response.ok) {
+            const deletedBranch = await response.json();
+            dispatch(deleteBranch(deletedBranch));
+        } else {
+            alert(
+                "Cannot delete this branch. Please delete relations associated with it first."
+            );
         }
-        alert(
-            "Cannot delete this branch. Please delete relations associated with it first."
-        );
     };
 
     const createNewBranch = async () => {
         if (!selectedTownshipId || !newAddress) return;
-        const response = await fetch(
-            `${config.apiBaseUrl}/branches/create/${company?.id}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    townshipId: selectedTownshipId,
-                    address: newAddress,
-                }),
-            }
-        );
-
+        const response = await fetch(`${config.apiBaseUrl}/branches/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                townshipId: selectedTownshipId,
+                address: newAddress,
+                companyId: company?.id,
+            }),
+        });
+        const newBranch = await response.json();
+        dispatch(addBranch(newBranch));
         setSelectdTownshipId("");
         setNewAddress("");
     };
 
     return (
         <Layout>
-            <Typography variant="h6">Branches </Typography>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                    onClick={() => setOpen(true)}
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    sx={{
+                        backgroundColor: "#606C5D",
+                        width: "fit-content",
+                        color: "#E8F6EF",
+                        mb: 2,
+
+                        ":hover": {
+                            bgcolor: "#7C9070", // theme.palette.primary.main
+                            color: "white",
+                        },
+                    }}
+                >
+                    New Branch
+                </Button>
+            </Box>
+            <>
+                {branchesData.map((branch, index) => (
+                    <ItemCard
+                        key={branch.id}
+                        icon={<AssistantIcon />}
+                        href={`/backoffice/branches/${branch.id}`}
+                        title={
+                            townships.find(
+                                (township: Townships) =>
+                                    township.id === branch.township_id
+                            )?.name
+                        }
+                        subtitle={branch.address}
+                    />
+                ))}
+            </>
+            <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogContent
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        maxWidth: 280,
+                        m: "0 auto",
+                    }}
+                >
+                    <BranchCreateDialog setOpen={setOpen} />
+                </DialogContent>
+            </Dialog>
             <FormControl>
                 <RadioGroup
                     aria-labelledby="demo-radio-buttons-group-label"
@@ -191,64 +264,6 @@ const Branches = () => {
                     ))}
                 </RadioGroup>
             </FormControl>
-
-            <Typography>Add new location</Typography>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <FormControl>
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            mb: 2,
-                        }}
-                    >
-                        <Select
-                            labelId="demo-simple-select-helper-label"
-                            id="demo-simple-select-helper"
-                            value={selectedTownshipId ? selectedTownshipId : ""}
-                            label="township"
-                            sx={{ width: 100 }}
-                            size="small"
-                            onChange={(evt) =>
-                                setSelectdTownshipId(String(evt.target.value))
-                            }
-                        >
-                            {townships.map((township) => (
-                                <MenuItem key={township.id} value={township.id}>
-                                    {township.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-
-                        <TextField
-                            id="outlined-size-small"
-                            value={newAddress}
-                            placeholder="enter address"
-                            size="small"
-                            onChange={(evt) => setNewAddress(evt.target.value)}
-                        />
-                    </Box>
-                </FormControl>
-
-                <Button
-                    variant="contained"
-                    color="success"
-                    onClick={createNewBranch}
-                    sx={{
-                        backgroundColor: "#606C5D",
-
-                        color: "#E8F6EF",
-                        mb: 2,
-
-                        ":hover": {
-                            bgcolor: "#7C9070", // theme.palette.primary.main
-                            color: "white",
-                        },
-                    }}
-                >
-                    create
-                </Button>
-            </Box>
         </Layout>
     );
 };
