@@ -15,18 +15,18 @@ export default async function handler(
             },
         });
         const assetUrl = menu?.asset_url;
-        if (!asset_url)
-            await prisma.menus.update({
-                where: {
-                    id: menuId,
-                },
-                data: {
-                    name: name,
-                    price: price,
-                    asset_url: asset_url === "" ? assetUrl : asset_url,
-                    description: description,
-                },
-            });
+
+        const menuUpdated = await prisma.menus.update({
+            where: {
+                id: menuId,
+            },
+            data: {
+                name: name,
+                price: price,
+                asset_url: asset_url === "" ? assetUrl : asset_url,
+                description: description,
+            },
+        });
 
         const addonCategoryIds = addonCategories.map(
             (addoncat: any) => addoncat.id
@@ -64,16 +64,15 @@ export default async function handler(
                 });
             });
         }
-        res.send(200);
+        res.status(200).send(menuUpdated);
     } else if (req.method === "DELETE") {
-        console.log(req.query);
         const menuId = parseInt(req.query.menuId as string, 10);
-        await prisma.menus.update({
+        const deletedMenu = await prisma.menus.update({
             data: {
                 is_archived: true,
             },
             where: { id: menuId },
         });
-        return res.send(200);
+        return res.status(200).send(deletedMenu);
     }
 }

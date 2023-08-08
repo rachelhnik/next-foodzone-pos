@@ -20,10 +20,11 @@ import { config } from "@/config/Config";
 import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const Branches = () => {
-    const { company, fetchData, branches, townships } =
-        useContext(BackofficeContext);
+    const { company, branches, townships } = useAppSelector(appData);
 
     const { data: session } = useSession();
     const router = useRouter();
@@ -52,26 +53,24 @@ const Branches = () => {
         );
 
         if (oldBranch?.address !== newBranch?.address) {
-            await fetch(`${config.backofficeApiBaseUrl}/branches/${branchId}`, {
+            await fetch(`${config.apiBaseUrl}/branches/${branchId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(newBranch),
             });
-            fetchData();
         }
     };
 
     const deleteLocation = async (branch: BranchesData) => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/branches/${branch.id}`,
+            `${config.apiBaseUrl}/branches/${branch.id}`,
             {
                 method: "DELETE",
             }
         );
         if (response.ok) {
-            return fetchData();
         }
         alert(
             "Cannot delete this branch. Please delete relations associated with it first."
@@ -81,7 +80,7 @@ const Branches = () => {
     const createNewBranch = async () => {
         if (!selectedTownshipId || !newAddress) return;
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/branches/create/${company?.id}`,
+            `${config.apiBaseUrl}/branches/create/${company?.id}`,
             {
                 method: "POST",
                 headers: {
@@ -93,7 +92,7 @@ const Branches = () => {
                 }),
             }
         );
-        fetchData();
+
         setSelectdTownshipId("");
         setNewAddress("");
     };

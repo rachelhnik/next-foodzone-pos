@@ -18,15 +18,22 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import DeleteDialog from "@/components/DeleteDialog";
+import { useSelector } from "react-redux";
+import { appData } from "@/store/slices/appSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { removeMenu, updateMenus } from "@/store/slices/menuSlice";
+import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
+import { getselectedLocationId } from "@/utils";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CenteredTabs() {
-    const { menus, addonCategories, menuAddonCategories, fetchData } =
-        useContext(BackofficeContext);
+    const { menus, addonCategories, menuAddonCategories } =
+        useSelector(appData);
     const router = useRouter();
     const menuId = parseInt(router.query.id as string, 10);
+    const branchId = getselectedLocationId() as string;
     let menu: MenusData | undefined;
     menu = menus.find((menu) => menu.id === menuId);
 
@@ -34,6 +41,7 @@ export default function CenteredTabs() {
     const onFileSelected = (files: File[]) => {
         setMenuImage(files[0]);
     };
+    const dispatch = useAppDispatch();
 
     const selectedAddonCategoriesIds = menuAddonCategories
         .filter((item) => item.menu_id === menuId)
@@ -60,17 +68,14 @@ export default function CenteredTabs() {
                 const formData = new FormData();
 
                 formData.append("files", menuImage as Blob);
-                const response = await fetch(
-                    `${config.backofficeApiBaseUrl}/assets`,
-                    {
-                        method: "POST",
-                        body: formData,
-                    }
-                );
+                const response = await fetch(`${config.apiBaseUrl}/assets`, {
+                    method: "POST",
+                    body: formData,
+                });
                 const responseJSON = await response.json();
                 updatedMenu.asset_url = responseJSON.assetUrl;
                 const responseUpdateMenu = await fetch(
-                    `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
+                    `${config.apiBaseUrl}/menus/${menu?.id}`,
                     {
                         method: "PUT",
                         headers: {
@@ -79,11 +84,11 @@ export default function CenteredTabs() {
                         body: JSON.stringify(updatedMenu),
                     }
                 );
-                fetchData();
+
                 router.push("/backoffice/menus");
             }
             const responseUpdateMenu = await fetch(
-                `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
+                `${config.apiBaseUrl}/menus/${menu?.id}`,
                 {
                     method: "PUT",
                     headers: {
@@ -92,7 +97,9 @@ export default function CenteredTabs() {
                     body: JSON.stringify(updatedMenu),
                 }
             );
-            fetchData();
+            const updateMenuData = await responseUpdateMenu.json();
+            dispatch(updateMenus(updateMenuData));
+            dispatch(fetchBranchesMenucategoriesMenus(branchId));
             router.push("/backoffice/menus");
         } catch (error) {
             return null;
@@ -100,13 +107,12 @@ export default function CenteredTabs() {
     };
 
     const handleRemoveMenu = async () => {
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menus/${menu?.id}`,
-            {
-                method: "DELETE",
-            }
-        );
-        fetchData();
+        const response = await fetch(`${config.apiBaseUrl}/menus/${menu?.id}`, {
+            method: "DELETE",
+        });
+        const deletedMenu = await response.json();
+        dispatch(removeMenu(deletedMenu));
+        dispatch(fetchBranchesMenucategoriesMenus(branchId));
         router.push("/backoffice/menus");
     };
 

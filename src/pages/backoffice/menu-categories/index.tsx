@@ -18,17 +18,16 @@ import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import NewMenuCategory from "./create";
 import ItemCard from "@/components/ItemCard";
+import { useSelector } from "react-redux";
+import { appData } from "@/store/slices/appSlice";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);
 
     const currentBranchId = parseInt(getselectedLocationId() as string, 10);
 
-    const {
-        menuCategories,
-
-        branchesMenucategoriesMenus,
-    } = useContext(BackofficeContext);
+    const { menuCategories, branchesMenucategoriesMenus } =
+        useSelector(appData);
 
     const { data: session } = useSession();
 

@@ -56,7 +56,7 @@ export default async function handler(
             }
         });
 
-        res.send(200);
+        res.status(200).send(newMenu);
     }
 
     res.send(200);

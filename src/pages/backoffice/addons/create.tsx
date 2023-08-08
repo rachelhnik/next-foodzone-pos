@@ -6,10 +6,12 @@ import { BackofficeContext } from "../../../contexts/BackofficeContext";
 
 import { config } from "../../../config/Config";
 import { useRouter } from "next/router";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 export default function NewAddons() {
-    const { fetchData, addons, menus, addonCategories, branches } =
-        useContext(BackofficeContext);
+    const { addons, menus, addonCategories, branches } =
+        useAppSelector(appData);
     const [selectedAddonCategoryId, setSelectedAddonCategoryId] =
         useState<number>();
     const [newAddon, setNewAddon] = useState({
@@ -17,12 +19,11 @@ export default function NewAddons() {
         price: 0,
         addoncategoryId: selectedAddonCategoryId,
     });
-    console.log(newAddon);
 
     const isDisabled = !newAddon.name || !selectedAddonCategoryId;
 
     const createAddon = async () => {
-        const response = await fetch(`${config.backofficeApiBaseUrl}/addons`, {
+        const response = await fetch(`${config.apiBaseUrl}/addons`, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -30,19 +31,13 @@ export default function NewAddons() {
             },
             body: JSON.stringify(newAddon),
         });
-
-        fetchData();
     };
 
     const deleteAddon = async (addonId: number | undefined) => {
         if (addonId === undefined) return;
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addons/${addonId}`,
-            {
-                method: "DELETE",
-            }
-        );
-        fetchData();
+        const response = await fetch(`${config.apiBaseUrl}/addons/${addonId}`, {
+            method: "DELETE",
+        });
     };
     return (
         <Box>

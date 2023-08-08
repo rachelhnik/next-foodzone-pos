@@ -19,6 +19,14 @@ import { config } from "@/config/Config";
 import { addon_categories, addons, menus } from "@prisma/client";
 import { getselectedLocationId } from "@/utils";
 import DeleteDialog from "@/components/DeleteDialog";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+import { useDispatch } from "react-redux";
+import {
+    deleteAddonCategory,
+    updateAddonCategories,
+} from "@/store/slices/addonCategorySlice";
+import { fetchMenuAddoncategories } from "@/store/slices/menuAddoncategorySlice";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -29,9 +37,9 @@ const AddonCategoryDetail = () => {
         menuAddonCategories,
         branchesMenucategoriesMenus,
         menus,
-        fetchData,
-    } = useContext(BackofficeContext);
+    } = useAppSelector(appData);
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const addonCategoryId = parseInt(router.query.id as string, 10);
     const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
     const currentAddonCategory = addonCategories.find(
@@ -42,6 +50,9 @@ const AddonCategoryDetail = () => {
     );
     const [newSelectedAddons, setNewSelectedAddons] =
         useState<addons[]>(selectedAddons);
+    const menuIds = menuAddonCategories
+        .filter((data) => data.addoncategory_id === addonCategoryId)
+        .map((data) => data.menu_id);
 
     const [open, setOpen] = useState(false);
 
@@ -56,7 +67,7 @@ const AddonCategoryDetail = () => {
 
     const updateAddonCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
+            `${config.apiBaseUrl}/addon-categories/${addonCategoryId}`,
             {
                 method: "PUT",
                 headers: {
@@ -65,17 +76,20 @@ const AddonCategoryDetail = () => {
                 body: JSON.stringify(newAddonCategory),
             }
         );
-        fetchData();
+        const updatedAddonCategory = await response.json();
+        dispatch(updateAddonCategories(updatedAddonCategory));
     };
 
     const handleRemoveAddonCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addon-categories/${addonCategoryId}`,
+            `${config.apiBaseUrl}/addon-categories/${addonCategoryId}`,
             {
                 method: "DELETE",
             }
         );
-        fetchData();
+        const deletedAddoncategory = await response.json();
+        dispatch(deleteAddonCategory(deletedAddoncategory));
+        dispatch(fetchMenuAddoncategories(menuIds));
         router.push("/backoffice/addon-categories");
     };
     return (

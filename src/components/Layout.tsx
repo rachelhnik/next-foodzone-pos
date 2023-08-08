@@ -5,6 +5,7 @@ import { Box } from "@mui/material";
 
 import { Sidebar } from "./Sidebar";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
+import { useAppSelector } from "@/store/hooks";
 
 interface Props {
     title?: string;
@@ -12,8 +13,7 @@ interface Props {
 }
 
 export default function Layout(props: Props) {
-    const { isLoading } = useContext(BackofficeContext);
-
+    const { isLoading } = useAppSelector((state) => state.app);
     if (isLoading) return null;
     return (
         <Box>

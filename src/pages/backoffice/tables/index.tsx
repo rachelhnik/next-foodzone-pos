@@ -14,9 +14,11 @@ import { config } from "@/config/Config";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
 import ItemCard from "@/components/ItemCard";
 import TableBarIcon from "@mui/icons-material/TableBar";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const Tables = () => {
-    const { fetchData, tables } = useContext(BackofficeContext);
+    const { tables } = useAppSelector(appData);
     const [open, setOpen] = useState(false);
     const selectedBranchId = getselectedLocationId();
     const [newTable, setNewTable] = useState({
@@ -27,19 +29,18 @@ const Tables = () => {
     const tablesForCurrentBranch = tables.filter(
         (table) => table.branch_id === Number(selectedBranchId)
     );
-    console.log(tablesForCurrentBranch);
 
     const createNewTable = async () => {
         const isValid = newTable.name;
         if (!isValid) return alert("Please enter table name");
-        await fetch(`${config.backofficeApiBaseUrl}/tables`, {
+        await fetch(`${config.apiBaseUrl}/tables`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(newTable),
         });
-        fetchData();
+
         setOpen(false);
     };
     return (

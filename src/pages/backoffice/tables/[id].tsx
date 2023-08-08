@@ -10,34 +10,32 @@ import { useContext, useState } from "react";
 import { tables } from "@prisma/client";
 import DeleteDialog from "@/components/DeleteDialog";
 import { table } from "console";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const TableDetail = () => {
     const router = useRouter();
     const tableId = router.query.id as string;
     const [open, setOpen] = useState(false);
     const selectedLocationId = getselectedLocationId() as string;
-    const { tables, fetchData } = useContext(BackofficeContext);
+    const { tables } = useAppSelector(appData);
     const currentTable = tables.find((table) => table.id === Number(tableId));
     const [tableName, setTableName] = useState(currentTable?.name);
     const [tableToRemove, setTableToRemove] = useState<tables>();
     const updateTable = async () => {
-        await fetch(`${config.backofficeApiBaseUrl}/tables`, {
+        await fetch(`${config.apiBaseUrl}/tables`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ tableId, name: tableName }),
         });
-        fetchData();
     };
     const handleRemoveTable = async () => {
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/tables/${tableId}`,
-            {
-                method: "DELETE",
-            }
-        );
-        fetchData();
+        const response = await fetch(`${config.apiBaseUrl}/tables/${tableId}`, {
+            method: "DELETE",
+        });
+
         router.push("/backoffice/tables");
     };
     return (

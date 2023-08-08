@@ -68,7 +68,7 @@ const OrderAppContextProvider = (props: any) => {
     const fetchData = async () => {
         if (!branchId) return;
         const response = await fetch(
-            `${config.orderAppApiBaseUrl}?branchId=${branchId}`
+            `${config.apiBaseUrl}/order?branchId=${branchId}`
         );
 
         const data = await response.json();

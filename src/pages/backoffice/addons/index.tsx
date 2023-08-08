@@ -1,12 +1,13 @@
 import Layout from "@/components/Layout";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
 import { Box, Button, Dialog, DialogContent } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import TapasIcon from "@mui/icons-material/Tapas";
 import NewAddons from "./create";
 import ItemCard from "@/components/ItemCard";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const Addon = () => {
     const [open, setOpen] = useState(false);
@@ -16,7 +17,7 @@ const Addon = () => {
         menus,
         menuAddonCategories,
         branchesMenucategoriesMenus,
-    } = useContext(BackofficeContext);
+    } = useAppSelector(appData);
     const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
     const validMenuIds = branchesMenucategoriesMenus
         .filter((item) => item.branch_id === selectedBranchId)

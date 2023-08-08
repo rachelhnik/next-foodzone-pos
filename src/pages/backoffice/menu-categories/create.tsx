@@ -1,5 +1,6 @@
 import { config } from "@/config/Config";
 import { BackofficeContext } from "@/contexts/BackofficeContext";
+import { appData } from "@/store/slices/appSlice";
 import { getselectedLocationId } from "@/utils";
 import {
     Box,
@@ -19,6 +20,7 @@ import {
 } from "@prisma/client";
 
 import { useContext, useState } from "react";
+import { useSelector } from "react-redux";
 
 const NewMenuCategory = () => {
     const [open, setOpen] = useState(false);
@@ -30,26 +32,21 @@ const NewMenuCategory = () => {
 
     const isDisabled = !menuCategory.name || !selectedBranchIds;
 
-    const { fetchData, menus, branches, townships } =
-        useContext(BackofficeContext);
+    const { menus, branches, townships } = useSelector(appData);
     const addNewMenucategory = async () => {
         if (!menuCategory?.name || !selectedBranchIds?.length) return;
 
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    menuCategory: menuCategory,
-                    selectedBranchIds: selectedBranchIds,
-                }),
-            }
-        );
+        const response = await fetch(`${config.apiBaseUrl}/menu-categories`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                menuCategory: menuCategory,
+                selectedBranchIds: selectedBranchIds,
+            }),
+        });
 
-        fetchData();
         setMenuCategory({ ...menuCategory, name: "" });
         setSelectedBranchIds([]);
         setOpen(false);

@@ -2,18 +2,19 @@ import Layout from "@/components/Layout";
 import { Box, TextField, Button } from "@mui/material";
 import { useRouter } from "next/router";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useContext, useState } from "react";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
+import { useState } from "react";
 import { getselectedLocationId } from "@/utils";
 import { config } from "@/config/Config";
 import { addons } from "@prisma/client";
 import DeleteDialog from "@/components/DeleteDialog";
+import { useSelector } from "react-redux";
+import { appData } from "@/store/slices/appSlice";
 
 const AddonDetail = () => {
     const router = useRouter();
     const currentAddonId = parseInt(router.query.id as string, 10);
     const selectedLocationId = getselectedLocationId() as string;
-    const { addons, fetchData } = useContext(BackofficeContext);
+    const { addons } = useSelector(appData);
     const currentAddon = addons.find(
         (addon) => addon.id === Number(currentAddonId)
     );
@@ -25,7 +26,7 @@ const AddonDetail = () => {
 
     const updateAddon = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addons/${currentAddonId}`,
+            `${config.apiBaseUrl}/addons/${currentAddonId}`,
             {
                 method: "PUT",
                 headers: {
@@ -34,16 +35,14 @@ const AddonDetail = () => {
                 body: JSON.stringify(newAddon),
             }
         );
-        fetchData();
         router.push("/backoffice/addons");
     };
 
     const handleRemoveAddon = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addons/${currentAddonId}`,
+            `${config.apiBaseUrl}/addons/${currentAddonId}`,
             { method: "DELETE" }
         );
-        fetchData();
         router.push("/backoffice/addons");
     };
 

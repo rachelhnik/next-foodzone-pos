@@ -40,7 +40,7 @@ const Cart = () => {
         const { branchId, tableId } = query;
         if (!branchId || !tableId || !cart.length) alert("Please order menus");
         const response = await fetch(
-            `${config.orderAppApiBaseUrl}/confirm?branchId=${branchId}&tableId=${tableId}`,
+            `${config.apiBaseUrl}/confirm?branchId=${branchId}&tableId=${tableId}`,
             {
                 method: "POST",
                 headers: { "content-type": "application/json" },

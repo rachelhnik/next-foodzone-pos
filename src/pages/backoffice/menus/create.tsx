@@ -9,28 +9,36 @@ import {
     Select,
     SelectChangeEvent,
     TextField,
+    getSelectUtilityClasses,
 } from "@mui/material";
 import Layout from "../../../components/Layout";
 import { useState } from "react";
 import { menus as MenusData } from "@prisma/client";
 import { config } from "../../../config/Config";
 import FileDropZone from "../../../components/FileDropZone";
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
-import { useContext } from "react";
+
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+import { useDispatch } from "react-redux";
+import { addMenu } from "@/store/slices/menuSlice";
+import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const CreateMenu = () => {
     const [menuImage, setMenuImage] = useState<File>();
     const router = useRouter();
-    const currentBranchId = getselectedLocationId();
+    const currentBranchId = getselectedLocationId() as string;
+    const branchId = getselectedLocationId() as string;
+    const dispatch = useDispatch();
 
-    const { fetchData, menuCategories, branchesMenucategoriesMenus } =
-        useContext(BackofficeContext);
+    const { menuCategories, branchesMenucategoriesMenus } =
+        useAppSelector(appData);
 
     const validMenuCategoryIds = branchesMenucategoriesMenus
         .filter(
@@ -68,47 +76,33 @@ const CreateMenu = () => {
                 const formData = new FormData();
 
                 formData.append("files", menuImage as Blob);
-                const response = await fetch(
-                    `${config.backofficeApiBaseUrl}/assets`,
-                    {
-                        method: "POST",
+                const response = await fetch(`${config.apiBaseUrl}/assets`, {
+                    method: "POST",
 
-                        body: formData,
-                    }
-                );
+                    body: formData,
+                });
                 const responseJSON = await response.json();
                 const assetUrl = responseJSON.assetUrl;
 
                 menu.asset_url = assetUrl;
-                const menuResponse = await fetch(
-                    `${config.backofficeApiBaseUrl}/menus`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            menu: menu,
-                            currentBranchId: currentBranchId,
-                        }),
-                    }
-                );
-                fetchData();
+                const menuResponse = await fetch(`${config.apiBaseUrl}/menus`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        menu: menu,
+                        currentBranchId: currentBranchId,
+                    }),
+                });
+                const newMenu = await menuResponse.json();
+                dispatch(addMenu(newMenu));
+                dispatch(fetchBranchesMenucategoriesMenus(branchId));
                 if (menuResponse.ok) router.push("/backoffice/menus");
             }
         } catch (error) {
             return null;
         }
-    };
-
-    const deleteMenu = async (menuId?: number) => {
-        if (!menuId) return;
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menus/${menuId}`,
-            {
-                method: "DELETE",
-            }
-        );
     };
 
     return (
@@ -181,8 +175,7 @@ const CreateMenu = () => {
                             return selectedMenuCategories
                                 .map(
                                     (selectedMenuCategory) =>
-                                        selectedMenuCategory &&
-                                        selectedMenuCategory.name
+                                        selectedMenuCategory?.id
                                 )
                                 .join(", ");
                         }}
@@ -202,7 +195,7 @@ const CreateMenu = () => {
                                             : false
                                     }
                                 />
-                                <ListItemText primary={menuCategory.name} />
+                                {/* <ListItemText primary={menuCategory.name} /> */}
                             </MenuItem>
                         ))}
                     </Select>

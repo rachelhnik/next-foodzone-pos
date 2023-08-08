@@ -17,6 +17,10 @@ import { config } from "../../../config/Config";
 import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
 import { useRouter } from "next/router";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+import { addAddonCategory } from "@/store/slices/addonCategorySlice";
+import { fetchMenuAddoncategories } from "@/store/slices/menuAddoncategorySlice";
 
 export default function CreateAddonCategory() {
     const [addonCategory, setAddonCategory] = useState<AddonCategory>({
@@ -24,33 +28,32 @@ export default function CreateAddonCategory() {
         is_required: false,
     } as AddonCategory);
     const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
-
-    console.log(addonCategory, selectedMenuIds);
+    const dispatch = useAppDispatch();
 
     const isDisabled = !addonCategory.name || !selectedMenuIds.length;
     const router = useRouter();
     const currentBranchId = getselectedLocationId();
 
-    const { fetchData, addonCategories, menus, addons } =
-        useContext(BackofficeContext);
+    const { addonCategories, menus, addons, menuAddonCategories } =
+        useAppSelector(appData);
 
     const createAddonCategory = async () => {
         if (!addonCategory?.name) return;
 
-        const response = await fetch(
-            `${config.backofficeApiBaseUrl}/addon-categories`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    addonCategory: addonCategory,
-                    selectedMenuIds: selectedMenuIds,
-                }),
-            }
-        );
-        fetchData();
+        const response = await fetch(`${config.apiBaseUrl}/addon-categories`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                addonCategory: addonCategory,
+                selectedMenuIds: selectedMenuIds,
+            }),
+        });
+
+        const newAddonCategory = await response.json();
+        dispatch(addAddonCategory(newAddonCategory));
+        dispatch(fetchMenuAddoncategories(selectedMenuIds));
     };
 
     return (

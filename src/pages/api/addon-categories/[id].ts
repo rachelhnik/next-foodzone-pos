@@ -10,7 +10,7 @@ export default async function handler(
     if (req.method === "PUT") {
         const addonCategoryId = parseInt(req.query.id as string, 10);
         const { name, is_required, selectedAddons } = req.body;
-        await prisma.addon_categories.update({
+        const updatedAddoncategory = await prisma.addon_categories.update({
             data: {
                 name: name,
                 is_required: is_required,
@@ -33,23 +33,15 @@ export default async function handler(
         const removedAddonsIds = currentAddonsIds.filter(
             (removedId) => !selectedAddonsIds.includes(removedId)
         );
-
-        // if (removedAddonsIds) {
-        //     removedAddonsIds.forEach(async (removedId) => {
-        //         await prisma.addons.delete({
-        //             where: { id: removedId },
-        //         });
-        //     });
-        // }
-        res.send(200);
+        res.status(200).send(updatedAddoncategory);
     } else if (req.method === "DELETE") {
         const addonCategoryId = parseInt(req.query.id as string, 10);
-        await prisma.addon_categories.update({
+        const deletedAddoncategory = await prisma.addon_categories.update({
             data: {
                 is_archived: true,
             },
             where: { id: addonCategoryId },
         });
-        res.send(200);
+        res.status(200).send(deletedAddoncategory);
     }
 }

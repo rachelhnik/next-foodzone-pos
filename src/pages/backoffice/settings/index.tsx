@@ -25,11 +25,12 @@ import { config } from "../../../config/Config";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import { useSession } from "next-auth/react";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 export default function Settings() {
-    const { company, branches, townships, fetchData } =
-        useContext(BackofficeContext);
+    const { company, branches, townships } = useAppSelector(appData);
     const router = useRouter();
     const { data: session } = useSession();
     const currentBranchId = getselectedLocationId();
@@ -79,7 +80,7 @@ export default function Settings() {
     const updateCompany = async () => {
         if (companyName.name === company?.name) alert("please update new name");
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/settings/companies/${company?.id}`,
+            `${config.apiBaseUrl}/settings/companies/${company?.id}`,
             {
                 method: "PUT",
                 headers: {
@@ -90,7 +91,6 @@ export default function Settings() {
         );
         const newCompany = await response.json();
 
-        fetchData();
         setCompanyName(newCompany.name);
     };
 

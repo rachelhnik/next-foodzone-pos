@@ -7,14 +7,14 @@ import AddIcon from "@mui/icons-material/Add";
 import { getselectedLocationId } from "@/utils";
 import CreateMenu from "./create";
 import ItemCard from "@/components/ItemCard";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const Menus = () => {
     const [open, setOpen] = useState(false);
     const branchId = getselectedLocationId();
 
-    const { fetchData, menus, branchesMenucategoriesMenus } =
-        useContext(BackofficeContext);
-
+    const { menus, branchesMenucategoriesMenus } = useAppSelector(appData);
     const validMenusIds = branchesMenucategoriesMenus
         .filter((data) => String(data.branch_id) === branchId)
         .map((data) => data.menu_id);

@@ -6,9 +6,11 @@ import { useContext, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import CreateAddonCategory from "./create";
 import ItemCard from "@/components/ItemCard";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 const AddonCategories = () => {
-    const { addonCategories, addons } = useContext(BackofficeContext);
+    const { addonCategories, addons } = useAppSelector(appData);
 
     const [open, setOpen] = useState(false);
 

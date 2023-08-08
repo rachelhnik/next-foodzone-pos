@@ -7,23 +7,23 @@ export default async function handler(
 ) {
     if (req.method === "DELETE") {
         const menuCatId = parseInt(req.query.id as string, 10);
-        await prisma.menu_categories.update({
+        const deletedMenuCategory = await prisma.menu_categories.update({
             data: {
                 is_archived: true,
             },
             where: { id: menuCatId },
         });
-        res.send(200);
+        console.log(deletedMenuCategory);
+        return res.status(200).send(deletedMenuCategory);
     }
 
     if (req.method === "PUT") {
         const { newMenuCategory, menuCategoryId } = req.body;
-
         const { name, branches } = newMenuCategory;
 
         const branchIds = branches.map((branch: any) => branch.id) as number[];
 
-        await prisma.menu_categories.update({
+        const updatedMenuCategory = await prisma.menu_categories.update({
             data: { name: name },
             where: { id: menuCategoryId },
         });
@@ -53,7 +53,7 @@ export default async function handler(
                 data: { branch_id: null },
                 where: { menucategory_id: menuCategoryId },
             });
-            return res.send(200);
+            return res.status(200).send(updatedMenuCategory);
         }
 
         // finding branches asscociated with current menucategory
@@ -101,7 +101,7 @@ export default async function handler(
                     });
                 }
             });
-            res.send(200);
+            res.status(200).send(updatedMenuCategory);
         }
 
         if (removedBranchIds.length) {
@@ -124,8 +124,8 @@ export default async function handler(
                     });
                 }
             });
-            res.send(200);
+            res.status(200).send(updatedMenuCategory);
         }
+        res.status(200).send(updatedMenuCategory);
     }
-    res.send(200);
 }

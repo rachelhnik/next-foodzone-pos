@@ -1,8 +1,8 @@
 interface Config {
     baseUrl: string;
-    backofficeApiBaseUrl: string;
+    apiBaseUrl: string;
     orderAppUrl: string;
-    orderAppApiBaseUrl: string;
+
     jwtSecret: string;
     spaceAccessKeyId: string;
     spaceSecretAccessKey: string;
@@ -17,9 +17,9 @@ interface Config {
 
 export const config: Config = {
     baseUrl: process.env.NEXTAUTH_URL || "",
-    backofficeApiBaseUrl: process.env.NEXT_PUBLIC_BACKOFFICE_API_BASE_URL || "",
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "",
     orderAppUrl: process.env.NEXT_PUBLIC_ORDERAPP_URL || "",
-    orderAppApiBaseUrl: process.env.NEXT_PUBLIC_ORDERAPP_API_BASE_URL || "",
+
     jwtSecret: process.env.JWT_SECRET || "",
     spaceAccessKeyId: process.env.SPACE_ACCESS_KEY_ID || "",
     spaceSecretAccessKey: process.env.SPACE_SECRET_ACCESS_KEY || "",

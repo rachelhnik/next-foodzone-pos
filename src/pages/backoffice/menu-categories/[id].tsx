@@ -9,7 +9,11 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { menus as Menu, branches, menu_categories } from "@prisma/client";
+import {
+    menus as Menu,
+    branches,
+    menu_categories as MenuCategory,
+} from "@prisma/client";
 import { useRouter } from "next/router";
 import { use, useContext, useState } from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -23,6 +27,11 @@ import MenuCard from "@/components/MenuCard";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveMenuFromMenuCategory from "./RemoveMenuFromCategory";
 import DeleteDialog from "@/components/DeleteDialog";
+import { appData } from "@/store/slices/appSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
+import { updateMenuCategories } from "@/store/slices/menuCategorySlice";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -38,22 +47,26 @@ const MenucategoryDetail = () => {
         branches,
         branchesMenucategoriesMenus,
         menuCategories,
-        fetchData,
+
         menus,
-    } = useContext(BackofficeContext);
+    } = useSelector(appData);
+
     const [open, setOpen] = useState(false);
     const [openMenucat, setOpenMenucat] = useState(false);
     const [selectedMenuToRemove, setSelectedMenuToRemove] = useState<Menu>();
-
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
+    const dispatch = useAppDispatch();
     const menuCategoryId = parseInt(router.query.id as string, 10);
 
     const menuCategory = menuCategories.find(
         (data) => data.id === menuCategoryId
     );
+
     const validMenus = getMenusByMenucategoryId(
         menuCategoryId,
         branchesMenucategoriesMenus,
-        menus
+        menus,
+        selectedBranchId
     );
 
     const menuIds = validMenus.map((item) => item.id);
@@ -63,15 +76,13 @@ const MenucategoryDetail = () => {
         menuCategoryId,
         branches
     );
-
-    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
-
+    //
     const [newMenuCategory, setNewMenuCategory] = useState({
         name: menuCategory?.name,
         branches: selectedBranches,
     });
     const [menuCategoryToRemove, setMenucategoryToRemove] =
-        useState<menu_categories>();
+        useState<MenuCategory>();
 
     const [selectedMenu, setSelectedMenu] = useState<AutocompleteProps | null>(
         null
@@ -80,7 +91,7 @@ const MenucategoryDetail = () => {
 
     const updateMenuCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/${menuCategoryId}`,
+            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}`,
             {
                 method: "PUT",
                 headers: { "content-type": "application/json" },
@@ -90,11 +101,14 @@ const MenucategoryDetail = () => {
                 }),
             }
         );
+        const updatedMenucategory = await response.json();
+        dispatch(updateMenuCategories(updatedMenucategory));
+        dispatch(fetchBranchesMenucategoriesMenus(String(selectedBranchId)));
+
         if (response.ok) router.push("/backoffice/menu-categories");
-        fetchData();
     };
     const addMenuToMenuCategory = async () => {
-        await fetch(`${config.backofficeApiBaseUrl}/menu-categories/addMenu`, {
+        await fetch(`${config.apiBaseUrl}/menu-categories/addMenu`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -105,13 +119,13 @@ const MenucategoryDetail = () => {
                 branchId: selectedBranchId,
             }),
         });
-        fetchData();
+
         setSelectedMenu(null);
     };
 
     const handleRemoveMenu = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/deleteMenu`,
+            `${config.apiBaseUrl}/menu-categories/deleteMenu`,
             {
                 method: "PUT",
                 headers: { "content-type": "application/json" },
@@ -122,19 +136,20 @@ const MenucategoryDetail = () => {
                 }),
             }
         );
-
-        fetchData();
+        const deletedMenuCategory = await response.json();
+        dispatch(deletedMenuCategory(deletedMenuCategory));
+        dispatch(fetchBranchesMenucategoriesMenus(String(selectedBranchId)));
         setOpen(false);
     };
 
     const handleRemoveMenuCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/${menuCategoryId}`,
+            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}`,
             {
                 method: "DELETE",
             }
         );
-        fetchData();
+
         router.push("/backoffice/menu-categories");
     };
 
@@ -310,7 +325,7 @@ const MenucategoryDetail = () => {
                                     alignItems: "center",
                                 }}
                             >
-                                <MenuCard menu={item} />
+                                <MenuCard menu={item} href={""} />
                                 <Button
                                     variant="outlined"
                                     color="inherit"
