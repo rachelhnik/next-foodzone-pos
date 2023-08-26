@@ -1,32 +1,34 @@
-import { config } from "@/config/Config";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
-import { appData } from "@/store/slices/appSlice";
-import { getselectedLocationId } from "@/utils";
-import {
-    Box,
-    Typography,
-    TextField,
-    Select,
-    MenuItem,
-    Button,
-    Checkbox,
-    FormControl,
-    InputLabel,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextFieldComponent from "../textfields/TextFieldComponent";
+import { useState } from "react";
 import {
     branches,
     townships,
     menu_categories as MenuCategory,
 } from "@prisma/client";
-
-import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
+import { appData } from "@/store/slices/appSlice";
+import { config } from "@/config/Config";
+import CreateButton from "../buttons/CreateButton";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import { useAppDispatch } from "@/store/hooks";
+import { addMenuCategory } from "@/store/slices/menuCategorySlice";
+import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
+import { getselectedLocationId } from "@/utils";
 
-const NewMenuCategory = () => {
-    const [open, setOpen] = useState(false);
+interface Props {
+    setOpen: (data: boolean) => void;
+}
+
+const MenuCategoryCreateDialog = ({ setOpen }: Props) => {
+    const dispatch = useAppDispatch();
+
     const [menuCategory, setMenuCategory] = useState({
         name: "",
     } as MenuCategory);
+    const branchId = getselectedLocationId();
 
     const [selectedBranchIds, setSelectedBranchIds] = useState<number[]>();
 
@@ -34,6 +36,7 @@ const NewMenuCategory = () => {
 
     const { menus, branches, townships } = useSelector(appData);
     const addNewMenucategory = async () => {
+        console.log("ehol");
         if (!menuCategory?.name || !selectedBranchIds?.length) return;
 
         const response = await fetch(`${config.apiBaseUrl}/menu-categories`, {
@@ -46,20 +49,28 @@ const NewMenuCategory = () => {
                 selectedBranchIds: selectedBranchIds,
             }),
         });
-
-        setMenuCategory({ ...menuCategory, name: "" });
-        setSelectedBranchIds([]);
-        setOpen(false);
+        if (response.ok) {
+            const newMenuCategory = await response.json();
+            console.log(newMenuCategory);
+            dispatch(addMenuCategory(newMenuCategory));
+            dispatch(fetchBranchesMenucategoriesMenus(branchId));
+            setOpen(false);
+        }
     };
     return (
-        <Box>
-            <h1 style={{ textAlign: "center" }}>Create a new menu category</h1>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                maxWidth: 300,
+                m: "0 auto",
+            }}
+        >
+            <h2 style={{ textAlign: "center" }}>Create a new menu category</h2>
             <Typography>enter new menucategory name</Typography>
-            <TextField
-                variant="outlined"
-                fullWidth
-                sx={{ mb: 2 }}
-                onChange={(e) =>
+            <TextFieldComponent
+                label=""
+                handleOnChange={(e) =>
                     setMenuCategory({
                         ...menuCategory,
                         name: e.target.value,
@@ -70,7 +81,7 @@ const NewMenuCategory = () => {
             <Select
                 value={selectedBranchIds ? selectedBranchIds : []}
                 fullWidth
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, maxWidth: 300 }}
                 multiple
                 onChange={(evt: any) => {
                     const values = evt.target.value as number[];
@@ -87,28 +98,12 @@ const NewMenuCategory = () => {
                     </MenuItem>
                 ))}
             </Select>
-
-            <Button
-                variant="contained"
-                onClick={addNewMenucategory}
-                fullWidth
-                disabled={isDisabled ? true : false}
-                sx={{
-                    backgroundColor: "#606C5D",
-
-                    color: "#E8F6EF",
-                    mb: 2,
-
-                    ":hover": {
-                        bgcolor: "#7C9070", // theme.palette.primary.main
-                        color: "white",
-                    },
-                }}
-            >
-                Create
-            </Button>
+            <CreateButton
+                isDisabled={isDisabled}
+                createItem={addNewMenucategory}
+            />
         </Box>
     );
 };
 
-export default NewMenuCategory;
+export default MenuCategoryCreateDialog;

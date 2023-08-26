@@ -1,25 +1,15 @@
 import Layout from "@/components/Layout";
-import {
-    Box,
-    Button,
-    Dialog,
-    DialogContent,
-    Grid,
-    Link,
-    Paper,
-    Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import { useContext, useEffect, useState } from "react";
+import { Box, Dialog, DialogContent } from "@mui/material";
+import { useEffect, useState } from "react";
 import CategoryIcon from "@mui/icons-material/Category";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
-import NewMenuCategory from "./create";
 import ItemCard from "@/components/ItemCard";
 import { useSelector } from "react-redux";
 import { appData } from "@/store/slices/appSlice";
+import OpenCreateButton from "@/components/buttons/OpenCreateButton";
+import MenuCategoryCreateDialog from "@/components/create/menuCategoryCreate";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);
@@ -66,26 +56,11 @@ const MenuCategories = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => setOpen(true)}
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: "fit-content",
-                            color: "#E8F6EF",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        New menu category
-                    </Button>
+                    <OpenCreateButton
+                        setOpen={setOpen}
+                        label="New menu category"
+                    />
                 </Box>
-
                 <Box
                     sx={{
                         display: "flex",
@@ -118,7 +93,7 @@ const MenuCategories = () => {
                             m: "0 auto",
                         }}
                     >
-                        <NewMenuCategory />
+                        <MenuCategoryCreateDialog setOpen={setOpen} />
                     </DialogContent>
                 </Dialog>
             </Box>

@@ -20,19 +20,11 @@ export default async function handler(
         await qrCodeImageUpload(Number(branchId), table.id);
         const qrCodeUrl = getQrCodeUrl(Number(branchId), table.id);
 
-        await prisma.tables.update({
+        const newTable = await prisma.tables.update({
             data: { asset_url: qrCodeUrl },
             where: { id: table.id },
         });
 
-        res.send(200);
-    }
-    if (req.method === "PUT") {
-        const { tableId, name } = req.body;
-        await prisma.tables.update({
-            data: { name: name },
-            where: { id: Number(tableId) },
-        });
-        res.send(200);
+        res.send(newTable);
     }
 }

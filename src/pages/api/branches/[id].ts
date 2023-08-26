@@ -7,10 +7,10 @@ export default async function handler(
 ) {
     if (req.method === "PUT") {
         const branchId = parseInt(req.query.id as string, 10);
-        const { id, address } = req.body;
+        const { name } = req.body;
         const newBranchAddress = await prisma.branches.update({
-            where: { id: id },
-            data: { address: address },
+            where: { id: branchId },
+            data: { address: name },
         });
         res.send(newBranchAddress);
     }

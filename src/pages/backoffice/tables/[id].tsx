@@ -10,8 +10,11 @@ import { useContext, useState } from "react";
 import { tables } from "@prisma/client";
 import DeleteDialog from "@/components/DeleteDialog";
 import { table } from "console";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
+import { deleteTable, updateTables } from "@/store/slices/tableSlice";
+import DeleteButton from "@/components/buttons/DeleteButton";
+import UpdateButton from "@/components/buttons/UpdateButton";
 
 const TableDetail = () => {
     const router = useRouter();
@@ -19,24 +22,38 @@ const TableDetail = () => {
     const [open, setOpen] = useState(false);
     const selectedLocationId = getselectedLocationId() as string;
     const { tables } = useAppSelector(appData);
+    const dispatch = useAppDispatch();
     const currentTable = tables.find((table) => table.id === Number(tableId));
     const [tableName, setTableName] = useState(currentTable?.name);
     const [tableToRemove, setTableToRemove] = useState<tables>();
     const updateTable = async () => {
-        await fetch(`${config.apiBaseUrl}/tables`, {
+        const response = await fetch(`${config.apiBaseUrl}/tables/${tableId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ tableId, name: tableName }),
+            body: JSON.stringify({ name: tableName }),
         });
+        if (response.ok) {
+            const updatedTableData = await response.json();
+            dispatch(updateTables(updatedTableData));
+            router.push("/backoffice/tables");
+        }
     };
     const handleRemoveTable = async () => {
         const response = await fetch(`${config.apiBaseUrl}/tables/${tableId}`, {
             method: "DELETE",
         });
+        if (response.ok) {
+            const deletedTableData = await response.json();
+            dispatch(deleteTable(deletedTableData));
+            router.push("/backoffice/tables");
+        }
+    };
 
-        router.push("/backoffice/tables");
+    const handleDelete = () => {
+        setOpen(true);
+        setTableToRemove(currentTable);
     };
     return (
         <Layout>
@@ -48,26 +65,7 @@ const TableDetail = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => {
-                            setOpen(true), setTableToRemove(currentTable);
-                        }}
-                        variant="contained"
-                        startIcon={<DeleteIcon />}
-                        sx={{
-                            backgroundColor: "#AFAFAF",
-                            width: "fit-content",
-                            color: "#000000",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#000000",
-                                color: "white",
-                            },
-                        }}
-                    >
-                        Delete Table
-                    </Button>
+                    <DeleteButton handleDelete={handleDelete} title="Table" />
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <TextField
@@ -75,13 +73,7 @@ const TableDetail = () => {
                         sx={{ mb: 2, width: 300 }}
                         onChange={(evt) => setTableName(evt.target.value)}
                     />
-                    <Button
-                        variant="contained"
-                        onClick={updateTable}
-                        sx={{ width: "fit-content", mt: 3 }}
-                    >
-                        Update
-                    </Button>
+                    <UpdateButton updateItem={updateTable} />
                 </Box>
                 <DeleteDialog
                     title="Are you sure you want to delete this table?"

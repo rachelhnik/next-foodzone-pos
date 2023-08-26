@@ -42,6 +42,11 @@ export default async function handler(
             },
             where: { id: addonCategoryId },
         });
+        await prisma.menu_addoncategories.deleteMany({
+            where: {
+                addoncategory_id: addonCategoryId,
+            },
+        });
         res.status(200).send(deletedAddoncategory);
     }
 }

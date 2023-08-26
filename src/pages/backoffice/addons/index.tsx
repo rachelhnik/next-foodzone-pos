@@ -1,23 +1,18 @@
 import Layout from "@/components/Layout";
 import { getselectedLocationId } from "@/utils";
-import { Box, Button, Dialog, DialogContent } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 import TapasIcon from "@mui/icons-material/Tapas";
-import NewAddons from "./create";
 import ItemCard from "@/components/ItemCard";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
+import AddonCreateDialog from "../../../components/create/addonCreate";
+import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Addon = () => {
     const [open, setOpen] = useState(false);
-    const {
-        addons,
-
-        menus,
-        menuAddonCategories,
-        branchesMenucategoriesMenus,
-    } = useAppSelector(appData);
+    const { addons, menuAddonCategories, branchesMenucategoriesMenus } =
+        useAppSelector(appData);
     const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
     const validMenuIds = branchesMenucategoriesMenus
         .filter((item) => item.branch_id === selectedBranchId)
@@ -34,24 +29,7 @@ const Addon = () => {
         <Layout>
             <Box sx={{ width: "900px" }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                        onClick={() => setOpen(true)}
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: "fit-content",
-                            color: "#E8F6EF",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        New addon
-                    </Button>
+                    <OpenCreateButton setOpen={setOpen} label="New addon" />
                 </Box>
                 <Box sx={{ display: "flex" }}>
                     {validAddons.map((addon) => (
@@ -78,7 +56,7 @@ const Addon = () => {
                         m: "0 auto",
                     }}
                 >
-                    <NewAddons />
+                    <AddonCreateDialog setOpen={setOpen} />
                 </DialogContent>
             </Dialog>
         </Layout>

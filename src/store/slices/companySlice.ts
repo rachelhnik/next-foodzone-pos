@@ -21,7 +21,9 @@ export const companySlice = createSlice({
             state.items = action.payload;
         },
         updateCompany: (state, action: PayloadAction<Company>) => {
-            state.items?.name === action.payload.name;
+            state.items?.id === action.payload.id
+                ? (state.items = action.payload)
+                : state.items;
         },
     },
 });

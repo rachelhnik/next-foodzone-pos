@@ -13,29 +13,29 @@ import {
 import { useContext, useState } from "react";
 
 import type { addon_categories as AddonCategory } from "@prisma/client";
-import { config } from "../../../config/Config";
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
+import { config } from "../../config/Config";
+import { BackofficeContext } from "../../contexts/BackofficeContext";
 import { getselectedLocationId } from "@/utils";
 import { useRouter } from "next/router";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
 import { addAddonCategory } from "@/store/slices/addonCategorySlice";
 import { fetchMenuAddoncategories } from "@/store/slices/menuAddoncategorySlice";
+import CreateButton from "../buttons/createButton";
 
-export default function CreateAddonCategory() {
+interface Props {
+    setOpen: (data: boolean) => void;
+}
+
+const CreateAddonCategoryDialog = ({ setOpen }: Props) => {
     const [addonCategory, setAddonCategory] = useState<AddonCategory>({
         name: "",
         is_required: false,
     } as AddonCategory);
     const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
-    const dispatch = useAppDispatch();
-
     const isDisabled = !addonCategory.name || !selectedMenuIds.length;
-    const router = useRouter();
-    const currentBranchId = getselectedLocationId();
-
-    const { addonCategories, menus, addons, menuAddonCategories } =
-        useAppSelector(appData);
+    const { menus } = useAppSelector(appData);
+    const dispatch = useAppDispatch();
 
     const createAddonCategory = async () => {
         if (!addonCategory?.name) return;
@@ -50,10 +50,12 @@ export default function CreateAddonCategory() {
                 selectedMenuIds: selectedMenuIds,
             }),
         });
-
-        const newAddonCategory = await response.json();
-        dispatch(addAddonCategory(newAddonCategory));
-        dispatch(fetchMenuAddoncategories(selectedMenuIds));
+        if (response.ok) {
+            const newAddonCategoryData = await response.json();
+            dispatch(addAddonCategory(newAddonCategoryData));
+            dispatch(fetchMenuAddoncategories(selectedMenuIds));
+            setOpen(false);
+        }
     };
 
     return (
@@ -137,24 +139,12 @@ export default function CreateAddonCategory() {
                 }
                 label="required"
             />
-            <Button
-                variant="contained"
-                onClick={createAddonCategory}
-                disabled={isDisabled ? true : false}
-                sx={{
-                    backgroundColor: "#606C5D",
-
-                    color: "#E8F6EF",
-                    mb: 2,
-
-                    ":hover": {
-                        bgcolor: "#7C9070", // theme.palette.primary.main
-                        color: "white",
-                    },
-                }}
-            >
-                Create
-            </Button>
+            <CreateButton
+                isDisabled={isDisabled}
+                createItem={createAddonCategory}
+            />
         </Box>
     );
-}
+};
+
+export default CreateAddonCategoryDialog;

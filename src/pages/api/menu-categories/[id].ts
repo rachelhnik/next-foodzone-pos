@@ -13,7 +13,7 @@ export default async function handler(
             },
             where: { id: menuCatId },
         });
-        console.log(deletedMenuCategory);
+
         return res.status(200).send(deletedMenuCategory);
     }
 
@@ -22,6 +22,7 @@ export default async function handler(
         const { name, branches } = newMenuCategory;
 
         const branchIds = branches.map((branch: any) => branch.id) as number[];
+        console.log("branchIds", branchIds);
 
         const updatedMenuCategory = await prisma.menu_categories.update({
             data: { name: name },

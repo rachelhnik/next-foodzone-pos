@@ -27,34 +27,43 @@ export default async function handler(
             },
         });
 
-        menuCategoryIds.forEach(async (menucatId: number) => {
-            const onlyMenuIdNeededRow =
-                await prisma.branches_menucategories_menus.findFirst({
-                    where: {
-                        menucategory_id: menucatId,
-                        branch_id: branchId,
-                        menu_id: null,
-                    },
-                });
-            if (onlyMenuIdNeededRow !== null) {
-                await prisma.branches_menucategories_menus.update({
-                    data: {
-                        menu_id: newMenu.id,
-                    },
-                    where: {
-                        id: onlyMenuIdNeededRow.id,
-                    },
-                });
-            } else {
-                await prisma.branches_menucategories_menus.create({
-                    data: {
-                        menu_id: newMenu.id,
-                        menucategory_id: menucatId,
-                        branch_id: branchId,
-                    },
-                });
-            }
-        });
+        if (menuCategoryIds.length) {
+            menuCategoryIds.forEach(async (menucatId: number) => {
+                const onlyMenuIdNeededRow =
+                    await prisma.branches_menucategories_menus.findFirst({
+                        where: {
+                            menucategory_id: menucatId,
+                            branch_id: branchId,
+                            menu_id: null,
+                        },
+                    });
+                if (onlyMenuIdNeededRow !== null) {
+                    await prisma.branches_menucategories_menus.update({
+                        data: {
+                            menu_id: newMenu.id,
+                        },
+                        where: {
+                            id: onlyMenuIdNeededRow.id,
+                        },
+                    });
+                } else {
+                    await prisma.branches_menucategories_menus.create({
+                        data: {
+                            menu_id: newMenu.id,
+                            menucategory_id: menucatId,
+                            branch_id: branchId,
+                        },
+                    });
+                }
+            });
+        } else {
+            await prisma.branches_menucategories_menus.create({
+                data: {
+                    menu_id: newMenu.id,
+                    branch_id: branchId,
+                },
+            });
+        }
 
         res.status(200).send(newMenu);
     }

@@ -14,7 +14,7 @@ const initialState: BranchesMenucategoriesMenusState = {
     error: null,
 };
 
-export const fetchBranchesMenucategoriesMenus = createAsyncThunk(
+export const fetchBranchesMenucategoriesMenus: any = createAsyncThunk(
     "BranchesMenucategoriesMenusSlice/fetchBranchesMenucategoriesMenus",
     async (branchId: string, thunkAPI) => {
         thunkAPI.dispatch(setIsLoading(true));

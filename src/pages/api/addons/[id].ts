@@ -7,17 +7,20 @@ export default async function handler(
 ) {
     if (req.method === "PUT") {
         const id = parseInt(req.query.id as string, 10);
-        const { name } = req.body;
-        await prisma.addons.update({ data: { name: name }, where: { id: id } });
-        res.send(200);
+        const { name, price } = req.body;
+        const updatedAddon = await prisma.addons.update({
+            data: { name: name, price: Number(price) },
+            where: { id: id },
+        });
+        res.send(updatedAddon);
     } else if (req.method === "DELETE") {
         const id = parseInt(req.query.id as string, 10);
-        await prisma.addons.update({
+        const deletedAddon = await prisma.addons.update({
             data: {
                 is_archived: true,
             },
             where: { id: id },
         });
-        res.send(200);
+        res.send(deletedAddon);
     }
 }

@@ -3,20 +3,10 @@ import Box from "@mui/material/Box";
 import Layout from "@/components/Layout";
 import { useRouter } from "next/router";
 import { menus as MenusData } from "@prisma/client";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import FileDropZone from "@/components/FileDropZone";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
-import {
-    Typography,
-    TextField,
-    Button,
-    Autocomplete,
-    Checkbox,
-} from "@mui/material";
+import { Typography } from "@mui/material";
 import { config } from "@/config/Config";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useSelector } from "react-redux";
 import { appData } from "@/store/slices/appSlice";
@@ -24,9 +14,10 @@ import { useAppDispatch } from "@/store/hooks";
 import { removeMenu, updateMenus } from "@/store/slices/menuSlice";
 import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
 import { getselectedLocationId } from "@/utils";
-
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+import DeleteButton from "@/components/buttons/DeleteButton";
+import UpdateButton from "@/components/buttons/UpdateButton";
+import TextFieldComponent from "@/components/textfields/TextFieldComponent";
+import AutocompleteComponent from "@/components/autocomplete/AutoCompleteCompenet";
 
 export default function CenteredTabs() {
     const { menus, addonCategories, menuAddonCategories } =
@@ -54,19 +45,16 @@ export default function CenteredTabs() {
         name: menu?.name,
         price: menu?.price,
         asset_url: "",
-        description: menu?.description,
+        description: menu?.description || "",
         addonCategories: selectedAddonCategories,
     });
-
     const [menuToRemove, setMenuToRemove] = useState<MenusData>();
-
     const [open, setOpen] = useState(false);
 
     const updateMenu = async () => {
         try {
             if (menuImage) {
                 const formData = new FormData();
-
                 formData.append("files", menuImage as Blob);
                 const response = await fetch(`${config.apiBaseUrl}/assets`, {
                     method: "POST",
@@ -107,13 +95,21 @@ export default function CenteredTabs() {
     };
 
     const handleRemoveMenu = async () => {
-        const response = await fetch(`${config.apiBaseUrl}/menus/${menu?.id}`, {
-            method: "DELETE",
-        });
+        const response = await fetch(
+            `${config.apiBaseUrl}/menus/${menuToRemove?.id}`,
+            {
+                method: "DELETE",
+            }
+        );
         const deletedMenu = await response.json();
         dispatch(removeMenu(deletedMenu));
         dispatch(fetchBranchesMenucategoriesMenus(branchId));
         router.push("/backoffice/menus");
+    };
+
+    const handleDelete = () => {
+        setOpen(true);
+        setMenuToRemove(menu);
     };
 
     return (
@@ -133,26 +129,10 @@ export default function CenteredTabs() {
                             justifyContent: "flex-end",
                         }}
                     >
-                        <Button
-                            onClick={() => {
-                                setOpen(true), setMenuToRemove(menu);
-                            }}
-                            variant="contained"
-                            startIcon={<DeleteIcon />}
-                            sx={{
-                                backgroundColor: "#AFAFAF",
-                                width: "fit-content",
-                                color: "#000000",
-                                mb: 2,
-
-                                ":hover": {
-                                    bgcolor: "#000000",
-                                    color: "white",
-                                },
-                            }}
-                        >
-                            Delete menu
-                        </Button>
+                        <DeleteButton
+                            handleDelete={handleDelete}
+                            title="Menu"
+                        />
                     </Box>
                     <Box
                         sx={{
@@ -162,105 +142,53 @@ export default function CenteredTabs() {
                             mt: -5,
                         }}
                     >
-                        <Typography variant="caption">Name</Typography>
-                        <TextField
-                            variant="outlined"
-                            defaultValue={updatedMenu.name}
-                            sx={{ mb: 2, maxWidth: 300 }}
-                            onChange={(evt) => {
+                        <TextFieldComponent
+                            defaultValue={updatedMenu?.name}
+                            handleOnChange={(evt: any) => {
                                 setUpdatedMenu({
                                     ...updatedMenu,
                                     name: evt.target.value,
                                 });
                             }}
+                            label="Name"
                         />
-                        <Typography variant="caption">Price</Typography>
-                        <TextField
-                            variant="outlined"
-                            type="number"
-                            defaultValue={updatedMenu.price}
-                            sx={{ mb: 2, maxWidth: 300 }}
-                            onChange={(evt) => {
+
+                        <TextFieldComponent
+                            defaultValue={updatedMenu?.price}
+                            handleOnChange={(evt) => {
                                 setUpdatedMenu({
                                     ...updatedMenu,
                                     price: parseInt(evt.target.value, 10),
                                 });
                             }}
+                            label="Price"
                         />
-                        <Typography variant="caption">description</Typography>
-                        <TextField
-                            id="outlined-basic"
-                            variant="outlined"
-                            defaultValue={updatedMenu.description}
-                            sx={{ mb: 2, maxWidth: 300 }}
-                            onChange={(evt) => {
+
+                        <TextFieldComponent
+                            defaultValue={updatedMenu?.description}
+                            handleOnChange={(evt) => {
                                 setUpdatedMenu({
                                     ...updatedMenu,
                                     description: evt.target.value,
                                 });
                             }}
+                            label="Description"
                         />
-
                         <Typography>change Image ?</Typography>
                         <FileDropZone onFileSelected={onFileSelected} />
-                        <Autocomplete
-                            sx={{ width: 300, mt: 2 }}
-                            multiple
+                        <AutocompleteComponent
                             options={addonCategories}
                             defaultValue={selectedAddonCategories}
-                            disableCloseOnSelect
-                            isOptionEqualToValue={(option, value) =>
-                                option.id === value.id
-                            }
-                            getOptionLabel={(option) => option.name}
-                            onChange={(evt, values) => {
+                            handleOnChange={(evt, values) => {
                                 setUpdatedMenu({
                                     ...updatedMenu,
                                     addonCategories: values,
                                 });
                             }}
-                            renderOption={(props, option) => (
-                                <li {...props}>
-                                    <Checkbox
-                                        icon={icon}
-                                        checkedIcon={checkedIcon}
-                                        style={{ marginRight: 8 }}
-                                        checked={
-                                            updatedMenu.addonCategories.find(
-                                                (addoncat) =>
-                                                    addoncat.id === option.id
-                                            )
-                                                ? true
-                                                : false
-                                        }
-                                    />
-                                    {option.name}
-                                </li>
-                            )}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="addon categories"
-                                />
-                            )}
+                            checkedData={updatedMenu}
+                            label="addon categories"
                         />
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: "#606C5D",
-                                width: 300,
-                                color: "#E8F6EF",
-                                mt: 2,
-
-                                ":hover": {
-                                    bgcolor: "#7C9070",
-                                    color: "white",
-                                },
-                            }}
-                            onClick={updateMenu}
-                        >
-                            Update
-                        </Button>
+                        <UpdateButton updateItem={updateMenu} />
                     </Box>
                     <DeleteDialog
                         title="Are you sure you want to delete this menu category?"

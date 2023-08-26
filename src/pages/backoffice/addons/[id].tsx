@@ -9,18 +9,25 @@ import { addons } from "@prisma/client";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useSelector } from "react-redux";
 import { appData } from "@/store/slices/appSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { deleteAddon, updateAddons } from "@/store/slices/addonSlice";
+import DeleteButton from "@/components/buttons/DeleteButton";
+import UpdateButton from "@/components/buttons/UpdateButton";
 
 const AddonDetail = () => {
     const router = useRouter();
     const currentAddonId = parseInt(router.query.id as string, 10);
     const selectedLocationId = getselectedLocationId() as string;
     const { addons } = useSelector(appData);
+    const dispatch = useAppDispatch();
     const currentAddon = addons.find(
         (addon) => addon.id === Number(currentAddonId)
     );
     const [open, setOpen] = useState(false);
-    const [newAddon, setNewAddon] = useState({ name: "" });
-    const [addonToRemove, setAddonToRemove] = useState<addons>();
+    const [newAddon, setNewAddon] = useState({
+        name: currentAddon?.name,
+        price: currentAddon?.price,
+    });
 
     if (!currentAddon) return;
 
@@ -35,7 +42,11 @@ const AddonDetail = () => {
                 body: JSON.stringify(newAddon),
             }
         );
-        router.push("/backoffice/addons");
+        if (response.ok) {
+            const updatedAddonData = await response.json();
+            dispatch(updateAddons(updatedAddonData));
+            router.push("/backoffice/addons");
+        }
     };
 
     const handleRemoveAddon = async () => {
@@ -43,7 +54,15 @@ const AddonDetail = () => {
             `${config.apiBaseUrl}/addons/${currentAddonId}`,
             { method: "DELETE" }
         );
-        router.push("/backoffice/addons");
+        if (response.ok) {
+            const deletedAddonData = await response.json();
+            dispatch(deleteAddon(deletedAddonData));
+            router.push("/backoffice/addons");
+        }
+    };
+
+    const handleDelete = () => {
+        setOpen(true);
     };
 
     return (
@@ -56,53 +75,27 @@ const AddonDetail = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => {
-                            setOpen(true), setAddonToRemove(currentAddon);
-                        }}
-                        variant="contained"
-                        startIcon={<DeleteIcon />}
-                        sx={{
-                            backgroundColor: "#AFAFAF",
-                            width: "fit-content",
-                            color: "#000000",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#000000",
-                                color: "white",
-                            },
-                        }}
-                    >
-                        Delete Addon
-                    </Button>
+                    <DeleteButton handleDelete={handleDelete} title="Addon" />
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <TextField
                         defaultValue={currentAddon.name}
-                        sx={{ mb: 2, width: 200 }}
+                        sx={{ mb: 2, width: 300 }}
                         onChange={(evt) =>
-                            setNewAddon({ name: evt.target.value })
+                            setNewAddon({ ...newAddon, name: evt.target.value })
                         }
                     />
-
-                    <Button
-                        variant="contained"
-                        onClick={updateAddon}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: 200,
-                            color: "#E8F6EF",
-                            mt: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070",
-                                color: "white",
-                            },
-                        }}
-                    >
-                        Update
-                    </Button>
+                    <TextField
+                        defaultValue={currentAddon.price}
+                        sx={{ mb: 2, width: 300 }}
+                        onChange={(evt) =>
+                            setNewAddon({
+                                ...newAddon,
+                                price: Number(evt.target.value),
+                            })
+                        }
+                    />
+                    <UpdateButton updateItem={updateAddon} />
                 </Box>
                 <DeleteDialog
                     title="Are you sure you want to delete this addon?"

@@ -1,15 +1,17 @@
-import { Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import Link from "next/link";
 import { ReactNode } from "react";
+import Image from "next/image";
 
 interface Props {
-    icon: ReactNode;
+    icon?: ReactNode;
     title?: string;
     href?: string;
     subtitle?: string;
+    imageUrl?: string | null;
 }
-
-const ItemCard = ({ icon, title, href, subtitle }: Props) => {
+//
+const ItemCard = ({ icon, title, href, subtitle, imageUrl }: Props) => {
     if (href) {
         return (
             <Link
@@ -30,10 +32,36 @@ const ItemCard = ({ icon, title, href, subtitle }: Props) => {
                         m: 2,
                     }}
                 >
-                    {icon}
-                    <Typography sx={{ color: "#4C4C6D", fontWeight: "700" }}>
-                        {title}
-                    </Typography>
+                    {imageUrl ? (
+                        <>
+                            <Image
+                                src={imageUrl}
+                                height={150}
+                                width={150}
+                                alt=""
+                            />
+
+                            <Box sx={{ display: "flex", mt: 1 }}>
+                                {icon}
+                                <Typography
+                                    sx={{ color: "#4C4C6D", fontWeight: "700" }}
+                                >
+                                    {title}
+                                </Typography>
+                            </Box>
+                        </>
+                    ) : (
+                        <>
+                            {icon}
+
+                            <Typography
+                                sx={{ color: "#4C4C6D", fontWeight: "700" }}
+                            >
+                                {title}
+                            </Typography>
+                        </>
+                    )}
+
                     {subtitle && (
                         <Typography sx={{ color: "#4C4C6D", fontSize: 14 }}>
                             {subtitle}
@@ -59,6 +87,11 @@ const ItemCard = ({ icon, title, href, subtitle }: Props) => {
             }}
         >
             {icon}
+            {imageUrl ? (
+                <Image src={imageUrl} width={200} height={200} alt="tabel" />
+            ) : (
+                <></>
+            )}
             <Typography sx={{ color: "#4C4C6D", fontWeight: "700" }}>
                 {title}
             </Typography>

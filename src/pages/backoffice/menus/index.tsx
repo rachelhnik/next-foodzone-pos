@@ -1,14 +1,13 @@
-import { Box, Button, Dialog, DialogContent } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import Layout from "../../../components/Layout";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
-import AddIcon from "@mui/icons-material/Add";
 import { getselectedLocationId } from "@/utils";
-import CreateMenu from "./create";
 import ItemCard from "@/components/ItemCard";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
+import CreateMenuDialog from "@/components/create/createMenuDialog";
+import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Menus = () => {
     const [open, setOpen] = useState(false);
@@ -40,24 +39,7 @@ const Menus = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => setOpen(true)}
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: "fit-content",
-                            color: "#E8F6EF",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        New menu
-                    </Button>
+                    <OpenCreateButton setOpen={setOpen} label="New menu" />
                 </Box>
                 <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                     {filteredMenus.map((menu) => (
@@ -73,8 +55,10 @@ const Menus = () => {
                             <ItemCard
                                 key={menu.id}
                                 icon={<RestaurantMenuIcon />}
+                                imageUrl={menu.asset_url}
                                 href={`/backoffice/menus/${menu.id}`}
                                 title={menu.name}
+                                subtitle={menu.description || ""}
                             />
                         </Box>
                     ))}
@@ -94,7 +78,7 @@ const Menus = () => {
                         m: "0 auto",
                     }}
                 >
-                    <CreateMenu />
+                    <CreateMenuDialog setOpen={setOpen} />
                 </DialogContent>
             </Dialog>
         </Layout>

@@ -1,17 +1,25 @@
 import { useState, useContext, useEffect } from "react";
-import Layout from "../../../components/Layout";
+import Layout from "../Layout";
 import { Box, TextField, Button, Checkbox, MenuItem } from "@mui/material";
 
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
+import { BackofficeContext } from "../../contexts/BackofficeContext";
 
-import { config } from "../../../config/Config";
+import { config } from "../../config/Config";
 import { useRouter } from "next/router";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
+import { addAddon } from "@/store/slices/addonSlice";
+import { addon_categories as AddonCategory } from "@prisma/client";
+import CreateButton from "../buttons/CreateButton";
 
-export default function NewAddons() {
+interface Props {
+    setOpen: (data: boolean) => void;
+}
+
+const AddonCreateDialog = ({ setOpen }: Props) => {
     const { addons, menus, addonCategories, branches } =
         useAppSelector(appData);
+    const dispatch = useAppDispatch();
     const [selectedAddonCategoryId, setSelectedAddonCategoryId] =
         useState<number>();
     const [newAddon, setNewAddon] = useState({
@@ -21,7 +29,6 @@ export default function NewAddons() {
     });
 
     const isDisabled = !newAddon.name || !selectedAddonCategoryId;
-
     const createAddon = async () => {
         const response = await fetch(`${config.apiBaseUrl}/addons`, {
             method: "POST",
@@ -31,6 +38,11 @@ export default function NewAddons() {
             },
             body: JSON.stringify(newAddon),
         });
+        if (response.ok) {
+            const newAddonData = await response.json();
+            dispatch(addAddon(newAddonData));
+            setOpen(false);
+        }
     };
 
     const deleteAddon = async (addonId: number | undefined) => {
@@ -83,7 +95,7 @@ export default function NewAddons() {
                     fullWidth
                     sx={{ mb: 2 }}
                 >
-                    {addonCategories.map((cat) => (
+                    {addonCategories.map((cat: AddonCategory) => (
                         <MenuItem
                             key={cat.id}
                             value={cat.id}
@@ -99,26 +111,13 @@ export default function NewAddons() {
                         </MenuItem>
                     ))}
                 </TextField>
-
-                <Button
-                    variant="contained"
-                    onClick={createAddon}
-                    sx={{
-                        backgroundColor: "#606C5D",
-
-                        color: "#E8F6EF",
-                        mb: 2,
-
-                        ":hover": {
-                            bgcolor: "#7C9070", // theme.palette.primary.main
-                            color: "white",
-                        },
-                    }}
-                    disabled={isDisabled ? true : false}
-                >
-                    Create
-                </Button>
+                <CreateButton
+                    isDisabled={isDisabled}
+                    createItem={createAddon}
+                />
             </Box>
         </Box>
     );
-}
+};
+
+export default AddonCreateDialog;

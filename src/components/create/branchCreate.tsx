@@ -5,6 +5,8 @@ import { addBranch } from "@/store/slices/branchSlice";
 import {
     Box,
     Button,
+    FormControl,
+    InputLabel,
     MenuItem,
     Select,
     TextField,
@@ -12,6 +14,7 @@ import {
 } from "@mui/material";
 import { townships as Township } from "@prisma/client";
 import { useState } from "react";
+import CreateButton from "../buttons/createButton";
 interface Props {
     setOpen: (data: boolean) => void;
 }
@@ -58,46 +61,40 @@ const BranchCreateDialog = ({ setOpen }: Props) => {
                 <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
                     Create a new branch
                 </Typography>
-                <Select
-                    labelId="demo-simple-select-helper-label"
-                    id="demo-simple-select-helper"
-                    value={selectedTownshipId ? selectedTownshipId : ""}
-                    sx={{ mb: 2 }}
-                    label="township"
-                    onChange={(evt) =>
-                        setSelectdTownshipId(String(evt.target.value))
-                    }
-                >
-                    {townships.map((township: Township) => (
-                        <MenuItem key={township.id} value={township.id}>
-                            {township.name}
-                        </MenuItem>
-                    ))}
-                </Select>
+                <FormControl>
+                    <InputLabel id="demo-simple-select-filled-label">
+                        Townships
+                    </InputLabel>
+                    <Select
+                        labelId="demo-simple-select-helper-label"
+                        id="demo-simple-select-helper"
+                        value={selectedTownshipId ? selectedTownshipId : ""}
+                        sx={{ mb: 2 }}
+                        label="township"
+                        placeholder="Please select township"
+                        onChange={(evt) =>
+                            setSelectdTownshipId(String(evt.target.value))
+                        }
+                    >
+                        {townships.map((township: Township) => (
+                            <MenuItem key={township.id} value={township.id}>
+                                {township.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
                 <TextField
                     id="outlined-size-small"
                     value={newAddress}
                     sx={{ mb: 2 }}
-                    placeholder="enter address"
+                    label="Enter address"
                     onChange={(evt) => setNewAddress(evt.target.value)}
                 />
-                <Button
-                    variant="contained"
-                    onClick={createNewBranch}
-                    sx={{
-                        backgroundColor: "#606C5D",
-                        color: "#E8F6EF",
-                        mb: 2,
-                        ":hover": {
-                            bgcolor: "#7C9070", // theme.palette.primary.main
-                            color: "white",
-                        },
-                    }}
-                    disabled={disable ? true : false}
-                >
-                    Create
-                </Button>
+                <CreateButton
+                    isDisabled={disable}
+                    createItem={createNewBranch}
+                />
             </Box>
         </Box>
     );

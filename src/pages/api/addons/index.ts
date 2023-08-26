@@ -6,7 +6,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     const { name, price, addoncategoryId } = req.body;
-    await prisma.addons.create({
+    const newAddon = await prisma.addons.create({
         data: {
             name: name,
             price: price,
@@ -14,5 +14,5 @@ export default async function handler(
         },
     });
 
-    res.send(200);
+    res.send(newAddon);
 }
