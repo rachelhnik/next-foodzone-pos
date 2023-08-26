@@ -1,14 +1,16 @@
 import Layout from "@/components/Layout";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
-import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import ClassIcon from "@mui/icons-material/Class";
-import { useContext, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import CreateAddonCategory from "./create";
+import { useState } from "react";
+
 import ItemCard from "@/components/ItemCard";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+import CreateAddonCategoryDialog from "../../../components/create/addonCategoryCreate";
+import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const AddonCategories = () => {
-    const { addonCategories, addons } = useContext(BackofficeContext);
+    const { addonCategories, addons } = useAppSelector(appData);
 
     const [open, setOpen] = useState(false);
 
@@ -35,24 +37,10 @@ const AddonCategories = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => setOpen(true)}
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: "fit-content",
-                            color: "#E8F6EF",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        New addon category
-                    </Button>
+                    <OpenCreateButton
+                        setOpen={setOpen}
+                        label="New addon category"
+                    />
                 </Box>
                 <Box sx={{ display: "flex", flexWrap: "nowrap" }}>
                     {addonCategories.map((addoncat) => (
@@ -82,7 +70,7 @@ const AddonCategories = () => {
                         m: "0 auto",
                     }}
                 >
-                    <CreateAddonCategory />
+                    <CreateAddonCategoryDialog setOpen={setOpen} />
                 </DialogContent>
             </Dialog>
         </Layout>

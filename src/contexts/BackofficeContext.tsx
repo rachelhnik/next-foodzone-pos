@@ -74,7 +74,7 @@ const BackofficeAppProvider = ({ children }: any) => {
 
     const fetchData = async () => {
         setPosData({ ...posData, isLoading: true });
-        const response = await fetch(`${config.backofficeApiBaseUrl}/app`);
+        const response = await fetch(`${config.apiBaseUrl}/app`);
 
         const data = await response.json();
 

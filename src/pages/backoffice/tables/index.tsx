@@ -7,63 +7,32 @@ import {
     DialogTitle,
     TextField,
 } from "@mui/material";
-import { useContext, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
+import { useState } from "react";
+
 import { getselectedLocationId } from "@/utils";
-import { config } from "@/config/Config";
-import { BackofficeContext } from "@/contexts/BackofficeContext";
+
 import ItemCard from "@/components/ItemCard";
 import TableBarIcon from "@mui/icons-material/TableBar";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+
+import CreateTableDialog from "@/components/create/createTableDialog";
+import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Tables = () => {
-    const { fetchData, tables } = useContext(BackofficeContext);
+    const { tables } = useAppSelector(appData);
     const [open, setOpen] = useState(false);
     const selectedBranchId = getselectedLocationId();
-    const [newTable, setNewTable] = useState({
-        name: "",
-        branchId: selectedBranchId,
-    });
 
     const tablesForCurrentBranch = tables.filter(
         (table) => table.branch_id === Number(selectedBranchId)
     );
-    console.log(tablesForCurrentBranch);
 
-    const createNewTable = async () => {
-        const isValid = newTable.name;
-        if (!isValid) return alert("Please enter table name");
-        await fetch(`${config.backofficeApiBaseUrl}/tables`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newTable),
-        });
-        fetchData();
-        setOpen(false);
-    };
     return (
         <Layout>
             <Box>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                        onClick={() => setOpen(true)}
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            width: "fit-content",
-                            color: "#E8F6EF",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        New table
-                    </Button>
+                    <OpenCreateButton setOpen={setOpen} label="New table" />
                 </Box>
                 <Box sx={{ display: "flex" }}>
                     {tablesForCurrentBranch.map((table) => (
@@ -81,6 +50,7 @@ const Tables = () => {
                                 icon={<TableBarIcon />}
                                 href={`/backoffice/tables/${table.id}`}
                                 title={table.name}
+                                imageUrl={table.asset_url}
                             />
                         </Box>
                     ))}
@@ -90,33 +60,10 @@ const Tables = () => {
                 <DialogTitle>Create new table</DialogTitle>
                 <DialogContent
                     sx={{
-                        display: "flex",
-                        flexDirection: "column",
                         minWidth: 300,
                     }}
                 >
-                    <TextField
-                        label="Name"
-                        variant="outlined"
-                        sx={{ mt: 1 }}
-                        onChange={(evt) =>
-                            setNewTable({
-                                ...newTable,
-                                name: evt.target.value,
-                            })
-                        }
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={createNewTable}
-                        sx={{
-                            width: "fit-content",
-                            alignSelf: "flex-end",
-                            mt: 2,
-                        }}
-                    >
-                        Create
-                    </Button>
+                    <CreateTableDialog setOpen={setOpen} />
                 </DialogContent>
             </Dialog>
         </Layout>

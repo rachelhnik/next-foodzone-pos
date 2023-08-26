@@ -33,7 +33,6 @@ export const qrCodeImageUpload = async (branchId: number, tableId: number) => {
         const command = new PutObjectCommand(input);
         const response = await s3Config.send(command);
     } catch (err) {
-        console.log("error");
         console.error(err);
     }
 };

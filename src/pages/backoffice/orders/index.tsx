@@ -6,10 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Layout from "@/components/Layout";
-import BackofficeProvider, {
-    BackofficeContext,
-} from "@/contexts/BackofficeContext";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { getMenusByOrderId, getselectedLocationId } from "@/utils";
 import {
     orders as Order,
@@ -21,17 +18,15 @@ import {
     Collapse,
     FormControl,
     IconButton,
-    InputLabel,
     MenuItem,
     Select,
     SelectChangeEvent,
-    Typography,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { OrderAppContext } from "@/contexts/OrderAppContext";
 import { config } from "@/config/Config";
-import { fetchData } from "next-auth/client/_utils";
+import { useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
 
 interface Props {
     order: Order;
@@ -40,7 +35,7 @@ interface Props {
 
 const Row = ({ order, orderlines }: Props) => {
     const [open, setOpen] = useState(false);
-    const { menus, fetchData } = useContext(BackofficeContext);
+    const { menus } = useAppSelector(appData);
     const orderId = order.id;
 
     const menusRelatedToOrder = getMenusByOrderId(orderId, orderlines, menus);
@@ -49,12 +44,11 @@ const Row = ({ order, orderlines }: Props) => {
         e: SelectChangeEvent<"PENDING" | "PREPARING" | "COMPLETE" | "REJECTED">,
         menuId: number | undefined
     ) => {
-        const response = await fetch(`${config.backofficeApiBaseUrl}/orders`, {
+        const response = await fetch(`${config.apiBaseUrl}/orders`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: e.target.value, menuId: menuId }),
         });
-        fetchData();
     };
 
     const renderMenusForOrders = (id: number) => {
@@ -176,7 +170,7 @@ const Row = ({ order, orderlines }: Props) => {
 };
 
 const Orders = () => {
-    const { orders, orderlines } = useContext(BackofficeContext);
+    const { orders, orderlines } = useAppSelector(appData);
     const currentBranchId = getselectedLocationId();
     const currentBranchOrders = orders.filter(
         (item) => item.branch_id === Number(currentBranchId)

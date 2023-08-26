@@ -14,30 +14,25 @@ import {
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import { BackofficeContext } from "../../../contexts/BackofficeContext";
 import type {
     branches as BranchesData,
     companies as Company,
 } from "@prisma/client";
-
 import { config } from "../../../config/Config";
-
 import { useRouter } from "next/router";
 import { getselectedLocationId } from "@/utils";
 import { useSession } from "next-auth/react";
-const label = { inputProps: { "aria-label": "Checkbox demo" } };
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { appData } from "@/store/slices/appSlice";
+import { updateCompany } from "@/store/slices/companySlice";
 
 export default function Settings() {
-    const { company, branches, townships, fetchData } =
-        useContext(BackofficeContext);
+    const { company, branches, townships } = useAppSelector(appData);
+    const dispatch = useAppDispatch();
     const router = useRouter();
     const { data: session } = useSession();
     const currentBranchId = getselectedLocationId();
-
-    const [companyName, setCompanyName] = useState<Company>({
-        name: company?.name || "",
-    } as Company);
-
+    const [companyName, setCompanyName] = useState<Company>(company as Company);
     const [selectedBranch, setSelectedBranch] = useState<
         BranchesData | undefined
     >(branches[0]);
@@ -72,14 +67,13 @@ export default function Settings() {
         const currentBranch = branches.find(
             (branch) => String(branch.id) === evt.target.value
         );
-
         setSelectedBranch(currentBranch);
     };
 
-    const updateCompany = async () => {
+    const updateCompanyData = async () => {
         if (companyName.name === company?.name) alert("please update new name");
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/settings/companies/${company?.id}`,
+            `${config.apiBaseUrl}/settings/companies/${company?.id}`,
             {
                 method: "PUT",
                 headers: {
@@ -88,10 +82,11 @@ export default function Settings() {
                 body: JSON.stringify(companyName),
             }
         );
-        const newCompany = await response.json();
-
-        fetchData();
-        setCompanyName(newCompany.name);
+        if (response.ok) {
+            const newCompany = await response.json();
+            dispatch(updateCompany(newCompany));
+            alert("succefully updated");
+        }
     };
 
     return (
@@ -106,20 +101,26 @@ export default function Settings() {
                 noValidate
                 autoComplete="off"
             >
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography>name</Typography>
-                    <div
-                        style={{
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginBottom: "2rem",
+                    }}
+                >
+                    <Typography variant="h5">Company Name</Typography>
+                    <Box
+                        sx={{
                             display: "flex",
                             justifyContent: "space-between",
                             flexFlow: "column",
                             alignItems: "center",
-                            marginBottom: "2rem",
+                            mt: 2,
                         }}
                     >
                         <TextField
                             id="outlined-size-small"
-                            value={companyName.name}
+                            value={companyName?.name}
                             size="small"
                             onChange={(evt) =>
                                 setCompanyName({
@@ -128,28 +129,25 @@ export default function Settings() {
                                 })
                             }
                         />
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: "#606C5D",
-
-                                color: "#E8F6EF",
-                                mt: 2,
-
-                                ":hover": {
-                                    bgcolor: "#7C9070", // theme.palette.primary.main
-                                    color: "white",
-                                },
-                            }}
-                            size="small"
-                            onClick={updateCompany}
-                            fullWidth
-                        >
-                            update
-                        </Button>
-                    </div>
+                    </Box>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: "#606C5D",
+                            color: "#E8F6EF",
+                            mt: 3,
+                            ":hover": {
+                                bgcolor: "#7C9070", // theme.palette.primary.main
+                                color: "white",
+                            },
+                        }}
+                        onClick={updateCompanyData}
+                        fullWidth
+                    >
+                        update
+                    </Button>
                 </div>
-                <Typography>Select current location</Typography>
+                <Typography variant="h5">Select current location</Typography>
                 {branches.map((branch) => (
                     <Box
                         sx={{

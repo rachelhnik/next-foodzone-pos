@@ -32,7 +32,7 @@ export const setselectedLocationId = (id: string) => {
     return "";
 };
 export const generateLinkForQRCode = (branchId: number, tableId: number) => {
-    return `${config.orderAppApiBaseUrl}?branchId=${branchId}&tableId=${tableId}`;
+    return `${config.apiBaseUrl}/order?branchId=${branchId}&tableId=${tableId}`;
 };
 export const getQrCodeUrl = (branchId: number, tableId: number) => {
     return `https://msquarefdc.sgp1.cdn.digitaloceanspaces.com/happy-pos/qrcode/sho/branchId-${branchId}-tableId-${tableId}.png`;

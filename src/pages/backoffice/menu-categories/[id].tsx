@@ -9,7 +9,11 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { menus as Menu, branches, menu_categories } from "@prisma/client";
+import {
+    menus as Menu,
+    branches,
+    menu_categories as MenuCategory,
+} from "@prisma/client";
 import { useRouter } from "next/router";
 import { use, useContext, useState } from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -23,6 +27,19 @@ import MenuCard from "@/components/MenuCard";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveMenuFromMenuCategory from "./RemoveMenuFromCategory";
 import DeleteDialog from "@/components/DeleteDialog";
+import { appData } from "@/store/slices/appSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
+import {
+    removeMenuCategory,
+    updateMenuCategories,
+} from "@/store/slices/menuCategorySlice";
+import DeleteButton from "@/components/buttons/DeleteButton";
+import UpdateButton from "@/components/buttons/UpdateButton";
+import TextFieldComponent from "@/components/textfields/TextFieldComponent";
+import AutocompleteComponent from "@/components/autocomplete/AutoCompleteCompenet";
+import MenucatAutoComplete from "@/components/autocomplete/MenucatAutocomplete";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -38,22 +55,26 @@ const MenucategoryDetail = () => {
         branches,
         branchesMenucategoriesMenus,
         menuCategories,
-        fetchData,
+
         menus,
-    } = useContext(BackofficeContext);
+    } = useSelector(appData);
+
     const [open, setOpen] = useState(false);
     const [openMenucat, setOpenMenucat] = useState(false);
     const [selectedMenuToRemove, setSelectedMenuToRemove] = useState<Menu>();
-
+    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
+    const dispatch = useAppDispatch();
     const menuCategoryId = parseInt(router.query.id as string, 10);
 
     const menuCategory = menuCategories.find(
         (data) => data.id === menuCategoryId
     );
+
     const validMenus = getMenusByMenucategoryId(
         menuCategoryId,
         branchesMenucategoriesMenus,
-        menus
+        menus,
+        selectedBranchId
     );
 
     const menuIds = validMenus.map((item) => item.id);
@@ -63,15 +84,13 @@ const MenucategoryDetail = () => {
         menuCategoryId,
         branches
     );
-
-    const selectedBranchId = parseInt(getselectedLocationId() as string, 10);
-
+    //
     const [newMenuCategory, setNewMenuCategory] = useState({
-        name: menuCategory?.name,
+        name: menuCategory?.name || "",
         branches: selectedBranches,
     });
     const [menuCategoryToRemove, setMenucategoryToRemove] =
-        useState<menu_categories>();
+        useState<MenuCategory>();
 
     const [selectedMenu, setSelectedMenu] = useState<AutocompleteProps | null>(
         null
@@ -80,7 +99,7 @@ const MenucategoryDetail = () => {
 
     const updateMenuCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/${menuCategoryId}`,
+            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}`,
             {
                 method: "PUT",
                 headers: { "content-type": "application/json" },
@@ -90,11 +109,18 @@ const MenucategoryDetail = () => {
                 }),
             }
         );
-        if (response.ok) router.push("/backoffice/menu-categories");
-        fetchData();
+
+        if (response.ok) {
+            const updatedMenucategory = await response.json();
+            dispatch(updateMenuCategories(updatedMenucategory));
+            dispatch(
+                fetchBranchesMenucategoriesMenus(String(selectedBranchId))
+            );
+            router.push("/backoffice/menu-categories");
+        }
     };
     const addMenuToMenuCategory = async () => {
-        await fetch(`${config.backofficeApiBaseUrl}/menu-categories/addMenu`, {
+        await fetch(`${config.apiBaseUrl}/menu-categories/addMenu`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -105,13 +131,13 @@ const MenucategoryDetail = () => {
                 branchId: selectedBranchId,
             }),
         });
-        fetchData();
+
         setSelectedMenu(null);
     };
 
     const handleRemoveMenu = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/deleteMenu`,
+            `${config.apiBaseUrl}/menu-categories/deleteMenu`,
             {
                 method: "PUT",
                 headers: { "content-type": "application/json" },
@@ -123,19 +149,24 @@ const MenucategoryDetail = () => {
             }
         );
 
-        fetchData();
         setOpen(false);
     };
 
     const handleRemoveMenuCategory = async () => {
         const response = await fetch(
-            `${config.backofficeApiBaseUrl}/menu-categories/${menuCategoryId}`,
+            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}`,
             {
                 method: "DELETE",
             }
         );
-        fetchData();
-        router.push("/backoffice/menu-categories");
+        if (response.ok) {
+            const deletedMenuCategoryData = await response.json();
+            dispatch(removeMenuCategory(deletedMenuCategoryData));
+            dispatch(
+                fetchBranchesMenucategoriesMenus(String(selectedBranchId))
+            );
+            router.push("/backoffice/menu-categories");
+        }
     };
 
     return (
@@ -154,94 +185,39 @@ const MenucategoryDetail = () => {
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
-                        onClick={() => {
+                    <DeleteButton
+                        handleDelete={() => {
                             setOpenMenucat(true),
                                 setMenucategoryToRemove(menuCategory);
                         }}
-                        variant="contained"
-                        startIcon={<DeleteIcon />}
-                        sx={{
-                            backgroundColor: "#AFAFAF",
-                            width: "fit-content",
-                            color: "#000000",
-                            mb: 2,
-
-                            ":hover": {
-                                bgcolor: "#000000",
-                                color: "white",
-                            },
-                        }}
-                    >
-                        Delete Menu Category
-                    </Button>
+                        title="menu category"
+                    />
                 </Box>
-                <Box sx={{ my: 3 }}>
-                    <TextField
+                <Box sx={{ my: 3, display: "flex", flexDirection: "column" }}>
+                    <TextFieldComponent
+                        label="Name"
                         defaultValue={menuCategory.name}
-                        fullWidth
-                        sx={{ mb: 2, width: 300 }}
-                        onChange={(evt) =>
+                        handleOnChange={(evt) =>
                             setNewMenuCategory({
                                 ...newMenuCategory,
                                 name: evt.target.value,
                             })
                         }
                     />
-                    <Autocomplete
-                        sx={{ width: 300 }}
-                        multiple
+                    <MenucatAutoComplete
                         options={branches}
                         defaultValue={selectedBranches}
-                        disableCloseOnSelect
-                        isOptionEqualToValue={(option, value) =>
-                            option.id === value.id
-                        }
-                        getOptionLabel={(option) => option.address}
-                        onChange={(evt, values) => {
+                        handleOnChange={(evt, values) => {
                             setNewMenuCategory({
                                 ...newMenuCategory,
                                 branches: values,
                             });
                         }}
-                        renderOption={(props, option) => (
-                            <li {...props}>
-                                <Checkbox
-                                    icon={icon}
-                                    checkedIcon={checkedIcon}
-                                    style={{ marginRight: 8 }}
-                                    checked={
-                                        newMenuCategory.branches.find(
-                                            (branch) => branch.id === option.id
-                                        )
-                                            ? true
-                                            : false
-                                    }
-                                />
-                                {option.address}
-                            </li>
-                        )}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Locations" />
-                        )}
+                        label="locations"
+                        checkedData={newMenuCategory}
                     />
-                    <Button
-                        variant="contained"
-                        onClick={updateMenuCategory}
-                        sx={{
-                            backgroundColor: "#606C5D",
 
-                            color: "#E8F6EF",
-                            mt: 2,
-                            width: 300,
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                    >
-                        Update
-                    </Button>
+                    <UpdateButton updateItem={updateMenuCategory} />
                 </Box>
                 <Box>
                     <Typography variant="h6" sx={{ mb: 2 }}>
@@ -310,7 +286,8 @@ const MenucategoryDetail = () => {
                                     alignItems: "center",
                                 }}
                             >
-                                <MenuCard menu={item} />
+                                <MenuCard menu={item} href={""} />
+
                                 <Button
                                     variant="outlined"
                                     color="inherit"
