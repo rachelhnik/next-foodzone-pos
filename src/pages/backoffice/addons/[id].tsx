@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import { Box, TextField, Button } from "@mui/material";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
@@ -13,6 +13,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { deleteAddon, updateAddons } from "@/store/slices/addonSlice";
 import DeleteButton from "@/components/buttons/DeleteButton";
 import UpdateButton from "@/components/buttons/UpdateButton";
+import TextFieldComponent from "@/components/textfields/TextFieldComponent";
 
 const AddonDetail = () => {
     const router = useRouter();
@@ -68,24 +69,17 @@ const AddonDetail = () => {
     return (
         <Layout title="Edit Addon">
             <Box sx={{ width: "900px" }}>
-                <Box
-                    sx={{
-                        right: 10,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <DeleteButton handleDelete={handleDelete} title="Addon" />
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <TextField
+                <Box sx={{ display: "flex", flexDirection: "column", mt: 7 }}>
+                    <TextFieldComponent
                         defaultValue={currentAddon.name}
-                        sx={{ mb: 2, width: 300 }}
-                        onChange={(evt) =>
+                        label="Name"
+                        handleOnChange={(evt) =>
                             setNewAddon({ ...newAddon, name: evt.target.value })
                         }
                     />
+                    <Typography variant="caption">Price</Typography>
                     <TextField
+                        type="number"
                         defaultValue={currentAddon.price}
                         sx={{ mb: 2, width: 300 }}
                         onChange={(evt) =>
@@ -96,6 +90,7 @@ const AddonDetail = () => {
                         }
                     />
                     <UpdateButton updateItem={updateAddon} />
+                    <DeleteButton handleDelete={handleDelete} title="Addon" />
                 </Box>
                 <DeleteDialog
                     title="Are you sure you want to delete this addon?"

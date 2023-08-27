@@ -23,6 +23,7 @@ export const store = configureStore({
         addonCategoris: addonCategorySlice,
         branches: branchSlice,
         branchesMenucategoriesMenus: branchesMenucategoriesMenuSlice,
+
         menuAddoncategoris: menuAddoncategorySlice,
         tables: tableSlice,
         orders: ordersSlice,

@@ -51,9 +51,9 @@ const MenuCategoryCreateDialog = ({ setOpen }: Props) => {
         });
         if (response.ok) {
             const newMenuCategory = await response.json();
-            console.log(newMenuCategory);
             dispatch(addMenuCategory(newMenuCategory));
             dispatch(fetchBranchesMenucategoriesMenus(branchId));
+
             setOpen(false);
         }
     };

@@ -25,6 +25,8 @@ import { useSession } from "next-auth/react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
 import { updateCompany } from "@/store/slices/companySlice";
+import TextFieldComponent from "@/components/textfields/TextFieldComponent";
+import UpdateButton from "@/components/buttons/UpdateButton";
 
 export default function Settings() {
     const { company, branches, townships } = useAppSelector(appData);
@@ -112,40 +114,23 @@ export default function Settings() {
                     <Box
                         sx={{
                             display: "flex",
-                            justifyContent: "space-between",
-                            flexFlow: "column",
-                            alignItems: "center",
+                            flexDirection: "column",
+
                             mt: 2,
                         }}
                     >
-                        <TextField
-                            id="outlined-size-small"
-                            value={companyName?.name}
-                            size="small"
-                            onChange={(evt) =>
+                        <TextFieldComponent
+                            defaultValue={companyName?.name}
+                            label=""
+                            handleOnChange={(evt) =>
                                 setCompanyName({
                                     ...companyName,
                                     name: evt.target.value,
                                 })
                             }
                         />
+                        <UpdateButton updateItem={updateCompanyData} />
                     </Box>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: "#606C5D",
-                            color: "#E8F6EF",
-                            mt: 3,
-                            ":hover": {
-                                bgcolor: "#7C9070", // theme.palette.primary.main
-                                color: "white",
-                            },
-                        }}
-                        onClick={updateCompanyData}
-                        fullWidth
-                    >
-                        update
-                    </Button>
                 </div>
                 <Typography variant="h5">Select current location</Typography>
                 {branches.map((branch) => (

@@ -37,6 +37,14 @@ const MenuCategories = () => {
     }, [session]);
 
     const getMenusCount = (menuCategoryId?: number) => {
+        console.log(
+            branchesMenucategoriesMenus.filter(
+                (item) =>
+                    item.menucategory_id === menuCategoryId &&
+                    item.branch_id === currentBranchId &&
+                    item.menu_id !== null
+            )
+        );
         if (!menuCategoryId) return 0;
         return branchesMenucategoriesMenus.filter(
             (item) =>

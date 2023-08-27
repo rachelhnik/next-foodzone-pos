@@ -1,27 +1,21 @@
-import Autocomplete from "@mui/material/Autocomplete";
-import Checkbox from "@mui/material/Checkbox";
-import TextField from "@mui/material/TextField";
+import { menus as Menu } from "@prisma/client";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import {
-    branches as Branch,
-    menu_categories as MenuCategory,
-} from "@prisma/client";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 interface Props {
-    options: Branch[];
-    defaultValue: Branch[];
+    options: Menu[];
+    defaultValue: Menu[];
     handleOnChange: (evt: any, values: any) => void;
     label: string;
-    checkedData: {
-        name: string;
-        branches: Branch[];
-    };
+    checkedData: Menu[];
 }
 
-const MenucatAutoComplete = ({
+const MenuAutocomplete = ({
     options,
     defaultValue,
     handleOnChange,
@@ -36,7 +30,7 @@ const MenucatAutoComplete = ({
             defaultValue={defaultValue}
             disableCloseOnSelect
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            getOptionLabel={(option) => option.address}
+            getOptionLabel={(option) => option.name}
             onChange={handleOnChange}
             renderOption={(props, option) => (
                 <li {...props}>
@@ -45,19 +39,17 @@ const MenucatAutoComplete = ({
                         checkedIcon={checkedIcon}
                         style={{ marginRight: 8 }}
                         checked={
-                            checkedData.branches.find(
-                                (branch) => branch.id === option.id
-                            )
+                            checkedData.find((data) => data.id === option.id)
                                 ? true
                                 : false
                         }
                     />
-                    {option.address}
+                    {option.name}
                 </li>
             )}
-            renderInput={(params) => <TextField {...params} label={label} />}
+            renderInput={(params) => <TextField {...params} label="menus" />}
         />
     );
 };
 
-export default MenucatAutoComplete;
+export default MenuAutocomplete;

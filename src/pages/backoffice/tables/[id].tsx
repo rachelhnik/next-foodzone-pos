@@ -15,6 +15,7 @@ import { appData } from "@/store/slices/appSlice";
 import { deleteTable, updateTables } from "@/store/slices/tableSlice";
 import DeleteButton from "@/components/buttons/DeleteButton";
 import UpdateButton from "@/components/buttons/UpdateButton";
+import TextFieldComponent from "@/components/textfields/TextFieldComponent";
 
 const TableDetail = () => {
     const router = useRouter();
@@ -58,22 +59,14 @@ const TableDetail = () => {
     return (
         <Layout>
             <Box sx={{ width: 900 }}>
-                <Box
-                    sx={{
-                        right: 10,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <DeleteButton handleDelete={handleDelete} title="Table" />
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <TextField
+                <Box sx={{ display: "flex", flexDirection: "column", mt: 7 }}>
+                    <TextFieldComponent
                         defaultValue={tableName}
-                        sx={{ mb: 2, width: 300 }}
-                        onChange={(evt) => setTableName(evt.target.value)}
+                        label="Name"
+                        handleOnChange={(evt) => setTableName(evt.target.value)}
                     />
                     <UpdateButton updateItem={updateTable} />
+                    <DeleteButton handleDelete={handleDelete} title="Table" />
                 </Box>
                 <DeleteDialog
                     title="Are you sure you want to delete this table?"

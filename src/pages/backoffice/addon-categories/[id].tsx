@@ -89,25 +89,14 @@ const AddonCategoryDetail = () => {
             <Box sx={{ width: 900 }}>
                 <Box
                     sx={{
-                        right: 10,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <DeleteButton
-                        handleDelete={handleDelete}
-                        title="Addon Category"
-                    />
-                </Box>
-                <Box
-                    sx={{
+                        mt: 7,
                         width: 300,
                         display: "flex",
                         flexDirection: "column",
                     }}
                 >
                     <TextFieldComponent
-                        label=""
+                        label="Name"
                         defaultValue={newAddonCategory.name}
                         handleOnChange={(evt) =>
                             setNewAddonCategory({
@@ -148,6 +137,10 @@ const AddonCategoryDetail = () => {
                         label="required"
                     />
                     <UpdateButton updateItem={updateAddonCategory} />
+                    <DeleteButton
+                        handleDelete={handleDelete}
+                        title="Addon Category"
+                    />
                     <DeleteDialog
                         title="Are you sure you want to delete this addon?"
                         open={open}

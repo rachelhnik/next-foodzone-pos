@@ -3,9 +3,10 @@ import Button from "@mui/material/Button";
 
 interface Props {
     updateItem: () => void;
+    label?: string;
 }
 
-const UpdateButton = ({ updateItem }: Props) => {
+const UpdateButton = ({ updateItem, label }: Props) => {
     return (
         <Box>
             <Button
@@ -23,7 +24,7 @@ const UpdateButton = ({ updateItem }: Props) => {
                 }}
                 onClick={() => updateItem()}
             >
-                Update
+                {label ? label : "Update"}
             </Button>
         </Box>
     );
