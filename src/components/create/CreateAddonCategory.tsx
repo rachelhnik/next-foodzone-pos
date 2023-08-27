@@ -21,7 +21,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
 import { addAddonCategory } from "@/store/slices/addonCategorySlice";
 import { fetchMenuAddoncategories } from "@/store/slices/menuAddoncategorySlice";
-import CreateButton from "../buttons/createButton";
+import CreateButton from "../buttons/CreateButton";
 
 interface Props {
     setOpen: (data: boolean) => void;

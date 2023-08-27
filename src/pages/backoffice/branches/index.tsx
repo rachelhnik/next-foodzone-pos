@@ -14,7 +14,7 @@ import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
 
 import ItemCard from "@/components/ItemCard";
-import BranchCreateDialog from "@/components/create/branchCreate";
+import BranchCreateDialog from "@/components/create/CreateBranch";
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Branches = () => {

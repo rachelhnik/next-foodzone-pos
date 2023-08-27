@@ -16,7 +16,11 @@ import { appData } from "@/store/slices/appSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchBranchesMenucategoriesMenus } from "@/store/slices/branchesMenucategoriesMenuSlice";
-import { removeMenuCategory } from "@/store/slices/menuCategorySlice";
+import {
+    removeMenuCategory,
+    setMenuCategory,
+    updateMenuCategories,
+} from "@/store/slices/menuCategorySlice";
 import DeleteButton from "@/components/buttons/DeleteButton";
 import UpdateButton from "@/components/buttons/UpdateButton";
 import TextFieldComponent from "@/components/textfields/TextFieldComponent";
@@ -65,17 +69,16 @@ const MenucategoryDetail = () => {
 
     const [newMenuCategory, setNewMenuCategory] = useState({
         name: menuCategory?.name || "",
-        branches: selectedBranches,
     });
 
     const [selectedMenus, setSelectedMenus] =
         useState<Menu[]>(selectedMenuData);
 
     if (!menuCategory) return;
-
+    console.log("selectedMenus", selectedMenus);
     const handleRemoveMenuCategory = async () => {
         const response = await fetch(
-            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}`,
+            `${config.apiBaseUrl}/menu-categories/${menuCategoryId}?branchId=${selectedBranchId}`,
             {
                 method: "DELETE",
             }
@@ -97,6 +100,7 @@ const MenucategoryDetail = () => {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    name: newMenuCategory.name,
                     selectedMenus: selectedMenus,
                     menuCategoryId: menuCategoryId,
                     branchId: selectedBranchId,
@@ -104,6 +108,8 @@ const MenucategoryDetail = () => {
             }
         );
         if (response.ok) {
+            const updatedMenuCategory = await response.json();
+            dispatch(updateMenuCategories(updatedMenuCategory));
             dispatch(
                 fetchBranchesMenucategoriesMenus(String(selectedBranchId))
             );

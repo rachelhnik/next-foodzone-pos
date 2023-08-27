@@ -9,7 +9,7 @@ import ItemCard from "@/components/ItemCard";
 import { useSelector } from "react-redux";
 import { appData } from "@/store/slices/appSlice";
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
-import MenuCategoryCreateDialog from "@/components/create/menuCategoryCreate";
+import MenuCategoryCreateDialog from "@/components/create/CreateMenuCategory";
 
 const MenuCategories = () => {
     const [open, setOpen] = useState(false);

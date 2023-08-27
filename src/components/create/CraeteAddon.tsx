@@ -45,12 +45,6 @@ const AddonCreateDialog = ({ setOpen }: Props) => {
         }
     };
 
-    const deleteAddon = async (addonId: number | undefined) => {
-        if (addonId === undefined) return;
-        const response = await fetch(`${config.apiBaseUrl}/addons/${addonId}`, {
-            method: "DELETE",
-        });
-    };
     return (
         <Box>
             <Box

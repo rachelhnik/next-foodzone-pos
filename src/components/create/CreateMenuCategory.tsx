@@ -36,7 +36,6 @@ const MenuCategoryCreateDialog = ({ setOpen }: Props) => {
 
     const { menus, branches, townships } = useSelector(appData);
     const addNewMenucategory = async () => {
-        console.log("ehol");
         if (!menuCategory?.name || !selectedBranchIds?.length) return;
 
         const response = await fetch(`${config.apiBaseUrl}/menu-categories`, {

@@ -57,7 +57,7 @@ const CreateMenuDialog = ({ setOpen }: Props) => {
         asset_url: "",
     });
 
-    const isDisabled = !menu.name || !menu.price || !menu.description;
+    const isDisabled = !menu.name || !menu.price;
 
     const onFileSelected = (files: File[]) => {
         setMenuImage(files[0]);

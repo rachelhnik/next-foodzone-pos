@@ -84,6 +84,7 @@ export const Sidebar = () => {
                     <Link
                         key={item.id}
                         href={item.link}
+                        passHref
                         style={{
                             textDecoration: "none",
                             color: "#313131",
@@ -109,6 +110,7 @@ export const Sidebar = () => {
                     <Link
                         key={item.id}
                         href={item.link}
+                        passHref
                         style={{
                             textDecoration: "none",
                             color: "#313131",

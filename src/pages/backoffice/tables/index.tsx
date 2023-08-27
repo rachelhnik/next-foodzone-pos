@@ -16,7 +16,7 @@ import TableBarIcon from "@mui/icons-material/TableBar";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
 
-import CreateTableDialog from "@/components/create/createTableDialog";
+import CreateTableDialog from "@/components/create/CreateTable";
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Tables = () => {
@@ -34,7 +34,7 @@ const Tables = () => {
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                     <OpenCreateButton setOpen={setOpen} label="New table" />
                 </Box>
-                <Box sx={{ display: "flex" }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                     {tablesForCurrentBranch.map((table) => (
                         <Box
                             sx={{

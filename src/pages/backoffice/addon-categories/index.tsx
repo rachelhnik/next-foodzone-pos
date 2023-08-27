@@ -6,8 +6,9 @@ import { useState } from "react";
 import ItemCard from "@/components/ItemCard";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
-import CreateAddonCategoryDialog from "../../../components/create/addonCategoryCreate";
+
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
+import CreateAddonCategoryDialog from "@/components/create/createAddonCategory";
 
 const AddonCategories = () => {
     const { addonCategories, addons } = useAppSelector(appData);
@@ -42,7 +43,7 @@ const AddonCategories = () => {
                         label="New addon category"
                     />
                 </Box>
-                <Box sx={{ display: "flex", flexWrap: "nowrap" }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                     {addonCategories.map((addoncat) => (
                         <ItemCard
                             key={addoncat.id}
