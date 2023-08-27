@@ -124,22 +124,9 @@ export default function CenteredTabs() {
                 >
                     <Box
                         sx={{
-                            right: 10,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                        }}
-                    >
-                        <DeleteButton
-                            handleDelete={handleDelete}
-                            title="Menu"
-                        />
-                    </Box>
-                    <Box
-                        sx={{
                             display: "flex",
                             flexDirection: "column",
                             mr: 2,
-                            mt: -5,
                         }}
                     >
                         <TextFieldComponent
@@ -189,6 +176,10 @@ export default function CenteredTabs() {
                             label="addon categories"
                         />
                         <UpdateButton updateItem={updateMenu} />
+                        <DeleteButton
+                            handleDelete={handleDelete}
+                            title="Menu"
+                        />
                     </Box>
                     <DeleteDialog
                         title="Are you sure you want to delete this menu category?"

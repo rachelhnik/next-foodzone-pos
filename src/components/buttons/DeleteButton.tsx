@@ -16,10 +16,9 @@ const DeleteButton = ({ handleDelete, title }: Props) => {
                 startIcon={<DeleteIcon />}
                 sx={{
                     backgroundColor: "#AFAFAF",
-                    width: "fit-content",
                     color: "#000000",
-                    mb: 2,
-
+                    mt: 2,
+                    width: 300,
                     ":hover": {
                         bgcolor: "#000000",
                         color: "white",

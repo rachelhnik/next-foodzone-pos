@@ -1,5 +1,7 @@
 import DeleteDialog from "@/components/DeleteDialog";
 import Layout from "@/components/Layout";
+import DeleteButton from "@/components/buttons/DeleteButton";
+import UpdateButton from "@/components/buttons/UpdateButton";
 import { config } from "@/config/Config";
 import { appData } from "@/store/slices/appSlice";
 import { deleteBranch, updateBranches } from "@/store/slices/branchSlice";
@@ -97,24 +99,17 @@ const SingleBranch = () => {
                 sx={{
                     marginTop: "0.5rem",
                     display: "flex",
-                    justifyContent: "flex-end",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
                     marginBottom: "1rem",
                 }}
             >
-                <Button
-                    variant="contained"
-                    sx={{ mr: 2 }}
-                    onClick={updateLocation}
-                >
-                    Update
-                </Button>
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => setOpen(true)}
-                >
-                    Delete
-                </Button>
+                <UpdateButton updateItem={updateLocation} />
+                <DeleteButton
+                    handleDelete={() => setOpen(true)}
+                    title="branch"
+                />
             </Box>
             <DeleteDialog
                 title="Are you sure you want to delete this table?"

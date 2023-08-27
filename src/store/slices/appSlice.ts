@@ -61,6 +61,7 @@ export const fetchAppData = createAsyncThunk(
         thunkAPI.dispatch(
             setBranchesMenucategoriesMenus(branchesMenucategoriesMenus)
         );
+
         thunkAPI.dispatch(setCompany(company));
         thunkAPI.dispatch(setTables(tables));
         thunkAPI.dispatch(setOrders(orders));
@@ -106,6 +107,7 @@ export const appData = createSelector(
         selectAddonCategories,
         selectMenuAddoncategories,
         selectBranchesMenuMenucategories,
+
         selectOrders,
         selectOrderlines,
         selectTables,
@@ -120,6 +122,7 @@ export const appData = createSelector(
         addonCategories,
         menuAddonCategories,
         branchesMenucategoriesMenus,
+
         orders,
         orderlines,
         tables,
@@ -134,6 +137,7 @@ export const appData = createSelector(
             addonCategories,
             menuAddonCategories,
             branchesMenucategoriesMenus,
+
             orders,
             orderlines,
             tables,
