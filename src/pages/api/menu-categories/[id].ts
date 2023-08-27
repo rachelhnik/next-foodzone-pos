@@ -7,6 +7,7 @@ export default async function handler(
 ) {
     if (req.method === "DELETE") {
         const menuCatId = parseInt(req.query.id as string, 10);
+        const branchId = parseInt(req.query.branchId as string, 10);
         const deletedMenuCategory = await prisma.menu_categories.update({
             data: {
                 is_archived: true,
@@ -14,12 +15,28 @@ export default async function handler(
             where: { id: menuCatId },
         });
 
+        await prisma.branches_menucategories_menus.deleteMany({
+            where: {
+                menucategory_id: menuCatId,
+                branch_id: branchId,
+            },
+        });
+
         return res.status(200).send(deletedMenuCategory);
     }
 
     if (req.method === "PUT") {
-        const { selectedMenus, menuCategoryId, branchId } = req.body;
+        const { selectedMenus, menuCategoryId, branchId, name } = req.body;
         const selectedMenusIds = selectedMenus.map((menu: Menu) => menu.id);
+
+        const updatedMenuCategory = await prisma.menu_categories.update({
+            data: {
+                name: name,
+            },
+            where: {
+                id: menuCategoryId,
+            },
+        });
         const branchesMenucategoriesMenus =
             await prisma.branches_menucategories_menus.findMany({
                 where: {
@@ -33,55 +50,87 @@ export default async function handler(
         const addedMenusIds = selectedMenusIds.filter(
             (menuId: number) => !existingMenusIds.includes(menuId)
         ) as number[];
+
         const removedMenusIds = existingMenusIds.filter(
             (menuId: number) => !selectedMenusIds.includes(menuId)
         ) as number[];
 
-        if (addedMenusIds.length) {
-            const rowWithNullMenuId =
-                await prisma.branches_menucategories_menus.findFirst({
-                    where: {
-                        menu_id: null,
-                        menucategory_id: menuCategoryId,
-                        branch_id: branchId,
-                    },
-                });
-            addedMenusIds.forEach(async (menuId) => {
-                if (rowWithNullMenuId) {
-                    await prisma.branches_menucategories_menus.update({
-                        data: {
-                            menu_id: menuId,
-                        },
+        const processChanges = async () => {
+            if (addedMenusIds.length) {
+                const rowsWithNullMenuId =
+                    await prisma.branches_menucategories_menus.findMany({
                         where: {
-                            id: rowWithNullMenuId.id,
-                        },
-                    });
-                }
-                await prisma.branches_menucategories_menus.create({
-                    data: {
-                        menu_id: menuId,
-                        menucategory_id: menuCategoryId,
-                        branch_id: branchId,
-                    },
-                });
-            });
-        } else if (removedMenusIds.length) {
-            removedMenusIds.forEach(async (menuId) => {
-                const rowToRemove =
-                    await prisma.branches_menucategories_menus.findFirst({
-                        where: {
-                            menu_id: menuId,
+                            menu_id: null,
                             menucategory_id: menuCategoryId,
                             branch_id: branchId,
                         },
                     });
 
-                await prisma.branches_menucategories_menus.delete({
-                    where: { id: rowToRemove?.id },
-                });
-            });
-        }
+                const menuIdsToReplace = addedMenusIds.slice(
+                    0,
+                    rowsWithNullMenuId.length
+                );
+                const menuIdsToCreate = addedMenusIds.slice(
+                    rowsWithNullMenuId.length
+                );
 
-        res.send(200);
+                await Promise.all(
+                    menuIdsToReplace.map(async (menuId, index) => {
+                        if (rowsWithNullMenuId) {
+                            await prisma.branches_menucategories_menus.update({
+                                data: {
+                                    menu_id: menuId,
+                                },
+                                where: {
+                                    id: rowsWithNullMenuId[index].id,
+                                },
+                            });
+                        }
+                    })
+                );
+
+                await Promise.all(
+                    menuIdsToCreate.map(async (menuId, index) => {
+                        await prisma.branches_menucategories_menus.create({
+                            data: {
+                                menu_id: menuId,
+                                menucategory_id: menuCategoryId,
+                                branch_id: branchId,
+                            },
+                        });
+                    })
+                );
+            }
+            if (removedMenusIds.length) {
+                await Promise.all(
+                    removedMenusIds.map(async (menuId) => {
+                        const rowToRemove =
+                            await prisma.branches_menucategories_menus.findFirst(
+                                {
+                                    where: {
+                                        menu_id: menuId,
+                                        menucategory_id: menuCategoryId,
+                                        branch_id: branchId,
+                                    },
+                                }
+                            );
+
+                        await prisma.branches_menucategories_menus.delete({
+                            where: { id: rowToRemove?.id },
+                        });
+                    })
+                );
+            }
+        };
+
+        processChanges()
+            .then(() => {
+                res.status(200).send(updatedMenuCategory);
+            })
+            .catch((error) => {
+                // Handle error appropriately
+                console.error(error);
+                res.status(500).send("Internal Server Error");
+            });
     }
 }

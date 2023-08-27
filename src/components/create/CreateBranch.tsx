@@ -14,7 +14,8 @@ import {
 } from "@mui/material";
 import { townships as Township } from "@prisma/client";
 import { useState } from "react";
-import CreateButton from "../buttons/createButton";
+import CreateButton from "../buttons/CreateButton";
+
 interface Props {
     setOpen: (data: boolean) => void;
 }

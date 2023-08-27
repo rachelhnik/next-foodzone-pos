@@ -20,7 +20,22 @@ export default function Layout(props: Props) {
             <NavBar />
             <Box sx={{ display: "flex", height: "100vh" }}>
                 <Sidebar />
-                <Box sx={{ p: 3, ml: 8 }}>{props.children}</Box>
+                <Box
+                    sx={{
+                        p: 3,
+                        ml: 8,
+                        overflow: "hidden",
+                        overflowY: "scroll",
+                        "&::-webkit-scrollbar": {
+                            display: "none", // Hide the scrollbar for WebKit browsers (Chrome, Safari, Edge, etc.)
+                        },
+                        "&-ms-overflow-style:": {
+                            display: "none", // Hide the scrollbar for IE
+                        },
+                    }}
+                >
+                    {props.children}
+                </Box>
             </Box>
         </Box>
     );

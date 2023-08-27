@@ -25,7 +25,7 @@ export default function NavBar({ title }: Props) {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar
-                position="static"
+                position="fixed"
                 sx={{ bgcolor: "#7C9070", borderBottom: "1px solid #FEE8B0" }}
             >
                 <Toolbar

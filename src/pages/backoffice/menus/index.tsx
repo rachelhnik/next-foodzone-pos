@@ -6,7 +6,7 @@ import { getselectedLocationId } from "@/utils";
 import ItemCard from "@/components/ItemCard";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
-import CreateMenuDialog from "@/components/create/createMenuDialog";
+import CreateMenuDialog from "@/components/create/CreateMenu";
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
 
 const Menus = () => {

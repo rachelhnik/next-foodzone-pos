@@ -6,8 +6,9 @@ import TapasIcon from "@mui/icons-material/Tapas";
 import ItemCard from "@/components/ItemCard";
 import { useAppSelector } from "@/store/hooks";
 import { appData } from "@/store/slices/appSlice";
-import AddonCreateDialog from "../../../components/create/addonCreate";
+
 import OpenCreateButton from "@/components/buttons/OpenCreateButton";
+import AddonCreateDialog from "@/components/create/CraeteAddon";
 
 const Addon = () => {
     const [open, setOpen] = useState(false);
@@ -31,8 +32,8 @@ const Addon = () => {
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                     <OpenCreateButton setOpen={setOpen} label="New addon" />
                 </Box>
-                <Box sx={{ display: "flex" }}>
-                    {validAddons.map((addon) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+                    {addons.map((addon) => (
                         <ItemCard
                             key={addon.id}
                             icon={<TapasIcon />}

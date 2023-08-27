@@ -261,10 +261,16 @@ export default async function handler(
         });
 
         const addons = await prisma.addons.findMany({
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                addon_categories_id: true,
+                is_archived: true,
+                createdAt: true,
+                updatedAt: true,
+            },
             where: {
-                addon_categories_id: {
-                    in: addonCategoryIds,
-                },
                 is_archived: false,
             },
         });
